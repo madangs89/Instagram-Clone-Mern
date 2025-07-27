@@ -1,0 +1,11 @@
+| 🧩 Service               | 📋 Responsibilities                                             | Tech Suggestions                       |
+| ------------------------ | --------------------------------------------------------------- | -------------------------------------- |
+| **Auth Service**         | Signup/Login, JWT issuing, password hashing, user sessions      | MongoDB + JWT                          |
+| **User Service**         | User profile management (bio, avatar, follow/unfollow)          | MongoDB + REST                         |
+| **Post Service**         | Create, fetch, like, comment on posts (feed system)             | MongoDB/GridFS + REST                  |
+| **Story Service**        | Upload/view stories, auto-expire after 24 hours                 | MongoDB + Cron Jobs                    |
+| **Reel Service**         | Upload/view reels, like/comment, vertical scroll experience     | Cloudinary/S3 + MongoDB                |
+| **Chat Service**         | Real-time messaging between users (Socket.io), message storage  | MongoDB + Redis + WebSocket            |
+| **Notification Service** | In-app real-time notifications (likes, follows, comments)       | MongoDB + Socket.io + Queue (RabbitMQ) |
+| **Media Upload Service** | Handle image/video upload, resize, and deliver URLs             | Cloudinary or AWS S3 + Multer          |
+| **Gateway API**          | Routes all client traffic to the correct services (API gateway) | Express Gateway / NGINX / BFF          |
