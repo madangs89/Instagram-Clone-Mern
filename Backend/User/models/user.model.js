@@ -19,6 +19,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: "https://www.gravatar.com/avatar/?d=mp",
   },
+  publicId: {
+    type: String,
+    default: "",
+  },
   followers: {
     type: [String],
     default: [],
@@ -36,7 +40,20 @@ const userSchema = new mongoose.Schema({
     required: [true, "Email is required"],
     unique: true,
   },
-  bio: [
+  bio: {
+    type: String,
+    default: "",
+  },
+  website: {
+    type: String,
+    default: "",
+  },
+  gender: {
+    type: String,
+    default: "none",
+    enum: ["none", "Male", "Female", "Other"],
+  },
+  highlights: [
     {
       name: {
         type: String,

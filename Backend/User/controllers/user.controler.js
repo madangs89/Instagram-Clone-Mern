@@ -1,5 +1,10 @@
 import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
+import {
+  deleteCloudinaryImage,
+  uploadToCloudinarySingle,
+} from "../utils/cloudinary.js";
+import fs from "fs";
 export const createUser = async (req, res) => {
   try {
     const { userName, password, avatar, email, name } = req.body;
@@ -33,7 +38,6 @@ export const getuser = async (req, res) => {
     const user = await User.findOne({
       $or: [{ userName: req.params.username }, { email: req.params.email }],
     });
-    console.log(user, "user");
     if (!user) {
       return res
         .status(200)
@@ -51,23 +55,49 @@ export const getuser = async (req, res) => {
 };
 export const updateUser = async (req, res) => {
   try {
-    if (!req.body) {
-      return res
-        .status(400)
-        .json({ message: "All fields are required", success: false });
-    }
-    const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
-    if (!updatedUser) {
+    const updateData = { ...(req.body || {}) };
+    // Find the user first to get the old avatar's publicId
+    const user = await User.findById(req.user._id);
+    if (!user) {
       return res
         .status(404)
         .json({ message: "User not found", success: false });
     }
-    return res
-      .status(200)
-      .json({ message: "User updated", user: updatedUser, success: true });
+
+    // If file uploaded, upload to Cloudinary
+    if (req.file) {
+      try {
+        // Upload to cloudinary
+        const cloudinaryResult = await uploadToCloudinarySingle(req.file.path);
+
+        // Delete local file
+        fs.unlinkSync(req.file.path);
+
+        // Delete old avatar from Cloudinary if exists
+        if (user.publicId) {
+          await deleteCloudinaryImage(user.publicId);
+        }
+
+        // Update avatar and publicId
+        updateData.avatar = cloudinaryResult.secure_url;
+        updateData.publicId = cloudinaryResult.public_id;
+      } catch (error) {
+        return res.status(500).json({
+          message: "Failed to upload avatar",
+          success: false,
+        });
+      }
+    }
+    const updatedUser = await User.findByIdAndUpdate(req.user._id, updateData, {
+      new: true,
+    });
+    return res.status(200).json({
+      message: "User updated",
+      user: updatedUser,
+      success: true,
+    });
   } catch (error) {
+    console.error(error);
     return res.status(500).json({ message: "Server error", success: false });
   }
 };
@@ -153,6 +183,22 @@ export const unfollowUser = async (req, res) => {
     await Promise.all([followingUser.save(), followerUser.save()]);
 
     return res.status(200).json({ message: "User unfollowed", success: true });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error", success: false });
+  }
+};
+export const getUserById = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select("-password -__v ");
+    if (!user) {
+      return res
+        .status(404)
+        .json({ message: "User not found", success: false });
+    }
+    return res
+      .status(200)
+      .json({ message: "User fetched successfully", success: true, user });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Server error", success: false });

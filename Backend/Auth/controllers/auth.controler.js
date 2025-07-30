@@ -3,6 +3,8 @@ import axios from "axios";
 import jwt from "jsonwebtoken";
 export const login = async (req, res) => {
   try {
+    console.log("getting the requrest");
+
     const { userName, password } = req.body;
     if (!userName || !password) {
       return res
@@ -13,10 +15,10 @@ export const login = async (req, res) => {
       `${process.env.USER_BACKEND}/user/${userName}/${password}`
     );
     const userData = user?.data?.user;
-    if (!userData._id && !userData.userName) {
+    if (!userData?._id && !userData?.userName) {
       return res
         .status(404)
-        .json({ message: "userData not found", success: false });
+        .json({ message: "userData not found", success: false, userName });
     }
     const isPasswordValid = await bcrypt.compare(password, userData.password);
     if (!isPasswordValid) {
@@ -29,6 +31,8 @@ export const login = async (req, res) => {
         _id: userData._id,
         avatar: userData.avatar,
         userName: userData.userName,
+        email: userData.email,
+        name: userData.name,
       },
       process.env.JWT_SECRET,
       {
@@ -44,7 +48,13 @@ export const login = async (req, res) => {
     return res.status(200).json({ message: "Login successful", success: true });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ message: "Server error", success: false });
+    return res
+      .status(500)
+      .json({
+        message: "Server error" + error.message,
+        success: false,
+        error: error.message,
+      });
   }
 };
 
@@ -72,13 +82,15 @@ export const register = async (req, res) => {
       email,
       name,
     });
-    console.log("user created", newUser);
     const newData = newUser?.data?.user;
     const token = jwt.sign(
       {
         _id: newData._id,
         avatar: newData.avatar,
         userName: newData.userName,
+        email: newData.email,
+        name: newData.name,
+        
       },
       process.env.JWT_SECRET,
       {

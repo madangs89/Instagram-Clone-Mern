@@ -3,10 +3,14 @@ import mongoose from "mongoose";
 const storySchema = new mongoose.Schema(
   {
     userId: {
-      type: String, // Since you're using microservices
+      type: String,
       required: true,
     },
     mediaUrl: {
+      type: String,
+      required: true,
+    },
+    publicId: {
       type: String,
       required: true,
     },
@@ -15,18 +19,29 @@ const storySchema = new mongoose.Schema(
       enum: ["image", "video"],
       required: true,
     },
+    userSnapshot: {
+      name: String,
+      userName: String,
+      avatar: String,
+    },
     caption: {
       type: String,
       default: "",
     },
     viewers: {
-      type: [String], // array of userIds who saw this story
+      type: [
+        {
+          userId: String,
+          avatar: String,
+          userName: String,
+        },
+      ],
       default: [],
     },
     expiresAt: {
       type: Date,
       required: true,
-      default: () => new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from creation
+      default: () => new Date(Date.now() + 24 * 60 * 60 * 1000),
     },
   },
   { timestamps: true }

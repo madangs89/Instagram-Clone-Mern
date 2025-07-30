@@ -3,7 +3,8 @@ import mongoose from "mongoose";
 const postSchema = new mongoose.Schema(
   {
     userId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Userdetails",
       required: true,
     },
     caption: {
@@ -16,30 +17,31 @@ const postSchema = new mongoose.Schema(
       enum: ["image", "video"],
     },
     media: {
-      type: [String],
-      required: true,
-    },
-    likes: {
-      type: [String],
-      default: [],
-    },
-    comments: {
       type: [
         {
-          userId: { type: String, required: true },
-          comment: { type: String, required: true },
-          reply: [
-            {
-              userId: { type: String, required: true },
-              comment: { type: String, required: true },
-              createdAt: { type: Date, default: Date.now },
-            },
-          ],
-          createdAt: { type: Date, default: Date.now },
+          publicId: { type: String, required: true },
+          url: { type: String, required: true },
         },
       ],
-      default: [],
+      required: true,
     },
+    // comments: {
+    //   type: [
+    //     {
+    //       userId: { type: String, required: true },
+    //       comment: { type: String, required: true },
+    //       reply: [
+    //         {
+    //           userId: { type: String, required: true },
+    //           comment: { type: String, required: true },
+    //           createdAt: { type: Date, default: Date.now },
+    //         },
+    //       ],
+    //       createdAt: { type: Date, default: Date.now },
+    //     },
+    //   ],
+    //   default: [],
+    // },
   },
   { timestamps: true }
 );

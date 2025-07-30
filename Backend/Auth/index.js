@@ -7,10 +7,16 @@ import cookieParser from "cookie-parser";
 dotenv.config({ path: "./.env" });
 
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: [process.env.USER_BACKEND, process.env.CLIENT_URL],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser())
+app.use(cookieParser());
 
 app.use("/auth", authRouter);
 

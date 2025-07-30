@@ -1,0 +1,262 @@
+import {
+  Home,
+  Search,
+  Compass,
+  Video,
+  MessageCircle,
+  Heart,
+  PlusSquare,
+  User,
+} from "lucide-react";
+
+export const instagramLinks = [
+  {
+    name: "Home",
+    href: "/",
+    icon: "home",
+  },
+  {
+    name: "Search",
+    href: "/search",
+    icon: "search",
+  },
+  {
+    name: "Explore",
+    href: "/explore",
+    icon: "compass",
+  },
+  {
+    name: "Reels",
+    href: "/reels",
+    icon: "video",
+  },
+  {
+    name: "Messages",
+    href: "/messages",
+    icon: "message-circle",
+  },
+  {
+    name: "Notifications",
+    href: "/notifications",
+    icon: "heart",
+  },
+  {
+    name: "Create",
+    href: "/create",
+    icon: "plus-square",
+  },
+  {
+    name: "Profile",
+    href: "/profile",
+    icon: "user",
+  },
+];
+export const iconMap = {
+  home: Home,
+  search: Search,
+  compass: Compass,
+  video: Video,
+  "message-circle": MessageCircle,
+  heart: Heart,
+  "plus-square": PlusSquare,
+  user: User,
+};
+export const reelsData = [
+  {
+    id: "1",
+    videoUrl: "/videos/reel1.mp4",
+    caption: "Chillin' in Bali 🌴 #vacation #travel",
+    likes: 12500,
+    comments: [
+      { id: "c1", user: "johndoe", text: "So cool!" },
+      { id: "c2", user: "janedoe", text: "Love this place!" },
+    ],
+    user: {
+      id: "u1",
+      name: "John Doe",
+      username: "johndoe",
+      avatar: "/avatars/john.jpg",
+    },
+    createdAt: "2025-07-27T14:00:00Z",
+    thumbnail: "/thumbnails/reel1.jpg",
+    audio: {
+      title: "Ocean Vibes",
+      artist: "DJ Chill",
+    },
+  },
+  {
+    id: "2",
+    videoUrl: "/videos/reel2.mp4",
+    caption: "Quick recipe for lazy days 🍝 #foodie",
+    likes: 8700,
+    comments: [],
+    user: {
+      id: "u2",
+      name: "Ella",
+      username: "ellaeats",
+      avatar: "/avatars/ella.jpg",
+    },
+    createdAt: "2025-07-25T10:30:00Z",
+    thumbnail: "/thumbnails/reel2.jpg",
+    audio: {
+      title: "Lo-fi kitchen beats",
+      artist: "Mellow Mix",
+    },
+  },
+];
+
+export const dummyStories = [
+  {
+    id: 1,
+    username: "john_doe",
+    avatar: "https://i.pravatar.cc/150?img=1",
+  },
+  {
+    id: 2,
+    username: "emma_watson",
+    avatar: "https://i.pravatar.cc/150?img=2",
+  },
+  {
+    id: 3,
+    username: "coder_girl",
+    avatar: "https://i.pravatar.cc/150?img=3",
+  },
+  {
+    id: 4,
+    username: "mad_dev",
+    avatar: "https://i.pravatar.cc/150?img=4",
+  },
+  {
+    id: 5,
+    username: "react_fan",
+    avatar: "https://i.pravatar.cc/150?img=5",
+  },
+  {
+    id: 6,
+    username: "tailwind_boy",
+    avatar: "https://i.pravatar.cc/150?img=6",
+  },
+  {
+    id: 3,
+    username: "coder_girl",
+    avatar: "https://i.pravatar.cc/150?img=3",
+  },
+  {
+    id: 4,
+    username: "mad_dev",
+    avatar: "https://i.pravatar.cc/150?img=4",
+  },
+  {
+    id: 5,
+    username: "react_fan",
+    avatar: "https://i.pravatar.cc/150?img=5",
+  },
+  {
+    id: 6,
+    username: "tailwind_boy",
+    avatar: "https://i.pravatar.cc/150?img=6",
+  },
+];
+
+export const dummyPosts = [
+  {
+    id: 1,
+    username: "creativeee_hub",
+    userAvatar: "https://i.pravatar.cc/150?img=1",
+    image: "https://i.ibb.co/4NQwqmn/lippan-art-clock.png", // You can replace with your uploaded image or host it
+    caption: "Lippan Art! 🎨 🌸",
+    hashtags: "#lippan #art #handmade",
+    time: "15 m",
+    commentsCount: 1,
+  },
+  {
+    id: 2,
+    username: "art_by_ella",
+    userAvatar: "https://i.pravatar.cc/150?img=2",
+    image: "https://i.pravatar.cc/600?img=10",
+    caption: "Nature vibes 🌿🍃",
+    hashtags: "#nature #painting #green",
+    time: "30 m",
+    commentsCount: 3,
+  },
+  {
+    id: 3,
+    username: "urban_sketcher",
+    userAvatar: "https://i.pravatar.cc/150?img=3",
+    image: "https://i.pravatar.cc/600?img=20",
+    caption: "Sketching on the go ✏️🧳",
+    hashtags: "#sketch #urbanart #travel",
+    time: "1 h",
+    commentsCount: 5,
+  },
+  {
+    id: 4,
+    username: "color.me.crazy",
+    userAvatar: "https://i.pravatar.cc/150?img=4",
+    image: "https://i.pravatar.cc/600?img=21",
+    caption: "Explosion of color 🎆",
+    hashtags: "#acrylic #colorful #modernart",
+    time: "2 h",
+    commentsCount: 10,
+  },
+  {
+    id: 5,
+    username: "pottery_vibes",
+    userAvatar: "https://i.pravatar.cc/150?img=5",
+    image: "https://i.pravatar.cc/600?img=22",
+    caption: "Clay in my veins 🏺",
+    hashtags: "#pottery #ceramic #craft",
+    time: "3 h",
+    commentsCount: 2,
+  },
+  {
+    id: 6,
+    username: "sketchbook_diary",
+    userAvatar: "https://i.pravatar.cc/150?img=6",
+    image: "https://i.pravatar.cc/600?img=23",
+    caption: "Late night sketch dump 🌙",
+    hashtags: "#sketchbook #blackink #artistlife",
+    time: "5 h",
+    commentsCount: 4,
+  },
+  {
+    id: 7,
+    username: "vintageframes",
+    userAvatar: "https://i.pravatar.cc/150?img=7",
+    image: "https://i.pravatar.cc/600?img=24",
+    caption: "Vintage style revival 🖼️",
+    hashtags: "#vintage #frames #decor",
+    time: "7 h",
+    commentsCount: 7,
+  },
+  {
+    id: 8,
+    username: "dotmandala.art",
+    userAvatar: "https://i.pravatar.cc/150?img=8",
+    image: "https://i.pravatar.cc/600?img=25",
+    caption: "Mandalas soothe the soul 🌀",
+    hashtags: "#mandala #dotart #peace",
+    time: "8 h",
+    commentsCount: 9,
+  },
+  {
+    id: 9,
+    username: "brushnink",
+    userAvatar: "https://i.pravatar.cc/150?img=9",
+    image: "https://i.pravatar.cc/600?img=26",
+    caption: "Ink flow therapy 🖋️🧘",
+    hashtags: "#ink #relax #brushwork",
+    time: "12 h",
+    commentsCount: 6,
+  },
+  {
+    id: 10,
+    username: "canvas_journey",
+    userAvatar: "https://i.pravatar.cc/150?img=10",
+    image: "https://i.pravatar.cc/600?img=27",
+    caption: "The journey begins 🎨🛤️",
+    hashtags: "#canvas #journey #firstpost",
+    time: "1 d",
+    commentsCount: 12,
+  },
+];
