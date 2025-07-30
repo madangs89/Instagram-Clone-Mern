@@ -52,6 +52,7 @@ export const createPost = async (req, res) => {
 };
 export const getAllUnlikedPosts = async (req, res) => {
   try {
+    console.log("Getting the requesti");
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
@@ -158,7 +159,7 @@ export const deletePost = async (req, res) => {
     }
 
     for (const mediaItem of post.media) {
-      await deleteCloudinaryImage(mediaItem.publicId);
+      await deleteCloudinaryImage(mediaItem.publicId, mediaItem.mediaType);
     }
 
     await Post.findByIdAndDelete(postId);

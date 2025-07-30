@@ -3,11 +3,21 @@ import LeftHome from "../components/Deloper/LeftHome.jsx";
 import PostWrapper from "../components/Deloper/PostWrapper.jsx";
 import SuggestionSidebar from "../components/Deloper/SuggestionSidebar.jsx";
 import MobileNavTop from "../components/Deloper/MobileNavTop.jsx";
+import { useDispatch } from "react-redux";
+import { useEffect } from "react";
+import { checkIsAuth } from "../Redux/Services/AuthThunk.js";
 
 const HomePage = () => {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    (async () => {
+       await dispatch(checkIsAuth());
+    })();
+  }, []);
   return (
     <>
-     <MobileNavTop />
+      <MobileNavTop />
       <div className="flex-1 mt-12 md:mt-1 bg-black flex h-screen overflow-hidden">
         {/* Main Content Area */}
         <div

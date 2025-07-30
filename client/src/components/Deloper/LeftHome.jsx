@@ -1,8 +1,10 @@
 import React from "react";
 import { iconMap, instagramLinks } from "../../utils/utilitity";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const LeftHome = () => {
+  const userDeatils = useSelector((state) => state.auth);
   return (
     <div className="hidden sticky top-0 left-0 lg:flex flex-col bg-black z-10 items-start px-3 pl-5 pt-10 md:w-1/5 h-screen border-r border-[#404040] ">
       <div className="logo text-white font-bold text-2xl">
@@ -29,7 +31,7 @@ const LeftHome = () => {
         {instagramLinks.map((link) => {
           const Icon = iconMap[link.icon];
           return (
-            <Link to={link.href} key={link.name} className="w-full">
+            <Link to={link.href === "/profile" ? `/profile/${userDeatils?._id}` : link.href} key={link.name} className="w-full">
               <div className="flex items-center gap-3 py-2 px-1 rounded-md transition-all duration-200 ease-in-out hover:bg-[#404040]">
                 <Icon className="w-6 h-6 text-white" />
                 <span className="text-white font-semibold text-md">

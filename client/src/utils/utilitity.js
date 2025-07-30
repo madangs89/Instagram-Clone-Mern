@@ -8,7 +8,6 @@ import {
   PlusSquare,
   User,
 } from "lucide-react";
-
 export const instagramLinks = [
   {
     name: "Home",

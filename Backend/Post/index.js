@@ -9,7 +9,14 @@ import reelRouter from "./routes/reel.route.js";
 dotenv.config({ path: "./.env" });
 
 const app = express();
-app.use(cors());
+app.use(cors(
+  {
+    origin: [process.env.CLIENT_URL , process.env.AUTH_BACKEND ],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE" , "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }
+));
 app.use(cookieParser())
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

@@ -1,9 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "../components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getUser } from "../Redux/Services/UserThunk";
-import FullPageLoader from "../components/Deloper/FullPageLoader";
+import {
+  getPostForProfile,
+  getReelForProfile,
+  getUser,
+} from "../Redux/Services/UserThunk";
+import VideoPost from "../components/Deloper/VideoPost";
+
+import Loader from "../components/Deloper/Loader";
 const dummyHighlights = [
   { id: 1, label: "🪔", image: "/highlight1.jpg" },
   { id: 2, label: "💪", image: "/highlight2.jpg" },
@@ -22,30 +28,26 @@ const dummyHighlights = [
   { id: 3, label: "💜", image: "/highlight3.jpg" },
 ];
 
-const dummyPosts = [
-  "/post1.jpg",
-  "/post2.jpg",
-  "/post3.jpg",
-  "/post1.jpg",
-  "/post2.jpg",
-];
-
 const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("posts");
   const dispatch = useDispatch();
+  const params = useParams();
   const data = useSelector((state) => state.user);
 
   useEffect(() => {
     (async () => {
-      await dispatch(getUser());
+      await dispatch(getUser(params.id));
+      await dispatch(getPostForProfile(params.id));
     })();
-
-    console.log(data);
   }, []);
 
-  if (data.loading) {
-    return <FullPageLoader />;
-  }
+  const handler = async (tab) => {
+    if (tab === "reels") {
+      await dispatch(getReelForProfile(params.id));
+    }
+    setActiveTab(tab);
+  };
+  console.log(data);
 
   return (
     <div className="flex-1 min-h-screen flex flex-col bg-black px-4 md:px-20 overflow-x-hidden text-white">
@@ -81,7 +83,9 @@ const ProfilePage = () => {
             </p>
           </div>
           <div className="text-sm text-gray-300 leading-tight">
-            <p><strong>{data.name}</strong></p>
+            <p>
+              <strong>{data.name}</strong>
+            </p>
             {data?.bio?.split("\n").map((line, index) => (
               <p key={index} className="mb-1">
                 {line}
@@ -96,7 +100,17 @@ const ProfilePage = () => {
         </div>
       </div>
       {/* Highlights */}
-      <div className="flex min-h-[130px] space-x-4 py-4 overflow-x-auto overflow-y-hidden hide-scrollbar">
+      <div className="flex min-h-[130px] space-x-4 py-4 px-5 overflow-x-auto overflow-y-hidden hide-scrollbar">
+        <div  className="flex flex-col items-center">
+          <div className="p-[2px] rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600">
+            <img
+              src={dummyHighlights[0].image}
+              alt=""
+              className="h-16 w-16 object-cover rounded-full border-4 border-black"
+            />
+          </div>
+          <span className="text-xs mt-1">{"Add"}</span>
+        </div>
         {dummyHighlights.map((item, index) => (
           <div key={index} className="flex flex-col items-center">
             <div className="p-[2px] rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600">
@@ -124,6 +138,16 @@ const ProfilePage = () => {
           Posts
         </button>
         <button
+          onClick={() => handler("reels")}
+          className={`py-3 font-medium ${
+            activeTab === "reels"
+              ? "border-t-2 border-white text-white"
+              : "text-gray-500"
+          }`}
+        >
+          Reels
+        </button>
+        <button
           onClick={() => setActiveTab("saved")}
           className={`py-3 font-medium ${
             activeTab === "saved"
@@ -134,18 +158,43 @@ const ProfilePage = () => {
           Saved
         </button>
       </div>
-
       {/* Post Grid */}
       {activeTab === "posts" && (
+        <div className="grid grid-cols-3 min-h-[600px] gap-1 mt-4">
+          {data?.userPosts?.map((post, index) => {
+            return post.mediaType == "image" ? (
+              <div key={index} className="w-full aspect-[3/4] bg-neutral-900">
+                <img
+                  src={post?.media[0]?.url}
+                  alt="post"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ) : (
+              <VideoPost
+                key={index}
+                src={post?.media[0]?.url}
+                isActive={"false"}
+              />
+            );
+          })}
+        </div>
+      )}
+
+      {/* Reels */}
+      {activeTab === "reels" && (
         <div className="grid grid-cols-3 min-h-[500px] gap-1 mt-4">
-          {dummyPosts.map((src, index) => (
-            <img
-              key={index}
-              src={src}
-              alt="post"
-              className="w-full aspect-square object-cover"
-            />
-          ))}
+          {data.loading ? (
+            <Loader />
+          ) : data?.userReels?.length === 0 ? (
+            <div className="col-span-3 text-center text-gray-500 py-10">
+              No reels available.
+            </div>
+          ) : (
+            data.userReels.map((post, index) => (
+              <VideoPost key={index} src={post?.media} isActive={"false"} />
+            ))
+          )}
         </div>
       )}
 

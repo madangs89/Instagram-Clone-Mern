@@ -8,6 +8,7 @@ import Views from "../models/views.model.js";
 export const createReel = async (req, res) => {
   try {
     const { caption } = req.body;
+    console.log("Gettging a new Request");
     if (!caption) {
       return res
         .status(400)
@@ -18,7 +19,6 @@ export const createReel = async (req, res) => {
         .status(400)
         .json({ message: "No media file uploaded", success: false });
     }
-
     const result = await uploadToCloudinarySingle(req.file.path);
     const publicId = result.public_id;
     const media = result.secure_url;
@@ -95,7 +95,6 @@ export const gettingAllUnSeenReels = async (req, res) => {
     return res.status(500).json({ success: false, message: "Server Error" });
   }
 };
-
 export const getAllReelsByIdForProfileVisit = async (req, res) => {
   try {
     const userId = req.params.userId;
@@ -155,7 +154,7 @@ export const deleteReel = async (req, res) => {
       return res.status(403).json({ message: "Unauthorized", success: false });
     }
 
-    await deleteCloudinaryImage(reel.publicId);
+    await deleteCloudinaryImage(reel.publicId , "video");
 
     await Reel.findByIdAndDelete(reelId);
 

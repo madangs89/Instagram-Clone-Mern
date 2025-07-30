@@ -14,18 +14,27 @@ import EditProfile from "./pages/EditProfliePage";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { checkIsAuth } from "./Redux/Services/AuthThunk";
+import Upload from "./pages/Upload";
+import { getUser } from "./Redux/Services/UserThunk";
 
 const App = () => {
   const auth = useSelector((state) => state.auth.isAuthenticated);
   const dispatch = useDispatch();
+  const data = useSelector((state) => state.auth);
 
   useEffect(() => {
     (async () => {
       const data = await dispatch(checkIsAuth());
-
     })();
   }, []);
 
+  useEffect(() => {
+    if (auth && data._id) {
+      (async () => {
+        await dispatch(getUser(data?._id));
+      })();
+    }
+  }, [auth]);
   return (
     <Router>
       <Routes>
@@ -36,8 +45,9 @@ const App = () => {
         {auth && (
           <Route path="/" element={<Layout />}>
             <Route index element={<HomePage />} />
-            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/profile/:id" element={<ProfilePage />} />
             <Route path="/profile/edit/:username" element={<EditProfile />} />
+            <Route path="/create" element={<Upload />} />
             {/* <Route path="messages" element={<Messages />} /> */}
             {/* Add more pages here */}
             <Route path="*" element={<Navigate to="/" />} />

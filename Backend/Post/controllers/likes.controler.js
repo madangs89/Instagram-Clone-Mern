@@ -8,7 +8,7 @@ export const likePost = async (req, res) => {
     const existing = await Likes.findOne({ userId: req.user._id, targetId });
     if (existing) {
       await Likes.findOneAndDelete({ userId: req.user._id, targetId });
-      return res.status(200).json({ message: "Post unliked", success: true });
+      return res.status(200).json({ message: "Post unliked", success: true , like: existing});
     }
     const like = new Likes({
       userId: req.user._id,
@@ -25,7 +25,7 @@ export const likePost = async (req, res) => {
         avatar: req.user.avatar,
       });
     }
-    return res.status(201).json({ success: true, like });
+    return res.status(201).json({ success: true, like , message: "Post liked" });
   } catch (err) {
     res
       .status(500)

@@ -119,6 +119,15 @@ export const followUser = async (req, res) => {
         .status(404)
         .json({ message: "User not found", success: false });
     }
+    if (
+      followingUser.followers.includes(followerId) &&
+      followerUser.following.includes(follwingId)
+    ) {
+      return res.status(400).json({
+        message: "You are already following this user",
+        success: false,
+      });
+    }
     if (!followingUser.followers.includes(followerId)) {
       followingUser.followers.push(followerId);
     }
@@ -130,7 +139,6 @@ export const followUser = async (req, res) => {
     return res.status(200).json({ message: "User followed", success: true });
   } catch (error) {
     console.log(error);
-
     return res.status(500).json({ message: "Server error", success: false });
   }
 };
@@ -170,6 +178,16 @@ export const unfollowUser = async (req, res) => {
       return res
         .status(404)
         .json({ message: "User not found", success: false });
+    }
+
+    if (
+      !followingUser.followers.includes(followerId) ||
+      !followerUser.following.includes(followingId)
+    ) {
+      return res.status(400).json({
+        message: "You are not following this user",
+        success: false,
+      });
     }
 
     // Filter out the IDs from arrays

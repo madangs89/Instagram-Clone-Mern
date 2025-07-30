@@ -1,5 +1,6 @@
 import { Heart, PlusSquare } from "lucide-react";
 import React from "react";
+import { Link } from "react-router-dom";
 
 const MobileNavTop = () => {
   const aboveIcons = {
@@ -29,9 +30,13 @@ const MobileNavTop = () => {
       </div>
       <div className="flex gap-2">
         {Object.entries(aboveIcons).map(([key, Icon]) => (
-          <div key={key} className="flex flex-col items-center">
+          <Link
+            to={key === "plus-square" ? "/create" : `/${key}`}
+            key={key}
+            className="flex flex-col items-center"
+          >
             <Icon className="h-6 w-6" />
-          </div>
+          </Link>
         ))}
       </div>
     </div>

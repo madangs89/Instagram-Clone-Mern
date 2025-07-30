@@ -1,5 +1,13 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { getUser, updateUser } from "../Services/UserThunk";
+import {
+  followUser,
+  getPostForProfile,
+  getReelForProfile,
+  getUser,
+  like,
+  unFollowUser,
+  updateUser,
+} from "../Services/UserThunk";
 
 const userSlice = createSlice({
   name: "user",
@@ -16,8 +24,32 @@ const userSlice = createSlice({
     error: null,
     gender: null,
     website: null,
+    isMuted: true,
+    userLikes: [],
+    userPosts: [],
+    userReels: [],
   },
-  reducers: {},
+  reducers: {
+    setMuted(state) {
+      state.isMuted = !state.isMuted;
+    },
+    addAndRemoveFollower(state, action) {
+      if (state.following.includes(action.payload)) {
+        state.followers = state.followers.filter((id) => id != action.payload);
+        state.following = state.following.filter((id) => id !== action.payload);
+      } else {
+        state.followers.push(action.payload);
+        state.following.push(action.payload);
+      }
+    },
+    addAndRemoveLike(state, action) {
+      if (state.userLikes.includes(action.payload)) {
+        state.userLikes = state.userLikes.filter((id) => id != action.payload);
+      } else {
+        state.userLikes.push(action.payload);
+      }
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(getUser.pending, (state) => {
@@ -63,8 +95,72 @@ const userSlice = createSlice({
         state.loading = false;
         state.error = action.payload.message || "Failed to fetch user data";
       });
+
+    builder.addCase(followUser.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(followUser.fulfilled, (state) => {
+      state.loading = false;
+      state.error = null;
+    });
+    builder.addCase(followUser.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload.message || "Failed to fetch user data";
+    });
+    builder.addCase(unFollowUser.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(unFollowUser.fulfilled, (state) => {
+      state.loading = false;
+      state.error = null;
+    });
+    builder.addCase(unFollowUser.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload.message || "Failed to fetch user data";
+    });
+    builder.addCase(like.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(like.fulfilled, (state, action) => {
+      state.loading = false;
+      state.error = null;
+    });
+    builder.addCase(like.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload.message || "Failed to fetch user data";
+    });
+    builder.addCase(getPostForProfile.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(getPostForProfile.fulfilled, (state, action) => {
+      state.loading = false;
+      state.error = null;
+      state.userPosts = action.payload.posts;
+    });
+    builder.addCase(getPostForProfile.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload.message || "Failed to fetch user data";
+    });
+    builder.addCase(getReelForProfile.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(getReelForProfile.fulfilled, (state, action) => {
+      state.loading = false;
+      state.error = null;
+      state.userReels = action.payload.reels;
+    });
+    builder.addCase(getReelForProfile.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload.message || "Failed to fetch user data";
+    });
   },
 });
 
-// export const { clearError, setAuthState } = userSlice.actions;
+export const { setMuted, addAndRemoveFollower, addAndRemoveLike } =
+  userSlice.actions;
 export const userReducer = userSlice.reducer;
