@@ -1,8 +1,13 @@
 import Post from "../models/post.model.js";
-import { uploadToCloudinarySingle } from "../utils/cloudinary.js";
+
 import fs from "fs";
-import { deleteCloudinaryImage } from "../utils/cloudinary.js";
+
 import Userdetails from "../models/user.model.js";
+
+import {
+  deleteCloudinaryImage,
+  uploadToCloudinarySingle,
+} from "../utils/cloudinary.js";
 import Likes from "../models/likes.model.js";
 export const createPost = async (req, res) => {
   try {

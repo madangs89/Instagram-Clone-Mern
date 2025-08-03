@@ -15,9 +15,25 @@
   -ms-overflow-style: none;
 }
 
-.custom-scroll::-webkit-scrollbar {
+.custom-scroll2::-webkit-scrollbar {
   display: none;
 }
+
+/* Scoped scroll styles */
+.custom-scrollbar2::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar2::-webkit-scrollbar-track {
+  background: #0f0f0f;
+}
+
+.custom-scrollbar2::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 8px;
+}
+
+
 
 html{
   user-select: none;

@@ -111,7 +111,6 @@ export const register = async (req, res) => {
     return res.status(500).json({ message: "Server error", success: false });
   }
 };
-
 export const logout = async (req, res) => {
   try {
     res.clearCookie("token");
@@ -123,7 +122,6 @@ export const logout = async (req, res) => {
     return res.status(500).json({ message: "Server error", success: false });
   }
 };
-
 export const isAuth = async (req, res) => {
   try {
     if (!req.user && !res.user._id) {

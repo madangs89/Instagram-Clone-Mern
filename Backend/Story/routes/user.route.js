@@ -1,11 +1,13 @@
 import express from "express";
 import {
   createStory,
+  deletAllStoryBydeveloper,
   deleteAllStoriesWithExpiry,
   deleteStory,
   getAllStories,
   getStoriesForUserToSee,
   getStoryById,
+  gettingStoryViews,
   updateStoryViewers,
 } from "../controllers/stroy.controler.js";
 import { authMiddleware } from "../middelwares/auth.middelware.js";
@@ -25,4 +27,6 @@ storyRouter.post(
 );
 
 storyRouter.delete("/:storyId", authMiddleware, deleteStory);
+storyRouter.delete("/delete/developer", deletAllStoryBydeveloper);
+storyRouter.get("/views/:storyId", authMiddleware, gettingStoryViews);
 storyRouter.delete("/delete/many", deleteAllStoriesWithExpiry);

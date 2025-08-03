@@ -3,7 +3,7 @@ import { Volume2, VolumeX } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { setMuted } from "../../Redux/Slice/UserSlice";
 
-export default function VideoPost({ src, isActive }) {
+export default function VideoPost({ src, isActive, aspectRatio }) {
   const videoRef = useRef(null);
   //   const [isMuted, setIsMuted] = useState(true);
 
@@ -40,7 +40,9 @@ export default function VideoPost({ src, isActive }) {
 
   return (
     <div
-      className="relative w-full aspect-square bg-black"
+      className={`relative w-full ${
+        aspectRatio ? aspectRatio : "aspect-square"
+      } bg-black`}
       onClick={handlePlayPause}
     >
       <video

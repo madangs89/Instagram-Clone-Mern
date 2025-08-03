@@ -1,6 +1,6 @@
 import express from "express";
 import { authMiddleware } from "../middelwares/auth.middelware.js";
-import { upload } from "../utils/cloudinary.js";
+import { upload } from "../../Message/utils/cloudinary.js";
 import {
   createReel,
   deleteReel,

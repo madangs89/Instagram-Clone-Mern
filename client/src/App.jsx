@@ -15,7 +15,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { checkIsAuth } from "./Redux/Services/AuthThunk";
 import Upload from "./pages/Upload";
-import { getUser } from "./Redux/Services/UserThunk";
+import { getCurrentUserDetails, getUser } from "./Redux/Services/UserThunk";
+import ReelsPage from "./pages/ReelsPage";
+import StoryPage from "./pages/StoryPage";
+import MessagePage from "./pages/MessagePage";
 
 const App = () => {
   const auth = useSelector((state) => state.auth.isAuthenticated);
@@ -24,7 +27,7 @@ const App = () => {
 
   useEffect(() => {
     (async () => {
-      const data = await dispatch(checkIsAuth());
+      await dispatch(checkIsAuth());
     })();
   }, []);
 
@@ -32,9 +35,10 @@ const App = () => {
     if (auth && data._id) {
       (async () => {
         await dispatch(getUser(data?._id));
+        await dispatch(getCurrentUserDetails(data?._id));
       })();
     }
-  }, [auth]);
+  }, [auth, data._id, dispatch]);
   return (
     <Router>
       <Routes>
@@ -48,6 +52,9 @@ const App = () => {
             <Route path="/profile/:id" element={<ProfilePage />} />
             <Route path="/profile/edit/:username" element={<EditProfile />} />
             <Route path="/create" element={<Upload />} />
+            <Route path="/reels" element={<ReelsPage />} />
+            <Route path="/story/:id" element={<StoryPage />} />
+            <Route path="/message/*" element={<MessagePage />} />
             {/* <Route path="messages" element={<Messages />} /> */}
             {/* Add more pages here */}
             <Route path="*" element={<Navigate to="/" />} />

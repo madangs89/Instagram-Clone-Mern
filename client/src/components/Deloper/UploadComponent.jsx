@@ -10,6 +10,7 @@ import {
 
 import { useNavigate } from "react-router-dom";
 import Loader from "./Loader";
+import { addToStoryUpdate } from "../../Redux/Slice/mediaFeedSlice";
 
 const UploadComponent = () => {
   const [activeTab, setActiveTab] = useState("story");
@@ -21,6 +22,7 @@ const UploadComponent = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const sliceData = useSelector((state) => state.mediaUpload);
+  const userData = useSelector((state) => state.user);
 
   const handleStoryChange = (e) => {
     const file = e.target.files?.[0] || null;
@@ -91,10 +93,17 @@ const UploadComponent = () => {
           formData.append("mediaType", mediaType);
           try {
             const data = await dispatch(addStory(formData));
+            console.log(data.payload.data, "story data in upload");
             if (data.payload.success) {
               toast.success("Story uploaded successfully.");
               setCaption("");
               setStoryFile(null);
+              dispatch(
+                addToStoryUpdate({
+                  ...data.payload.data,
+                  currentUserId: userData._id,
+                })
+              );
               navigate("/");
               return;
             }

@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 export const connectDB = async () => {
-  try{
+  try {
     mongoose.connect(process.env.MONGO_URL, {
       dbName: "Instagram",
     });

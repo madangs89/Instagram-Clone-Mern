@@ -3,6 +3,8 @@ import {
   createUser,
   followUser,
   getAlluser,
+  getSugestedusers,
+  gettingArrayOfUsers,
   getuser,
   getUserById,
   unfollowUser,
@@ -19,3 +21,5 @@ userRouter.get("/:username/:email", getuser);
 userRouter.patch("/", authMiddleware, upload.single("avatar"), updateUser);
 userRouter.post("/follow/:id", authMiddleware, followUser);
 userRouter.post("/unfollow/:id", authMiddleware, unfollowUser);
+userRouter.get("/sugested/users/data", authMiddleware, getSugestedusers);
+userRouter.get("/get/array/users", gettingArrayOfUsers);

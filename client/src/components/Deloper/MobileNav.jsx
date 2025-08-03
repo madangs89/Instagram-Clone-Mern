@@ -9,7 +9,8 @@ import {
   Video,
 } from "lucide-react";
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const MobileNav = () => {
   const iconMap = {
@@ -19,6 +20,14 @@ const MobileNav = () => {
     "message-circle": MessageCircle,
     user: User,
   };
+  const userData = useSelector((state) => state.user);
+  const location = useLocation();
+
+  const isToShowNav = location.pathname.includes("message");
+
+  if (isToShowNav) {
+    return;
+  }
 
   const instagramLinks = [
     {
@@ -38,35 +47,36 @@ const MobileNav = () => {
     },
     {
       name: "Messages",
-      href: "/messages",
+      href: "/message",
       icon: "message-circle",
     },
     {
       name: "Profile",
-      href: "/profile",
+      href: "/profile/" + userData._id,
       icon: "user",
     },
   ];
   return (
     <>
-      <div className="flex lg:hidden fixed bottom-0 justify-between items-center bg-black text-white p-4 px-10 w-full z-50">
+      <div className="flex lg:hidden fixed bottom-0 justify-between items-center bg-black text-white p-3 px-10 w-full z-50">
         {/* {Object.entries(iconMap).map(([key, Icon]) => (
           <div key={key} className="flex flex-col items-center">
             <Icon className="h-7 w-7" />
           </div>
         ))} */}
-        {
-            instagramLinks.map((link) => {
-              const Icon = iconMap[link.icon];
-              return (
-                <div key={link.name} className="flex cursor-pointer flex-col items-center">
-                  <Link to={link.href}>
-                    <Icon className="h-7 w-7" />
-                  </Link>
-                </div>
-              );
-            })
-        }
+        {instagramLinks.map((link) => {
+          const Icon = iconMap[link.icon];
+          return (
+            <div
+              key={link.name}
+              className="flex cursor-pointer flex-col items-center"
+            >
+              <Link to={link.href}>
+                <Icon className="h-7 w-7" />
+              </Link>
+            </div>
+          );
+        })}
       </div>
     </>
   );

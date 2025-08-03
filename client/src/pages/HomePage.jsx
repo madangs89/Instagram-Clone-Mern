@@ -3,18 +3,25 @@ import LeftHome from "../components/Deloper/LeftHome.jsx";
 import PostWrapper from "../components/Deloper/PostWrapper.jsx";
 import SuggestionSidebar from "../components/Deloper/SuggestionSidebar.jsx";
 import MobileNavTop from "../components/Deloper/MobileNavTop.jsx";
-import { useDispatch } from "react-redux";
 import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { checkIsAuth } from "../Redux/Services/AuthThunk.js";
+// import { useEffect } from "react";
+// import { checkIsAuth } from "../Redux/Services/AuthThunk.js";
 
 const HomePage = () => {
-  const dispatch = useDispatch();
+  const userData = useSelector((state) => state.user);
 
+  const dispatch = useDispatch();
   useEffect(() => {
-    (async () => {
-       await dispatch(checkIsAuth());
-    })();
-  }, []);
+    if (!userData._id) {
+      console.log("user data is not there so calling api");
+      
+      (async () => {
+        await dispatch(checkIsAuth());
+      })();
+    }
+  }, [userData._id, dispatch]);
   return (
     <>
       <MobileNavTop />

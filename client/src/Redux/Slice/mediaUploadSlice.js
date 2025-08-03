@@ -7,6 +7,7 @@ const mediaUploadSlice = createSlice({
     story: { error: null, loading: false, status: "" },
     reel: { error: null, loading: false, status: "" },
     post: { error: null, loading: false, status: "" },
+    userStory: [],
   },
   reducers: {
     clearError: (state) => {
@@ -29,6 +30,7 @@ const mediaUploadSlice = createSlice({
         state.story.loading = false;
         state.story.error = null;
         state.story.status = "success";
+        state.userStory.push(action.payload.data);
       })
       .addCase(addStory.rejected, (state, action) => {
         state.story.loading = false;
@@ -39,7 +41,6 @@ const mediaUploadSlice = createSlice({
       .addCase(addReel.pending, (state) => {
         state.reel.loading = true;
         state.reel.error = null;
-
         state.reel.status = "uploading";
       })
       .addCase(addReel.fulfilled, (state, action) => {

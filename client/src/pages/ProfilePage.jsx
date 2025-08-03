@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "../components/ui/button";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getPostForProfile,
@@ -10,6 +10,10 @@ import {
 import VideoPost from "../components/Deloper/VideoPost";
 
 import Loader from "../components/Deloper/Loader";
+import Story from "../components/Deloper/Story";
+import FollowUnFolowButton from "../components/Deloper/FollowUnFolowButton";
+import { Plus } from "lucide-react";
+import FullPageLoader from "../components/Deloper/FullPageLoader";
 const dummyHighlights = [
   { id: 1, label: "🪔", image: "/highlight1.jpg" },
   { id: 2, label: "💪", image: "/highlight2.jpg" },
@@ -27,13 +31,15 @@ const dummyHighlights = [
   { id: 2, label: "💪", image: "/highlight2.jpg" },
   { id: 3, label: "💜", image: "/highlight3.jpg" },
 ];
-
 const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("posts");
   const dispatch = useDispatch();
   const params = useParams();
   const data = useSelector((state) => state.user);
-
+  const storyData = useSelector((state) => state.mediaFeed);
+  const userData = useSelector((state) => state.user);
+  const auth = useSelector((state) => state.auth);
+  const navigate = useNavigate();
   useEffect(() => {
     (async () => {
       await dispatch(getUser(params.id));
@@ -47,61 +53,111 @@ const ProfilePage = () => {
     }
     setActiveTab(tab);
   };
-  console.log(data);
 
+  console.log(userData.getCurrentUser, "userData.getCurrentUser");
+  if (data.loading) {
+    return <FullPageLoader />;
+  }
   return (
     <div className="flex-1 min-h-screen flex flex-col bg-black px-4 md:px-20 overflow-x-hidden text-white">
       {/* Profile Info */}
-      <div className="w-full flex flex-col md:flex-row py-6 border-b border-neutral-800">
+      <div className="w-full flex flex-col justify-center md:flex-row py-6 border-b border-neutral-800">
+        
+        {/* Profile Picture */}
         <div className="w-full md:w-1/3 flex items-center justify-center mb-4 md:mb-0">
-          <div className="p-[3px] rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600">
-            <img
-              src={data.avatar || "/default-avatar.jpg"}
-              alt=""
-              className="h-32 w-32 object-cover rounded-full border-4 border-black"
+          {auth._id == params.id ? (
+            <Story
+              key={userData._id}
+              id={userData._id}
+              username="Your Story"
+              avatar={userData.avatar}
             />
-          </div>
+          ) : (
+            <div
+              onClick={() => {
+                if (auth._id == params.id) {
+                  navigate("/create");
+                }
+              }}
+              className="flex cursor-pointer flex-col items-center space-y-1"
+            >
+              <div className="w-[87px] relative h-[87px] rounded-full p-[3px]">
+                <img
+                  src={data?.getCurrentUser?.avatar || "/default-avatar.jpg"}
+                  alt={"image"}
+                  className="w-full  border-[4px] border-black h-full object-fit rounded-full"
+                />
+              </div>
+              <p className="text-xs text-center text-white  w-16">
+                {auth._id == params.id ? "You" : data?.getCurrentUser?.userName}
+              </p>
+            </div>
+          )}
         </div>
-        <div className="flex-1 flex flex-col justify-center gap-4 px-2">
+        <div className="flex-1 flex flex-col  justify-center gap-4 px-2">
           <div className="flex items-center gap-4 text-xl font-semibold">
-            <p>{data.userName}</p>
-            <Link to="/profile/edit/madan">
-              <Button variant="black" className="bg-[#27272a]">
-                Edit Profile
-              </Button>
-            </Link>
+            <p>{data?.getCurrentUser?.userName}</p>
+            {auth._id == params.id && (
+              <Link to={`/profile/edit/${auth._id}`}>
+                <Button variant="black" className="bg-[#27272a]">
+                  Edit Profile
+                </Button>
+              </Link>
+            )}
           </div>
           <div className="flex gap-4 text-sm md:text-base">
             <p>
               <strong>0</strong> posts
             </p>
             <p>
-              <strong>{data?.followers?.length}</strong> followers
+              <strong>{data?.getCurrentUser?.followers?.length}</strong>{" "}
+              followers
             </p>
             <p>
-              <strong>{data?.following?.length}</strong> following
+              <strong>{data?.getCurrentUser?.following?.length}</strong>{" "}
+              following
             </p>
           </div>
           <div className="text-sm text-gray-300 leading-tight">
             <p>
-              <strong>{data.name}</strong>
+              <strong>{data?.getCurrentUser?.name}</strong>
             </p>
-            {data?.bio?.split("\n").map((line, index) => (
+            {data?.getCurrentUser?.bio?.split("\n").map((line, index) => (
               <p key={index} className="mb-1">
                 {line}
               </p>
             ))}
             {/* {data.bio || "No bio available."} */}
           </div>
+          {auth._id != params.id &&
+            data.following &&
+            !data.following.includes(params.id) && (
+              <div className="flex gap-4 text-sm text-white md:text-base">
+                <FollowUnFolowButton id={params.id} />
+                <Button variant="black" className="bg-[#27272a]">
+                  Message
+                </Button>
+              </div>
+            )}
+          {auth._id != params.id &&
+            data.following &&
+            data.following.includes(params.id) && (
+              <div className="flex gap-4 text-sm text-white md:text-base">
+                <FollowUnFolowButton clr="text-blue-500" id={params.id} />
+                <Button variant="black" className="bg-[#27272a]">
+                  Message
+                </Button>
+              </div>
+            )}
           <div className="flex gap-4 text-sm text-white md:text-base">
-            <p>{data.website}</p>
-            <p>{data.gender}</p>
+            <p>{data?.getCurrentUser?.website}</p>
+            <p>{data?.getCurrentUser?.gender}</p>
           </div>
         </div>
       </div>
       {/* Highlights */}
       <div className="flex min-h-[130px] space-x-4 py-4 px-5 overflow-x-auto overflow-y-hidden hide-scrollbar">
-        <div  className="flex flex-col items-center">
+        <div className="flex flex-col items-center">
           <div className="p-[2px] rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600">
             <img
               src={dummyHighlights[0].image}
@@ -172,6 +228,7 @@ const ProfilePage = () => {
               </div>
             ) : (
               <VideoPost
+                aspectRatio="aspect-[3/4]"
                 key={index}
                 src={post?.media[0]?.url}
                 isActive={"false"}

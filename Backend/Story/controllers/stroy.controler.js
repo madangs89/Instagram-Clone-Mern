@@ -25,7 +25,6 @@ export const createStory = async (req, res) => {
         avatar: req.user.avatar,
       },
     };
-
     if (req.file && req.file.path) {
       const result = await uploadToCloudinarySingle(req.file.path);
       if (!result || !result.secure_url || !result.public_id) {
@@ -67,8 +66,10 @@ export const getStoriesForUserToSee = async (req, res) => {
         .json({ message: "User following list not found", success: false });
     }
 
-    const following = Array.isArray(userFollowingList.data.following)
-      ? userFollowingList.data.following
+    console.log(userFollowingList.data, userFollowingList.data.user.following);
+
+    const following = Array.isArray(userFollowingList.data.user.following)
+      ? userFollowingList.data.user.following
       : [];
 
     const stories = await Story.find({
@@ -168,7 +169,7 @@ export const updateStoryViewers = async (req, res) => {
         .json({ message: "Story not found", success: false });
     }
     if (story.viewers.some((viewer) => viewer.userId == req.user._id)) {
-      return res.status(200).json({
+      return res.status(400).json({
         message: "You have already viewed this story",
         success: true,
       });
@@ -209,10 +210,7 @@ export const getAllStories = async (req, res) => {
 };
 export const deleteAllStoriesWithExpiry = async (req, res) => {
   try {
-    // 1. Find all expired stories
     const expiredStories = await Story.find({ expiresAt: { $lt: new Date() } });
-
-    // 2. Delete each media from Cloudinary
     for (const story of expiredStories) {
       if (story.publicId && story.mediaType) {
         await deleteCloudinaryImage(story.publicId, story.mediaType);
@@ -228,6 +226,49 @@ export const deleteAllStoriesWithExpiry = async (req, res) => {
     });
   } catch (error) {
     console.error("Error deleting expired stories:", error);
+    return res
+      .status(500)
+      .json({ message: "Internal server error", success: false });
+  }
+};
+
+export const gettingStoryViews = async (req, res) => {
+  try {
+    const { storyId } = req.params;
+    if (!storyId) {
+      return res
+        .status(400)
+        .json({ message: "Story ID is required", success: false });
+    }
+    const story = await Story.find({ _id: storyId, userId: req.user._id });
+    if (!story) {
+      return res
+        .status(404)
+        .json({ message: "Story not found", success: false });
+    }
+    return res.status(200).json({
+      message: "Story fetched successfully",
+      success: true,
+      story,
+    });
+  } catch (error) {}
+};
+
+export const deletAllStoryBydeveloper = async (req, res) => {
+  try {
+    const stotries = await Story.find();
+    for (const story of stotries) {
+      if (story.publicId && story.mediaType) {
+        await deleteCloudinaryImage(story.publicId, story.mediaType);
+      }
+    }
+    await Story.deleteMany();
+    return res.status(200).json({
+      message: "All stories deleted successfully",
+      success: true,
+    });
+  } catch (error) {
+    console.error("Error deleting all stories:", error);
     return res
       .status(500)
       .json({ message: "Internal server error", success: false });

@@ -1,10 +1,12 @@
 import { uploadToCloudinarySingle } from "../utils/cloudinary.js";
 import fs from "fs";
-import { deleteCloudinaryImage } from "../utils/cloudinary.js";
+// import { deleteCloudinaryImage } from "../../Message/utils/cloudinary.js";
+
 import Userdetails from "../models/user.model.js";
 import Likes from "../models/likes.model.js";
 import Reel from "../models/reel.model.js";
 import Views from "../models/views.model.js";
+import { deleteCloudinaryImage } from "../utils/cloudinary.js";
 export const createReel = async (req, res) => {
   try {
     const { caption } = req.body;
@@ -55,9 +57,7 @@ export const gettingAllUnSeenReels = async (req, res) => {
     const veiwedReels = await Views.find({ userId: req.user._id }).select(
       "reelId"
     );
-
     const viewedReelIds = veiwedReels.map((view) => view.reelId);
-    // Fetch ONLY unliked posts from OTHER users (not uploaded by logged-in user)
     const reels = await Reel.find({
       _id: { $nin: viewedReelIds },
       userId: { $ne: req.user._id },
@@ -154,7 +154,7 @@ export const deleteReel = async (req, res) => {
       return res.status(403).json({ message: "Unauthorized", success: false });
     }
 
-    await deleteCloudinaryImage(reel.publicId , "video");
+    await deleteCloudinaryImage(reel.publicId, "video");
 
     await Reel.findByIdAndDelete(reelId);
 

@@ -31,7 +31,7 @@ export const instagramLinks = [
   },
   {
     name: "Messages",
-    href: "/messages",
+    href: "/message",
     icon: "message-circle",
   },
   {

@@ -1,8 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
   followUser,
+  getCurrentUserDetails,
   getPostForProfile,
   getReelForProfile,
+  getSugestedUser,
   getUser,
   like,
   unFollowUser,
@@ -18,8 +20,8 @@ const userSlice = createSlice({
     name: null,
     email: null,
     bio: null,
-    followers: null,
-    following: null,
+    followers: [],
+    following: [],
     loading: false,
     error: null,
     gender: null,
@@ -28,6 +30,19 @@ const userSlice = createSlice({
     userLikes: [],
     userPosts: [],
     userReels: [],
+    getCurrentUser: {
+      userName: null,
+      _id: null,
+      avatar: null,
+      name: null,
+      email: null,
+      bio: null,
+      followers: [],
+      following: [],
+      gender: null,
+      website: null,
+    },
+    sugestedUser: [],
   },
   reducers: {
     setMuted(state) {
@@ -35,10 +50,8 @@ const userSlice = createSlice({
     },
     addAndRemoveFollower(state, action) {
       if (state.following.includes(action.payload)) {
-        state.followers = state.followers.filter((id) => id != action.payload);
         state.following = state.following.filter((id) => id !== action.payload);
       } else {
-        state.followers.push(action.payload);
         state.following.push(action.payload);
       }
     },
@@ -58,6 +71,28 @@ const userSlice = createSlice({
       })
       .addCase(getUser.fulfilled, (state, action) => {
         state.loading = false;
+        state.getCurrentUser.userName = action.payload.userName;
+        state.getCurrentUser._id = action.payload._id;
+        state.getCurrentUser.avatar = action.payload.avatar;
+        state.getCurrentUser.name = action.payload.name;
+        state.getCurrentUser.email = action.payload.email;
+        state.getCurrentUser.bio = action.payload.bio;
+        state.getCurrentUser.followers = action.payload.followers;
+        state.getCurrentUser.following = action.payload.following;
+        state.getCurrentUser.gender = action.payload.gender;
+        state.getCurrentUser.website = action.payload.website;
+      })
+      .addCase(getUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload.message || "Failed to fetch user data";
+      });
+    builder
+      .addCase(getCurrentUserDetails.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getCurrentUserDetails.fulfilled, (state, action) => {
+        state.loading = false;
         state.userName = action.payload.userName;
         state._id = action.payload._id;
         state.avatar = action.payload.avatar;
@@ -69,7 +104,7 @@ const userSlice = createSlice({
         state.gender = action.payload.gender;
         state.website = action.payload.website;
       })
-      .addCase(getUser.rejected, (state, action) => {
+      .addCase(getCurrentUserDetails.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload.message || "Failed to fetch user data";
       });
@@ -155,6 +190,19 @@ const userSlice = createSlice({
       state.userReels = action.payload.reels;
     });
     builder.addCase(getReelForProfile.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload.message || "Failed to fetch user data";
+    });
+    builder.addCase(getSugestedUser.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(getSugestedUser.fulfilled, (state, action) => {
+      state.loading = false;
+      state.error = null;
+      state.sugestedUser = action.payload.suggestedUsers;
+    });
+    builder.addCase(getSugestedUser.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload.message || "Failed to fetch user data";
     });

@@ -1,7 +1,7 @@
 import Likes from "../models/likes.model.js";
 import Userdetails from "../models/user.model.js";
 
-// Like a post
+
 export const likePost = async (req, res) => {
   try {
     const { targetId, targetType } = req.body;

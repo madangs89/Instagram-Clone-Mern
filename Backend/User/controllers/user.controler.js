@@ -103,8 +103,6 @@ export const updateUser = async (req, res) => {
 };
 export const followUser = async (req, res) => {
   try {
-    console.log(req.params.id, req.user._id);
-
     const follwingId = req.params.id;
     const followerId = req.user._id;
     if (followerId === follwingId) {
@@ -222,3 +220,96 @@ export const getUserById = async (req, res) => {
     return res.status(500).json({ message: "Server error", success: false });
   }
 };
+
+export const getSugestedusers = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ message: "User not found", success: false });
+    }
+    // getting the curr3ct user follwing id
+    const followingIds = user.following.map((following) =>
+      following.toString()
+    );
+
+    const frinedsFollwingList = await User.find({
+      _id: { $in: followingIds },
+    }).select("following");
+
+    let suggestionsSet = new Set();
+    frinedsFollwingList.forEach((friend) => {
+      friend.following.forEach((id) => {
+        const idStr = id.toString();
+        if (idStr !== userId.toString() && !followingIds.includes(idStr)) {
+          suggestionsSet.add(idStr);
+        }
+      });
+    });
+    const suggestedId = Array.from(suggestionsSet);
+    const sugesteduser = await User.find({ _id: { $in: suggestedId } }).select(
+      "-__v -password"
+    );
+
+    const finalResutl = [...sugesteduser];
+    if (sugesteduser.length < 10) {
+      const notFollwingUSerrByFreidsAndOwn = await User.find({
+        _id: { $nin: [...suggestedId, ...followingIds, userId] },
+      })
+        .limit(10 - sugesteduser.length)
+        .select("-__v -password");
+      finalResutl.push(...notFollwingUSerrByFreidsAndOwn);
+    }
+
+    console.log("finalResutl", finalResutl);
+
+    return res.status(200).json({
+      message: "Users fetched successfully",
+      success: true,
+      suggestedUsers: finalResutl,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error", success: false });
+  }
+};
+
+export const gettingArrayOfUsers = async (req, res) => {
+  try {
+    let { userIdsArray } = req.query;
+
+    // Handle if sent as a single ID (e.g., string not array)
+    if (!userIdsArray) {
+      return res.status(400).json({
+        message: "Bad request: userIdsArray is required",
+        success: false,
+      });
+    }
+
+    // If only one ID is sent, it comes as a string — convert to array
+    if (!Array.isArray(userIdsArray)) {
+      userIdsArray = [userIdsArray];
+    }
+
+    if (userIdsArray.length === 0) {
+      return res.status(400).json({
+        message: "Bad request: userIdsArray is empty",
+        success: false,
+      });
+    }
+    const users = await User.find({ _id: { $in: userIdsArray } }).select(
+      "-__v -password"
+    );
+    return res.status(200).json({
+      message: "Users fetched successfully",
+      success: true,
+      users,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error", success: false });
+  }
+};
+

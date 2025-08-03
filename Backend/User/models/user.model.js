@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { type } from "os";
 const userSchema = new mongoose.Schema({
   userName: {
     type: String,
@@ -24,11 +25,11 @@ const userSchema = new mongoose.Schema({
     default: "",
   },
   followers: {
-    type: [String],
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Userdetails" }],
     default: [],
   },
   following: {
-    type: [String],
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Userdetails" }],
     default: [],
   },
   password: {

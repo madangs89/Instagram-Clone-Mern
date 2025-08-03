@@ -1,6 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { checkIsAuth, loginUser, registerUser } from "../Services/AuthThunk";
-
 const authSlice = createSlice({
   name: "auth",
   initialState: {

@@ -11,13 +11,16 @@ import {
 import { followUser, like, unFollowUser } from "../../Redux/Services/UserThunk";
 import { toast } from "sonner";
 
+import {useNavigate} from "react-router-dom"
+
 export default function PostCard({ post, isActive }) {
   const [comment, setComment] = useState("");
   const data = useSelector((state) => state.user);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleFollowAndUnFollow = async (id) => {
-     dispatch(addAndRemoveFollower(id));
+    dispatch(addAndRemoveFollower(id));
     console.log("clicking", data?.following?.includes(id));
     if (data?.following?.includes(id)) {
       try {
@@ -73,7 +76,7 @@ export default function PostCard({ post, isActive }) {
     <div className="bg-black md:border border-neutral-800 rounded-md w-full max-w-md mx-auto mb-1 md:mb-5 text-white">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3">
-        <div className="flex items-center space-x-3">
+        <div onClick={ () => navigate(`/profile/${post?.userId?._id}`) } className="flex items-center cursor-pointer space-x-3">
           <img
             src={post?.userId?.avatar}
             alt="avatar"
@@ -81,7 +84,6 @@ export default function PostCard({ post, isActive }) {
           />
           <div className="text-sm font-semibold">{post?.userId?.userName}</div>
           <span className="text-xs text-neutral-400">
-            {" "}
             •{" "}
             {formatDistanceToNow(new Date(post?.createdAt), {
               addSuffix: true,

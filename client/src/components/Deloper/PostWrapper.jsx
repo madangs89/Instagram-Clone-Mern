@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import { dummyPosts } from "../../utils/utilitity";
 import PostCard from "./PostCard";
 import { useSelector } from "react-redux";
 
