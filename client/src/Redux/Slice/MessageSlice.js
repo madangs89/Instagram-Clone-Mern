@@ -27,6 +27,47 @@ const messageSlice = createSlice({
     setSelectedIndex: (state, action) => {
       state.selectedIndex = action.payload;
     },
+    updateCurrentUserMessage: (state, action) => {
+      state.currentUserMessage.push(action.payload);
+    },
+    updatingStatusForMessages: (state, action) => {
+      const { newStatus, tempId, realMessageId } = action.payload;
+      const index = state.currentUserMessage.findIndex(
+        (item) => item.tempId == tempId
+      );
+      if (index !== -1) {
+        state.currentUserMessage[index].status.forEach((item) => {
+          item.state = newStatus;
+        });
+        if (realMessageId) {
+          state.currentUserMessage[index]._id = realMessageId;
+        }
+      }
+    },
+    updateMessageReactionEmoji: (state, action) => {
+      const { emoji, messageId, userId } = action.payload;
+      console.log(emoji, messageId, userId + "emoji");
+
+      const index = state.currentUserMessage.findIndex(
+        (item) => (item._id || item.tempId) == messageId
+      );
+      if (index !== -1) {
+        // state.currentUserMessage[index].reactions.push({ userId, emoji });
+
+        const isUserPresent = state.currentUserMessage[index].reactions.some(
+          (reaction) => reaction.userId == userId
+        );
+        if (isUserPresent) {
+          state.currentUserMessage[index].reactions.forEach((reaction) => {
+            if (reaction.userId == userId) {
+              reaction.emoji = emoji;
+            }
+          });
+        } else {
+          state.currentUserMessage[index].reactions.push({ userId, emoji });
+        }
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -78,7 +119,6 @@ const messageSlice = createSlice({
         state.loading = false;
         state.error = null;
         console.log(action.payload, "action.payload");
-        state.currentUserMessage.push(action.payload);
       })
       .addCase(createMessage.rejected, (state, action) => {
         state.loading = false;
@@ -88,5 +128,11 @@ const messageSlice = createSlice({
 });
 
 // Exports
-export const { rechangeInbox, setSelectedIndex } = messageSlice.actions;
+export const {
+  rechangeInbox,
+  setSelectedIndex,
+  updateCurrentUserMessage,
+  updatingStatusForMessages,
+  updateMessageReactionEmoji,
+} = messageSlice.actions;
 export const messageReducer = messageSlice.reducer;

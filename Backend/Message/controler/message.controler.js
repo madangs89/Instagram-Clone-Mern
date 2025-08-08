@@ -21,11 +21,17 @@ export const createMessage = async (req, res) => {
       return res
         .status(400)
         .json({ message: "Media Or Text is required", success: false });
+    status.forEach((item) => {
+      if (item.state == "sending") {
+        item.state = "sent";
+      }
+    });
     const messageData = await Message.create({
       conversationId,
       sender,
       text,
       media,
+      status,
     });
     if (!messageData)
       return res
@@ -37,63 +43,6 @@ export const createMessage = async (req, res) => {
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Server error", success: false });
-  }
-};
-
-export const deleteMessage = async (req, res) => {
-  try {
-    const { messageId, conversationId } = req.params;
-    const senderId = req.user._id;
-    // 1. Find message
-    const message = await Message.findById(messageId);
-    if (!message) return res.status(404).json({ message: "Message not found" });
-    // 2. Ensure only sender can delete
-    if (message.sender.toString() !== senderId.toString())
-      return res.status(401).json({ message: "Unauthorized" });
-
-    // 3. Soft delete the message
-    message.isDeleted = true;
-    await message.save();
-
-    // 4. Update conversation last message ONLY if this was the last message
-    const conversation = await Conversation.findById(conversationId);
-    if (!conversation)
-      return res.status(404).json({ message: "Conversation not found" });
-
-    const lastMsg = await Message.findOne({ conversationId }).sort({
-      createdAt: -1,
-    }); // latest message
-
-    if (lastMsg && lastMsg._id.toString() === messageId.toString()) {
-      conversation.lastMessage = "A message has been deleted";
-      conversation.lastMessageTime = new Date();
-      await conversation.save();
-    }
-
-    // 5. Emit socket event to other conversation members
-    const socketIds = {}; // { userId: { socketId, conversationId } } - replace with your real map
-    const receivers = conversation.members.filter((id) => id != senderId);
-
-    // receivers.forEach((receiverId) => {
-    //   const userSocket = socketIds[receiverId];
-    //   if (userSocket) {
-    //     io.to(userSocket.socketId).emit("messageDeleted", {
-    //       conversationId,
-    //       messageId,
-    //       deletedBy: senderId,
-    //       isLastMessage: lastMsg && lastMsg._id.toString() === messageId.toString()
-    //     });
-    //   }
-    // });
-
-    return res.status(200).json({
-      message: "Message deleted",
-      success: true,
-      deletedMessage: message,
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
@@ -223,6 +172,90 @@ export const createConversation = async (req, res) => {
       success: false,
       error: error.message,
     });
+  }
+};
+export const addReactions = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { emoji, messageId } = req.body;
+    const message = await Message.findById(messageId);
+    if (!message) return res.status(404).json({ message: "Message not found" });
+    const alreadyThere = message.reactions.some((id) => id.userId == userId);
+    if (alreadyThere) {
+      message.reactions.forEach((data) => {
+        if (data.userId == userId) {
+          data.emoji = emoji;
+        }
+      });
+    } else {
+      message.reactions.push({ userId, emoji });
+    }
+    await message.save();
+    return res.status(200).json({ message: "Reaction added", success: true });
+  } catch (error) {
+    console.error("Error in addReactions:", error);
+    return res.status(500).json({
+      message: "Server error",
+      success: false,
+      error: error.message,
+    });
+  }
+};
+//not handled
+export const deleteMessage = async (req, res) => {
+  try {
+    const { messageId, conversationId } = req.params;
+    const senderId = req.user._id;
+    // 1. Find message
+    const message = await Message.findById(messageId);
+    if (!message) return res.status(404).json({ message: "Message not found" });
+    // 2. Ensure only sender can delete
+    if (message.sender.toString() !== senderId.toString())
+      return res.status(401).json({ message: "Unauthorized" });
+
+    // 3. Soft delete the message
+    message.isDeleted = true;
+    await message.save();
+
+    // 4. Update conversation last message ONLY if this was the last message
+    const conversation = await Conversation.findById(conversationId);
+    if (!conversation)
+      return res.status(404).json({ message: "Conversation not found" });
+
+    const lastMsg = await Message.findOne({ conversationId }).sort({
+      createdAt: -1,
+    }); // latest message
+
+    if (lastMsg && lastMsg._id.toString() === messageId.toString()) {
+      conversation.lastMessage = "A message has been deleted";
+      conversation.lastMessageTime = new Date();
+      await conversation.save();
+    }
+
+    // 5. Emit socket event to other conversation members
+    const socketIds = {}; // { userId: { socketId, conversationId } } - replace with your real map
+    const receivers = conversation.members.filter((id) => id != senderId);
+
+    // receivers.forEach((receiverId) => {
+    //   const userSocket = socketIds[receiverId];
+    //   if (userSocket) {
+    //     io.to(userSocket.socketId).emit("messageDeleted", {
+    //       conversationId,
+    //       messageId,
+    //       deletedBy: senderId,
+    //       isLastMessage: lastMsg && lastMsg._id.toString() === messageId.toString()
+    //     });
+    //   }
+    // });
+
+    return res.status(200).json({
+      message: "Message deleted",
+      success: true,
+      deletedMessage: message,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };
 export const createGroup = async (req, res) => {};

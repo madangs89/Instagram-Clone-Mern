@@ -25,7 +25,7 @@ const messageSchema = new mongoose.Schema(
           url: { type: String, required: true },
           publicId: { type: String },
           type: {
-            type: String,
+            type: [String],
             required: true,
             enum: ["image", "video", "reel", "post"],
           },
@@ -45,6 +45,17 @@ const messageSchema = new mongoose.Schema(
         readAt: { type: Date },
       },
     ],
+    reactions: {
+      type: [
+        {
+          userId: { type: String, required: true },
+          emoji: {
+            type: String,
+          },
+        },
+      ],
+      default: [],
+    },
   },
   { timestamps: true }
 );

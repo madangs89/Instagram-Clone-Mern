@@ -60,3 +60,27 @@ export const createMessage = createAsyncThunk(
     }
   }
 );
+export const uploadMediatoClodinary = createAsyncThunk(
+  "message/uploadMediatoClodinary",
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await api.post("/message/upload/files", data);
+      console.log(response.data.data, "response in message thunk");
+      return response?.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Erorr");
+    }
+  }
+);
+export const addReactions = createAsyncThunk(
+  "message/addReactions",
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await api.post("/message/add/reactions", data);
+      console.log(response.data, "response in message thunk");
+      return response?.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Erorr");
+    }
+  }
+);
