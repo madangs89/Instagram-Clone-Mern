@@ -5,7 +5,9 @@ export const login = async (req, res) => {
   try {
     console.log("getting the requrest");
 
+    
     const { userName, password } = req.body;
+    console.log(userName, password);
     if (!userName || !password) {
       return res
         .status(400)
@@ -48,19 +50,18 @@ export const login = async (req, res) => {
     return res.status(200).json({ message: "Login successful", success: true });
   } catch (error) {
     console.log(error);
-    return res
-      .status(500)
-      .json({
-        message: "Server error" + error.message,
-        success: false,
-        error: error.message,
-      });
+    return res.status(500).json({
+      message: "Server error" + error.message,
+      success: false,
+      error: error.message,
+    });
   }
 };
 
 export const register = async (req, res) => {
   try {
-    const { userName, password, email, name } = req.body;
+    const { userName, password, email, name, publicKey, encryptedPrivateKey } =
+      req.body;
     if (!userName || !password || !email || !name) {
       return res
         .status(400)
@@ -81,6 +82,8 @@ export const register = async (req, res) => {
       password,
       email,
       name,
+      publicKey,
+      encryptedPrivateKey,
     });
     const newData = newUser?.data?.user;
     const token = jwt.sign(
@@ -89,8 +92,8 @@ export const register = async (req, res) => {
         avatar: newData.avatar,
         userName: newData.userName,
         email: newData.email,
+        publicKey: newData.publicKey,
         name: newData.name,
-        
       },
       process.env.JWT_SECRET,
       {

@@ -2,16 +2,23 @@ import React, { useState, useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import MessageInbox from "../components/Deloper/MessageInbox";
 import MessageChat from "../components/Deloper/MessageChat";
+import { useDispatch, useSelector } from "react-redux";
+import { getAllConversationAndGroup } from "../Redux/Services/MessageThunk";
 
 const MessagePage = () => {
   const location = useLocation();
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const dispatch = useDispatch();
+  const allInbox = useSelector((state) => state.message);
+  useEffect(() => {
+    (async () => {
+      const data = dispatch(getAllConversationAndGroup());
+    })();
+  }, []);
 
-  // ✅ Update state when path changes
   useEffect(() => {
     setIsChatOpen(location.pathname !== "/message");
   }, [location.pathname]);
-
   return (
     <div className="flex flex-1 h-screen bg-black">
       {/* Left Sidebar (Inbox) */}
@@ -20,7 +27,7 @@ const MessagePage = () => {
           isChatOpen ? "hidden md:block" : ""
         }`}
       >
-        <MessageInbox />
+        <MessageInbox allInbox={allInbox.allConversationsAndGroups} />
       </div>
 
       {/* Right Chat Area */}

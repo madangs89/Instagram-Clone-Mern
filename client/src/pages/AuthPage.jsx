@@ -17,12 +17,36 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import AuthNav from "../components/Deloper/AuthNav";
 import Loader from "../components/Deloper/Loader";
+import { arrayBufferTobase64 } from "../utils/utilitity";
 
 const AuthPage = () => {
   const [login, setLogin] = useState(true);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const state = useSelector((state) => state.auth);
+
+  const createTwoPairsOfRsaKeys = async () => {
+    const keyPairs = await crypto.subtle.generateKey(
+      {
+        name: "RSA-OAEP",
+        modulusLength: 2048,
+        publicExponent: new Uint8Array([1, 0, 1]),
+        hash: { name: "SHA-256" },
+      },
+      true,
+      ["decrypt", "encrypt"]
+    );
+    let publicKey = await crypto.subtle.exportKey("spki", keyPairs.publicKey);
+    let privateKey = await crypto.subtle.exportKey(
+      "pkcs8",
+      keyPairs.privateKey
+    );
+    publicKey = arrayBufferTobase64(publicKey);
+    privateKey = arrayBufferTobase64(privateKey);
+
+    return { publicKey, privateKey };
+  };
+
   const submitHanlder = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -46,7 +70,6 @@ const AuthPage = () => {
           return;
         }
         toast.success("Login successful");
-        // Redirect to home page after successful login
         navigate("/");
       } catch (err) {
         console.error("Login error:", err);
@@ -54,6 +77,11 @@ const AuthPage = () => {
       }
     } else {
       try {
+        const { publicKey, privateKey } = await createTwoPairsOfRsaKeys();
+        console.log(publicKey, privateKey, "keys");
+        data.publicKey = publicKey;
+        console.log(data, "data");
+        localStorage.setItem("privateKey", privateKey);
         const resultAction = await dispatch(registerUser(data));
         const userData = resultAction.payload;
         if (!userData.success) {
@@ -167,5 +195,4 @@ const AuthPage = () => {
     </div>
   );
 };
-
 export default AuthPage;

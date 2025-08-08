@@ -5,19 +5,32 @@ import {
   uploadToCloudinarySingle,
 } from "../utils/cloudinary.js";
 import fs from "fs";
+import mongoose from "mongoose";
 export const createUser = async (req, res) => {
   try {
-    const { userName, password, avatar, email, name } = req.body;
+    const {
+      userName,
+      password,
+      avatar,
+      email,
+      name,
+      publicKey,
+      encryptedPrivateKey,
+    } = req.body;
     if (!userName || !password || !email) {
       return res
         .status(400)
         .json({ message: "All fields are required", success: false });
     }
+    console.log(publicKey, encryptedPrivateKey);
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await User.create({
       userName,
       password: hashedPassword,
       avatar,
+      publicKey,
+      encryptedPrivateKey,
       email,
       name,
     });
@@ -35,14 +48,18 @@ export const createUser = async (req, res) => {
 };
 export const getuser = async (req, res) => {
   try {
+    console.log("getting the request for login");
+
     const user = await User.findOne({
       $or: [{ userName: req.params.username }, { email: req.params.email }],
-    });
+    }).select("-__v -encryptedPrivateKey");
     if (!user) {
       return res
         .status(200)
         .json({ message: "User not found", success: false });
     }
+    console.log(user);
+
     return res
       .status(200)
       .json({ message: "User fetched successfully", success: true, user });
@@ -212,6 +229,8 @@ export const getUserById = async (req, res) => {
         .status(404)
         .json({ message: "User not found", success: false });
     }
+    console.log("user fecthed successfully", user);
+
     return res
       .status(200)
       .json({ message: "User fetched successfully", success: true, user });
@@ -312,4 +331,59 @@ export const gettingArrayOfUsers = async (req, res) => {
     return res.status(500).json({ message: "Server error", success: false });
   }
 };
+export const getUsersNotInArray = async (req, res) => {
+  try {
+    let { userIdsArray } = req.query;
+    console.log("userIdsArray", userIdsArray);
+    console.log(req.query, "req.query");
 
+    const userId = req.user._id;
+    if (!userIdsArray) {
+      userIdsArray = [];
+    } else if (!Array.isArray(userIdsArray)) {
+      const data = userIdsArray.split(",");
+      userIdsArray = [...data];
+    }
+    console.log("gettin the request for users not in array");
+
+    console.log("userIdsArray", userIdsArray);
+    if (!userIdsArray) {
+      return res.status(400).json({
+        message: "Bad request: userIdsArray is required",
+        success: false,
+      });
+    }
+    // Convert string to array if necessary
+    if (typeof userIdsArray === "string") {
+      userIdsArray = [userIdsArray];
+    }
+
+    // Convert string IDs to ObjectId
+    userIdsArray = userIdsArray.map((id) => new mongoose.Types.ObjectId(id));
+
+    const users = await User.find({
+      _id: { $nin: [...userIdsArray, userId] },
+    }).select("userName name avatar");
+
+    // Format result to include only required fields
+    const formattedUsers = users.map((user) => ({
+      _id: user._id,
+      userName: user.userName,
+      name: user.name,
+      avatar: user.avatar,
+    }));
+
+    return res.status(200).json({
+      message: "Users fetched successfully",
+      success: true,
+      users: formattedUsers,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Server error",
+      success: false,
+      error: error.message,
+    });
+  }
+};

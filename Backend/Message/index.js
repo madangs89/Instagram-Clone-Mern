@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { connectDB } from "./utils/ConnectDB.js";
 import cookieParser from "cookie-parser";
+import { messageRouter } from "./routes/message.routes.js";
 dotenv.config({ path: "./.env" });
 
 const app = express();
@@ -18,9 +19,14 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+
+
 app.get("/", (req, res) => {
   res.send("Hello World");
 });
+
+
+app.use("/message" , messageRouter)
 app.listen(process.env.PORT, async () => {
   connectDB();
   console.log(`Server is running on  http://localhost:${process.env.PORT}`);

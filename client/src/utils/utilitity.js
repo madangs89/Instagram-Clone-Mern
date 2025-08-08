@@ -259,3 +259,14 @@ export const dummyPosts = [
     commentsCount: 12,
   },
 ];
+
+export const arrayBufferTobase64 = (buffer) => {
+  let binary = "";
+  const len = buffer.byteLength;
+  const newBuffer = new Uint8Array(buffer);
+
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(newBuffer[i]);
+  }
+  return btoa(binary);
+};

@@ -1,109 +1,42 @@
-import Conversation from "../models/Conversation.model";
-import Message from "../models/Message";
-import { uploadToCloudinarySingle } from "../utils/cloudinary";
+import Conversation from "../models/Conversation.model.js";
+import Message from "../models/Message.js";
+import { uploadToCloudinarySingle } from "../utils/cloudinary.js";
+
+import axios from "axios";
+
+const api = axios.create({
+  baseURL: `${process.env.USER_BACKEND}`,
+  withCredentials: true,
+});
 
 export const createMessage = async (req, res) => {
   try {
-    let { conversationId, text, receiversId, otherMedia } = req.body;
-    const senderId = req.user._id;
-    if (
-      (!conversationId && !receiversId) ||
-      (!text && !req.files && !otherMedia)
-    )
-      return res.status(400).json({ message: "Missing fields" });
-
-    if (!conversationId) {
-      const newConversation = await Conversation.create({
-        members: [senderId, receiversId],
-        unreadCount: [
-          { userId: senderId, count: 0 },
-          { userId: receiversId, count: 0 },
-        ],
-      });
-      receiversId = newConversation.members.filter((id) => id != senderId);
-      conversationId = newConversation._id;
-    } else {
-      const conversation = await Conversation.findById(conversationId);
-      receiversId = conversation.members.filter((id) => id != senderId);
-    }
-    let media = [];
-    if (req.files && req.files.length > 0) {
-      for (const file of req.files) {
-        const result = await uploadToCloudinarySingle(file.path);
-        media.push({
-          publicId: result.public_id,
-          url: result.secure_url,
-          type: file.mimetype.startsWith("image") ? "image" : "video",
-        });
-        fs.unlinkSync(file.path);
-      }
-    }
-    if (otherMedia && otherMedia.length > 0) {
-      for (const file of otherMedia) {
-        media.push(file);
-      }
-    }
-
-    // Example placeholder for active sockets (replace with your map)
-    let socketIds = {}; // { userId: { socketId, conversationId } }
-
-    let updatingConversation = await Conversation.findById(conversationId);
-    const status = receiversId.map((id) => {
-      const userSocket = socketIds[id];
-      if (userSocket && userSocket.conversationId == conversationId) {
-        // Receiver is in chat -> read
-        updatingConversation.unreadCount.forEach((user) => {
-          if (user.userId == id) user.count = 0;
-        });
-        return {
-          userId: id,
-          state: "read",
-          readAt: new Date(),
-          receivedAt: new Date(),
-        };
-      } else if (userSocket) {
-        updatingConversation.unreadCount.forEach((user) => {
-          if (user.userId == id) user.count += 1;
-        });
-        return {
-          userId: id,
-          state: "delivered",
-          readAt: null,
-          receivedAt: new Date(),
-        };
-      } else {
-        // Offline -> sent
-        updatingConversation.unreadCount.forEach((user) => {
-          if (user.userId == id) user.count += 1;
-        });
-        return {
-          userId: id,
-          state: "sent",
-          readAt: null,
-          receivedAt: null,
-        };
-      }
-    });
-
-    const message = await Message.create({
+    const { conversationId, text, media, status } = req.body;
+    const sender = req.user._id;
+    if (!conversationId || !sender)
+      return res
+        .status(400)
+        .json({ message: "Missing fields", success: false });
+    if (!text && !media)
+      return res
+        .status(400)
+        .json({ message: "Media Or Text is required", success: false });
+    const messageData = await Message.create({
       conversationId,
-      sender: senderId,
+      sender,
       text,
       media,
-      status,
     });
-
-    updatingConversation.lastMessage = message.text || "New Attachment Sent";
-    updatingConversation.lastMessageTime = new Date();
-
-    await updatingConversation.save();
-
+    if (!messageData)
+      return res
+        .status(500)
+        .json({ message: "Problem creating message", success: false });
     return res
-      .status(200)
-      .json({ message: "Message sent", success: true, message });
+      .status(201)
+      .json({ message: "Message created", success: true, messageData });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ message: "Internal Server Error" });
+    return res.status(500).json({ message: "Server error", success: false });
   }
 };
 
@@ -170,6 +103,10 @@ export const getAllMessages = async (req, res) => {
     const messages = await Message.find({ conversationId }).sort({
       createdAt: 1,
     });
+    if (!messages || messages.length === 0)
+      return res
+        .status(200)
+        .json({ message: "Messages not found", success: true, messages });
     return res
       .status(200)
       .json({ message: "Messages fetched", success: true, messages });
@@ -178,8 +115,118 @@ export const getAllMessages = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
-export const getAllConversationAndGroup = async (req, res) => {};
+export const getAllConversationAndGroup = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const conversations = await Conversation.find({
+      members: { $in: [userId] },
+    });
+    let data = [];
+    for (const conversation of conversations) {
+      if (conversation.isGroup == true) {
+        data.push({
+          conversationId: conversation._id,
+          isGroup: true,
+          groupName: conversation.groupName,
+          groupAvatar: conversation.groupAvatar,
+          members: conversation.members,
+          lastMessage: conversation.lastMessage,
+          lastMessageTime: conversation.lastMessageTime,
+          unreadCount: conversation.unreadCount,
+        });
+      } else {
+        // 1-to-1 chat: fetch the other user's data
+        const otherMember = conversation.members.find(
+          (member) => member != userId
+        );
+        if (otherMember) {
+          const userDataRes = await api.get(`/user/details/${otherMember}`);
+          // console.log(userDataRes, "userDataRes");
+
+          const userData = userDataRes.data.user;
+
+          data.push({
+            isGroup: false,
+            userId: userData._id,
+            unreadCount: conversation.unreadCount,
+            name: userData.name,
+            userName: userData.userName,
+            avatar: userData.avatar,
+            conversationId: conversation._id,
+            lastMessage: conversation.lastMessage,
+            lastMessageTime: conversation.lastMessageTime,
+          });
+        }
+      }
+    }
+    if (data.length < 10) {
+      const existingUserIds = data
+        .filter((d) => !d.isGroup && d.userId)
+        .map((d) => d.userId);
+      console.log(existingUserIds, "existingUserIds");
+
+      const token =
+        req.cookies?.token || req.headers.authorization?.split(" ")[1];
+
+      const remainingUsersRes = await api.get("/user/get/not-array/users", {
+        params: {
+          userIdsArray: existingUserIds,
+        },
+        paramsSerializer: (params) => {
+          return new URLSearchParams(params).toString();
+        },
+        headers: {
+          Authorization: `Bearer ${token}`, // ✅ Forward the token
+        },
+      });
+
+      data = [...data, ...remainingUsersRes.data.users];
+    }
+
+    return res.status(200).json({
+      message: "Conversations fetched",
+      success: true,
+      data,
+    });
+  } catch (error) {
+    console.error("Error in getAllConversationAndGroup:", error);
+    return res.status(500).json({
+      message: "Server error",
+      success: false,
+      error: error.message,
+    });
+  }
+};
+export const createConversation = async (req, res) => {
+  try {
+    let { members } = req.body;
+    const userId = req.user._id;
+
+    if (!Array.isArray(members) || typeof userIdsArray === "string") {
+      members = [members];
+    }
+    if (!members || members.length == 0 || !Array.isArray(members))
+      return res.status(400).json({ message: "Missing fields" });
+
+    const conversation = await Conversation.create({
+      members: [userId, ...members],
+    });
+    return res.status(200).json({
+      message: "Conversation created",
+      success: true,
+      conversation,
+    });
+  } catch (error) {
+    console.error("Error in createConversation:", error);
+    return res.status(500).json({
+      message: "Server error",
+      success: false,
+      error: error.message,
+    });
+  }
+};
 export const createGroup = async (req, res) => {};
+
 export const addMembersToGroup = async (req, res) => {};
 export const deleteGroup = async (req, res) => {};
 export const leaveGroup = async (req, res) => {};

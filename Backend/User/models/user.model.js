@@ -54,6 +54,16 @@ const userSchema = new mongoose.Schema({
     default: "none",
     enum: ["none", "Male", "Female", "Other"],
   },
+  publicKey: {
+    type: String,
+    default: "",
+    required: true,
+  },
+  encryptedPrivateKey: {
+    type: String,
+    default: "",
+    // required: true,
+  },
   highlights: [
     {
       name: {
