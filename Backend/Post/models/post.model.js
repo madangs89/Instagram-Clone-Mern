@@ -25,23 +25,7 @@ const postSchema = new mongoose.Schema(
       ],
       required: true,
     },
-    // comments: {
-    //   type: [
-    //     {
-    //       userId: { type: String, required: true },
-    //       comment: { type: String, required: true },
-    //       reply: [
-    //         {
-    //           userId: { type: String, required: true },
-    //           comment: { type: String, required: true },
-    //           createdAt: { type: Date, default: Date.now },
-    //         },
-    //       ],
-    //       createdAt: { type: Date, default: Date.now },
-    //     },
-    //   ],
-    //   default: [],
-    // },
+  
   },
   { timestamps: true }
 );

@@ -19,6 +19,7 @@ import { getCurrentUserDetails, getUser } from "./Redux/Services/UserThunk";
 import ReelsPage from "./pages/ReelsPage";
 import StoryPage from "./pages/StoryPage";
 import MessagePage from "./pages/MessagePage";
+import ExplorePage from "./pages/ExplorePage";
 
 const App = () => {
   const auth = useSelector((state) => state.auth.isAuthenticated);
@@ -54,6 +55,7 @@ const App = () => {
             <Route path="/create" element={<Upload />} />
             <Route path="/reels" element={<ReelsPage />} />
             <Route path="/story/:id" element={<StoryPage />} />
+            <Route path="/explore" element={<ExplorePage />} />
             <Route path="/message/*" element={<MessagePage />} />
             {/* <Route path="messages" element={<Messages />} /> */}
             {/* Add more pages here */}

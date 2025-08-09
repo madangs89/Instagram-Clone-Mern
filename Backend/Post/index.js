@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import likesRouter from "./routes/likes.route.js";
 import reelRouter from "./routes/reel.route.js";
 import { connectDB } from "./utils/ConnectDB.js";
+import commentRouter from "./routes/comment.route.js";
 dotenv.config({ path: "./.env" });
 
 const app = express();
@@ -25,6 +26,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/post" , postRouter)
 app.use("/reel" , reelRouter)
 app.use("/" , likesRouter)
+
+app.use("/comment" , commentRouter)
 app.get("/", (req, res) => {
   res.send("Hello World");
 });

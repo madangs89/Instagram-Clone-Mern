@@ -7,6 +7,7 @@ import {
   Volume2,
   VolumeX,
 } from "lucide-react";
+import { toast } from "sonner";
 
 import { useDispatch, useSelector } from "react-redux";
 import { addAndRemoveLike, setMuted } from "../../Redux/Slice/UserSlice";
@@ -14,6 +15,10 @@ import Dialoger from "./Dialoger";
 import FollowUnFolowButton from "./FollowUnFolowButton";
 import { useNavigate } from "react-router-dom";
 import { like } from "../../Redux/Services/UserThunk";
+import {
+  addComment,
+  getAllComments,
+} from "../../Redux/Services/mediaUploadThunk";
 
 export default function ReelVedio({ src, isActive, reel }) {
   const videoRef = useRef(null);
@@ -23,7 +28,11 @@ export default function ReelVedio({ src, isActive, reel }) {
   const data = useSelector((state) => state.user);
   const navigate = useNavigate();
 
+  const [reelId, setReelId] = useState(reel._id);
+
   const [show, setShow] = useState(false);
+  const [comments, setComments] = useState([]);
+  const [comment, setComment] = useState("");
   const toggleMute = (e) => {
     e.stopPropagation(); // prevent togglePlayPause
     dispatch(setMuted());
@@ -71,10 +80,37 @@ export default function ReelVedio({ src, isActive, reel }) {
     }
   };
 
-  const handleComment = async () => {
-    console.log(show);
+  const handleMessageCircleClick = async (id) => {
+    try {
+      const results = await dispatch(getAllComments(id));
+      console.log(results.payload.comments);
+      setComments(results.payload.comments);
+      if (results?.payload?.success) {
+        setShow(true);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-    setShow(!show);
+  const addComments = async (id) => {
+    try {
+      const data = {
+        mediaId: id,
+        comment,
+      };
+      const result = await dispatch(addComment(data));
+      console.log(result.payload.success, "result while adding the comment");
+      if (result?.payload?.success) {
+        setComments((prev) => [...prev, result.payload.comment]);
+        setComment("");
+        toast.success("Comment added successfully");
+        return;
+      }
+      toast.error("Something went wrong");
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   useEffect(() => {
@@ -156,22 +192,32 @@ export default function ReelVedio({ src, isActive, reel }) {
           className={`cursor-pointer transition-transform duration-200 active:scale-125`}
         >
           {data?.userLikes.includes(reel._id) ? (
-            <Heart className="w-7 h-7 text-red-500 fill-red-500 transition-all duration-200" />
+            <Heart className="w-7 h-7 cursor-pointer text-red-500 fill-red-500 transition-all duration-200" />
           ) : (
-            <Heart className="w-7 h-7 text-white transition-all duration-200" />
+            <Heart className="w-7 h-7 cursor-pointer text-white transition-all duration-200" />
           )}
         </div>
         <MessageCircle
           onClick={(e) => {
             e.stopPropagation();
-            handleComment();
+            handleMessageCircleClick(reel._id);
           }}
-          className="w-7 h-7 text-white"
+          className="w-7 h-7 cursor-pointer text-white"
         />
-        <Send className="w-7 h-7 text-white" />
+        <Send className="w-7 h-7 cursor-pointer text-white" />
       </div>
 
-      {show && <Dialoger onClose={onClose} />}
+      {show && (
+        <Dialoger
+          addComments={addComments}
+          setComments={setComments}
+          comment={comment}
+          comments={comments}
+          setComment={setComment}
+          onClose={onClose}
+          reelId={reel._id}
+        />
+      )}
     </div>
   );
 }

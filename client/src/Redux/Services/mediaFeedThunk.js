@@ -64,3 +64,25 @@ export const curretStoryView = createAsyncThunk(
     }
   }
 );
+export const getReelById = createAsyncThunk(
+  "mediaFeed/getReelById",
+  async (reelId, { rejectWithValue }) => {
+    try {
+      const response = await api.get(`/reel/get/reel/${reelId}`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Error");
+    }
+  }
+);
+export const getPostById = createAsyncThunk(
+  "mediaFeed/getPostById",
+  async (postId, { rejectWithValue }) => {
+    try {
+      const response = await api.get(`/post/get/post/${postId}`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Error");
+    }
+  }
+);

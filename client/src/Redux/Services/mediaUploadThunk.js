@@ -44,3 +44,36 @@ export const addStory = createAsyncThunk(
     }
   }
 );
+export const addComment = createAsyncThunk(
+  "mediaUpload/addComment",
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await api.post("/comment", data);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Error");
+    }
+  }
+);
+export const getAllComments = createAsyncThunk(
+  "mediaUpload/getAllComments",
+  async (mediaId, { rejectWithValue }) => {
+    try {
+      const response = await api.get(`/comment/${mediaId}`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Error");
+    }
+  }
+);
+export const deleteComment = createAsyncThunk(
+  "mediaUpload/delete",
+  async (commentId, { rejectWithValue }) => {
+    try {
+      const response = await api.delete(`/comment/${commentId}`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Error");
+    }
+  }
+);

@@ -10,6 +10,7 @@ import {
   rechangeInbox,
   setSelectedIndex,
 } from "../../Redux/Slice/MessageSlice";
+import { formatDistanceToNow } from "date-fns";
 const MessageInbox = ({ allInbox }) => {
   const navigate = useNavigate();
   const user = useSelector((state) => state.auth);
@@ -82,9 +83,9 @@ const MessageInbox = ({ allInbox }) => {
                 </div>
                 <div className="text-xs text-gray-500">
                   {chat?.isGroup ? chat?.lastMessage : chat?.lastMessage} •{" "}
-                  {chat?.isGroup
-                    ? chat?.lastMessageTime
-                    : chat?.lastMessageTime}
+                  {formatDistanceToNow(new Date(chat?.lastMessageTime), {
+                    addSuffix: false,
+                  })}
                 </div>
               </div>
             </div>

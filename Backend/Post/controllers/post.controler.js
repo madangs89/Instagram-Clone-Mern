@@ -1,7 +1,6 @@
 import Post from "../models/post.model.js";
 
 import fs from "fs";
-
 import Userdetails from "../models/user.model.js";
 
 import {
@@ -9,6 +8,7 @@ import {
   uploadToCloudinarySingle,
 } from "../utils/cloudinary.js";
 import Likes from "../models/likes.model.js";
+
 export const createPost = async (req, res) => {
   try {
     const { caption, mediaType } = req.body;
@@ -57,10 +57,6 @@ export const createPost = async (req, res) => {
 };
 export const getAllUnlikedPosts = async (req, res) => {
   try {
-    console.log("Getting the requesti");
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
     // Get all liked post IDs by this user
     const likedPosts = await Likes.find({
       userId: req.user._id,
@@ -73,8 +69,6 @@ export const getAllUnlikedPosts = async (req, res) => {
       userId: { $ne: req.user._id }, // exclude user's own posts
     })
       .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
       .populate("userId");
     const postsWithLikeCounts = await Promise.all(
       posts.map(async (post) => {
@@ -82,6 +76,7 @@ export const getAllUnlikedPosts = async (req, res) => {
         return {
           ...post._doc,
           likeCount,
+          contentType: "post",
         };
       })
     );
@@ -95,8 +90,7 @@ export const getAllUnlikedPosts = async (req, res) => {
       success: true,
       posts: postsWithLikeCounts,
       totalPosts: totalUnlikedPosts,
-      currentPage: page,
-      totalPages: Math.ceil(totalUnlikedPosts / limit),
+      totalPages: Math.ceil(totalUnlikedPosts),
     });
   } catch (error) {
     console.error("Get Unliked Posts Error:", error);
@@ -172,6 +166,26 @@ export const deletePost = async (req, res) => {
     return res.status(200).json({ success: true, message: "Post deleted" });
   } catch (error) {
     console.error("Delete Post Error:", error);
+    return res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
+export const getPostById = async (req, res) => {
+  try {
+    const { postId } = req.params;
+    const post = await Post.findById(postId).populate("userId");
+    let totalLikes = await Likes.countDocuments({ targetId: postId });
+    if (!totalLikes) {
+      totalLikes = 0;
+    }
+    const newData = {
+      ...post._doc,
+      contentType: "post",
+      likeCount: totalLikes,
+    };
+    return res.status(200).json({ success: true, post: newData });
+  } catch (error) {
+    console.error("Get Post by Id Error:", error);
     return res.status(500).json({ success: false, message: "Server Error" });
   }
 };

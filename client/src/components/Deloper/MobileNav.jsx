@@ -37,7 +37,7 @@ const MobileNav = () => {
     },
     {
       name: "Search",
-      href: "/search",
+      href: "/explore",
       icon: "search",
     },
     {

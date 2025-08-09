@@ -11,13 +11,45 @@ import {
 import { followUser, like, unFollowUser } from "../../Redux/Services/UserThunk";
 import { toast } from "sonner";
 
-import {useNavigate} from "react-router-dom"
+import { useNavigate } from "react-router-dom";
+
+import Dialoger from "./Dialoger";
+import {
+  addComment,
+  getAllComments,
+} from "../../Redux/Services/mediaUploadThunk";
 
 export default function PostCard({ post, isActive }) {
   const [comment, setComment] = useState("");
   const data = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [show, setShow] = useState(false);
+  const [comments, setComments] = useState([]);
+
+  const onClose = () => {
+    setShow(false);
+  };
+
+  const addComments = async () => {
+    try {
+      const data = {
+        mediaId: post._id,
+        comment,
+      };
+      const result = await dispatch(addComment(data));
+      console.log(result.payload.success, "result while adding the comment");
+      if (result?.payload?.success) {
+        setComments((prev) => [...prev, result.payload.comment]);
+        setComment("");
+        toast.success("Comment added successfully");
+        return;
+      }
+      toast.error("Something went wrong");
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handleFollowAndUnFollow = async (id) => {
     dispatch(addAndRemoveFollower(id));
@@ -72,11 +104,27 @@ export default function PostCard({ post, isActive }) {
     }
   };
 
+  const handleMessageCircleClick = async () => {
+    try {
+      const results = await dispatch(getAllComments(post._id));
+      console.log(results.payload.comments);
+      setComments(results.payload.comments);
+      if (results?.payload?.success) {
+        setShow(true);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className="bg-black md:border border-neutral-800 rounded-md w-full max-w-md mx-auto mb-1 md:mb-5 text-white">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3">
-        <div onClick={ () => navigate(`/profile/${post?.userId?._id}`) } className="flex items-center cursor-pointer space-x-3">
+        <div
+          onClick={() => navigate(`/profile/${post?.userId?._id}`)}
+          className="flex items-center cursor-pointer space-x-3"
+        >
           <img
             src={post?.userId?.avatar}
             alt="avatar"
@@ -121,29 +169,25 @@ export default function PostCard({ post, isActive }) {
             className={`cursor-pointer transition-transform duration-200 active:scale-125`}
           >
             {data?.userLikes.includes(post._id) ? (
-              <Heart className="w-7 h-7 text-red-500 fill-red-500 transition-all duration-200" />
+              <Heart className="w-7 h-7 cursor-pointer text-red-500 fill-red-500 transition-all duration-200" />
             ) : (
-              <Heart className="w-7 h-7 text-white transition-all duration-200" />
+              <Heart className="w-7 h-7 cursor-pointer text-white transition-all duration-200" />
             )}
           </div>
-          <MessageCircle className="w-7 h-7" />
-          <Send className="w-7 h-7" />
+          <MessageCircle
+            onClick={handleMessageCircleClick}
+            className="w-7 h-7 cursor-pointer"
+          />
+          <Send className="w-7 h-7 cursor-pointer" />
         </div>
-        <Bookmark className="w-7 h-7" />
+        <Bookmark className="w-7 h-7 cursor-pointer" />
       </div>
 
       {/* Caption */}
       <div className="px-4 pb-2 text-sm">
         <span className="font-semibold">{post?.userId?.userName}</span>{" "}
         <span>{post?.caption}</span>
-        {/* <div className="text-neutral-400 mt-1">{post.hashtags}</div> */}
       </div>
-
-      {/* Comments */}
-      {/* <div className="px-4 pb-1 text-sm text-neutral-400">
-        View all {post.commentsCount} comment
-        {post.commentsCount !== 1 ? "s" : ""}
-      </div> */}
 
       <div className="flex items-center pr-5 justify-between">
         <Input
@@ -155,9 +199,25 @@ export default function PostCard({ post, isActive }) {
           className="px-4 pb-3 text-sm text-neutral-400 border-none outline-none ring-0 focus:outline-none focus:ring-0 focus:border-none focus-visible:ring-0 focus-visible:outline-none shadow-none"
         />
         {comment ? (
-          <button className="text-sm font-semibold text-white">Post</button>
+          <button
+            onClick={addComments}
+            className="text-sm font-semibold cursor-pointer hover:text-blue-400 transition-all duration-150 ease-in-out text-white"
+          >
+            Post
+          </button>
         ) : null}
       </div>
+
+      {show && (
+        <Dialoger
+          addComments={addComments}
+          setComments={setComments}
+          comment={comment}
+          comments={comments}
+          setComment={setComment}
+          onClose={onClose}
+        />
+      )}
     </div>
   );
 }

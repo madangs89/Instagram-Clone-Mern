@@ -15,6 +15,5 @@ const viewsSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
 const Views = mongoose.model("Views", viewsSchema);
 export default Views;

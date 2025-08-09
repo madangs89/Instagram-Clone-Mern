@@ -36,9 +36,11 @@ export const addConversation = createAsyncThunk(
 );
 export const getCurrentUserMessage = createAsyncThunk(
   "message/currentUserMessage",
-  async (id, { rejectWithValue }) => {
+  async (data, { rejectWithValue }) => {
     try {
-      const response = await api.get(`/message/all/messages/${id}`);
+      const response = await api.get(
+        `/message/all/messages/${data.id}`
+      );
       console.log(response.data.messages, "response in message thunk");
 
       return response?.data?.messages;
@@ -79,6 +81,32 @@ export const addReactions = createAsyncThunk(
       const response = await api.post("/message/add/reactions", data);
       console.log(response.data, "response in message thunk");
       return response?.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Erorr");
+    }
+  }
+);
+export const getAllMessageReaction = createAsyncThunk(
+  "message/getAllMessageReaction",
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await api.get(
+        `/message/all/reactions/${data.messageId}`
+      );
+      console.log(response.data, "response in message thunk");
+      return response?.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Erorr");
+    }
+  }
+);
+export const removeMessageReaction = createAsyncThunk(
+  "message/removeMessageReaction",
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await api.delete(`/message/delete/reactions`, { data });
+      console.log(response.data, "response in message thunk");
+      return response?.data.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Erorr");
     }

@@ -1,7 +1,5 @@
 import { uploadToCloudinarySingle } from "../utils/cloudinary.js";
 import fs from "fs";
-// import { deleteCloudinaryImage } from "../../Message/utils/cloudinary.js";
-
 import Userdetails from "../models/user.model.js";
 import Likes from "../models/likes.model.js";
 import Reel from "../models/reel.model.js";
@@ -50,9 +48,9 @@ export const createReel = async (req, res) => {
 };
 export const gettingAllUnSeenReels = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
+    // const page = parseInt(req.query.page) || 1;
+    // const limit = parseInt(req.query.limit) || 10;
+    // const skip = (page - 1) * limit;
     // Get all liked post IDs by this user
     const veiwedReels = await Views.find({ userId: req.user._id }).select(
       "reelId"
@@ -63,8 +61,6 @@ export const gettingAllUnSeenReels = async (req, res) => {
       userId: { $ne: req.user._id },
     })
       .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
       .populate("userId");
     const reelsWithLikeCounts = await Promise.all(
       reels.map(async (reel) => {
@@ -73,6 +69,7 @@ export const gettingAllUnSeenReels = async (req, res) => {
         return {
           ...reel._doc,
           likeCount,
+          contentType: "reel",
           viewCount,
         };
       })
@@ -87,8 +84,7 @@ export const gettingAllUnSeenReels = async (req, res) => {
       success: true,
       reels: reelsWithLikeCounts,
       totalReels: totalUnlikedReels,
-      currentPage: page,
-      totalPages: Math.ceil(totalUnlikedReels / limit),
+      totalPages: Math.ceil(totalUnlikedReels),
     });
   } catch (error) {
     console.error("Get Unliked Reels Error:", error);
@@ -164,13 +160,32 @@ export const deleteReel = async (req, res) => {
     return res.status(500).json({ success: false, message: "Server Error" });
   }
 };
-
 export const getAllReel = async (req, res) => {
   try {
     const reels = await Reel.find().sort({ createdAt: -1 }).populate("userId");
     return res.status(200).json({ success: true, reels });
   } catch (error) {
     console.error("Get All Reels Error:", error);
+    return res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
+export const getReelById = async (req, res) => {
+  try {
+    const { reelId } = req.params;
+    const reel = await Reel.findById(reelId).populate("userId");
+    let totalLikes = await Likes.countDocuments({ targetId: reel });
+    if (!totalLikes) {
+      totalLikes = 0;
+    }
+    const newData = {
+      ...reel._doc,
+      contentType: "reel",
+      likeCount: totalLikes,
+    };
+    return res.status(200).json({ success: true, reel: newData });
+  } catch (error) {
+    console.error("Get Reel by Id Error:", error);
     return res.status(500).json({ success: false, message: "Server Error" });
   }
 };

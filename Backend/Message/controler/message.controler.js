@@ -33,6 +33,11 @@ export const createMessage = async (req, res) => {
       media,
       status,
     });
+    let conversation = await Conversation.findByIdAndUpdate(conversationId, {
+      lastMessage: text ? text : "A message has been sent",
+      lastMessageTime: new Date(),
+    });
+    await conversation.save();
     if (!messageData)
       return res
         .status(500)
@@ -49,9 +54,12 @@ export const createMessage = async (req, res) => {
 export const getAllMessages = async (req, res) => {
   try {
     const { conversationId } = req.params;
-    const messages = await Message.find({ conversationId }).sort({
-      createdAt: 1,
-    });
+
+    const messages = await Message.find({ conversationId })
+      .sort({
+        createdAt: 1,
+      })
+
     if (!messages || messages.length === 0)
       return res
         .status(200)
@@ -192,6 +200,87 @@ export const addReactions = async (req, res) => {
     }
     await message.save();
     return res.status(200).json({ message: "Reaction added", success: true });
+  } catch (error) {
+    console.error("Error in addReactions:", error);
+    return res.status(500).json({
+      message: "Server error",
+      success: false,
+      error: error.message,
+    });
+  }
+};
+
+export const getAllMessageReaction = async (req, res) => {
+  try {
+    const { messageId } = req.params;
+    const userId = req.user;
+    const message = await Message.findById(messageId);
+    if (!message)
+      return res
+        .status(404)
+        .json({ message: "Message not found", success: false });
+
+    const responseReaction = [];
+    const reactions = message.reactions;
+    if (reactions && reactions.length != 0) {
+      for (let react of reactions) {
+        if (react.userId == userId._id) {
+          responseReaction.unshift({
+            emoji: react.emoji,
+            userId: react.userId,
+            name: userId.name,
+            userName: userId.userName,
+            avatar: userId.avatar,
+          });
+        } else {
+          const userDataRes = await api.get(`/user/details/${react.userId}`);
+          const userData = userDataRes.data.user;
+          responseReaction.unshift({
+            emoji: react.emoji,
+            userId: react.userId,
+            name: userData.name,
+            userName: userData.userName,
+            avatar: userData.avatar,
+          });
+        }
+      }
+    }
+    return res.status(200).json({
+      message: "Reactions fetched",
+      success: true,
+      data: responseReaction,
+    });
+  } catch (error) {
+    console.error("Error in addReactions:", error);
+    return res.status(500).json({
+      message: "Server error",
+      success: false,
+      error: error.message,
+    });
+  }
+};
+
+export const removeMessageReaction = async (req, res) => {
+  try {
+    const { messageId, user } = req.body;
+    const userId = req.user._id;
+    const message = await Message.findById(messageId);
+    if (!message) return res.status(404).json({ message: "Message not found" });
+
+    if (user != userId)
+      return res
+        .status(401)
+        .json({ message: "You Are Not Authorized To Delete the reaction" });
+
+    message.reactions = message.reactions.filter(
+      (reaction) => reaction.userId != userId
+    );
+    await message.save();
+    return res.status(200).json({
+      message: "Reaction deleted",
+      success: true,
+      data: { messageId, userId },
+    });
   } catch (error) {
     console.error("Error in addReactions:", error);
     return res.status(500).json({

@@ -1,9 +1,11 @@
-import { createSlice, current } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 import {
   addConversation,
   createMessage,
   getAllConversationAndGroup,
+  getAllMessageReaction,
   getCurrentUserMessage,
+  removeMessageReaction,
 } from "../Services/MessageThunk";
 const messageSlice = createSlice({
   name: "message",
@@ -11,6 +13,7 @@ const messageSlice = createSlice({
     allConversationsAndGroups: [],
     selectedIndex: {},
     currentUserMessage: [],
+    currentMesageAllReactions: [],
     loading: false,
     loading2: false,
     error: null,
@@ -27,7 +30,20 @@ const messageSlice = createSlice({
     setSelectedIndex: (state, action) => {
       state.selectedIndex = action.payload;
     },
+    clearSelectedCurrentUserMessage: (state) => {
+      state.currentUserMessage = [];
+    },
     updateCurrentUserMessage: (state, action) => {
+      console.log(action.payload, "Checking for upadting the index");
+      state.allConversationsAndGroups.forEach((data) => {
+        if (data?.conversationId == action.payload.conversationId) {
+          data.lastMessage = action.payload.text
+            ? action.payload.text
+            : "A message has been sent";
+          data.lastMessageTime = Date.now();
+        }
+      });
+
       state.currentUserMessage.push(action.payload);
     },
     updatingStatusForMessages: (state, action) => {
@@ -68,6 +84,21 @@ const messageSlice = createSlice({
         }
       }
     },
+
+    updateMessageReaction: (state, action) => {
+      state.currentMesageAllReactions = state.currentMesageAllReactions.filter(
+        (item) => item.userId != action.payload.userId
+      );
+      const isMessageThere = state.currentUserMessage.findIndex(
+        (msg) => msg._id == action.payload.messageId
+      );
+      if (isMessageThere != -1) {
+        state.currentUserMessage[isMessageThere].reactions =
+          state.currentUserMessage[isMessageThere].reactions.filter(
+            (item) => item.userId != action.payload.userId
+          );
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -104,7 +135,11 @@ const messageSlice = createSlice({
       .addCase(getCurrentUserMessage.fulfilled, (state, action) => {
         state.loading2 = false;
         state.error = null;
-        state.currentUserMessage = action.payload;
+        // state.currentUserMessage = [
+        //   ...action.payload,
+        //   ...state.currentUserMessage,
+        // ];
+        state.currentUserMessage.unshift(...action.payload);
       })
       .addCase(getCurrentUserMessage.rejected, (state, action) => {
         state.loading2 = false;
@@ -124,6 +159,49 @@ const messageSlice = createSlice({
         state.loading = false;
         state.error = action.payload.message || "Error fetching posts";
       });
+    builder
+      .addCase(getAllMessageReaction.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getAllMessageReaction.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        console.log(action.payload, "action.payload");
+        state.currentMesageAllReactions = action.payload.data;
+      })
+      .addCase(getAllMessageReaction.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload.message || "Error fetching posts";
+      });
+    builder
+      .addCase(removeMessageReaction.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(removeMessageReaction.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        console.log(action.payload, "action.payload");
+        state.currentMesageAllReactions =
+          state.currentMesageAllReactions.filter(
+            (item) => item.userId != action.payload.userId
+          );
+        const isMessageThere = state.currentUserMessage.findIndex(
+          (msg) => msg._id == action.payload.messageId
+        );
+
+        if (isMessageThere !== -1) {
+          state.currentUserMessage[isMessageThere].reactions =
+            state.currentUserMessage[isMessageThere].reactions.filter(
+              (item) => item.userId != action.payload.userId
+            );
+        }
+      })
+      .addCase(removeMessageReaction.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload.message || "Error fetching posts";
+      });
   },
 });
 
@@ -133,6 +211,7 @@ export const {
   setSelectedIndex,
   updateCurrentUserMessage,
   updatingStatusForMessages,
+  clearSelectedCurrentUserMessage,
   updateMessageReactionEmoji,
 } = messageSlice.actions;
 export const messageReducer = messageSlice.reducer;
