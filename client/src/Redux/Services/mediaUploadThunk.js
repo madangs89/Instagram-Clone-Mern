@@ -77,3 +77,14 @@ export const deleteComment = createAsyncThunk(
     }
   }
 );
+export const addView = createAsyncThunk(
+  "mediaUpload/addView",
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await api.post(`/reel/view/create`, data);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Error");
+    }
+  }
+);

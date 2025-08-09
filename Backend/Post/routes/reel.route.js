@@ -10,9 +10,11 @@ import {
   gettingAllUnSeenReels,
   updateReel,
 } from "../controllers/reel.controller.js";
+import { createView } from "../controllers/views.contrler.js";
 
 const reelRouter = express.Router();
 reelRouter.post("/", authMiddleware, upload.single("reel"), createReel);
+reelRouter.post("/view/create", authMiddleware, createView);
 reelRouter.get("/", authMiddleware, gettingAllUnSeenReels);
 reelRouter.get("/all", getAllReel);
 reelRouter.get("/get/reel/:reelId", getReelById);

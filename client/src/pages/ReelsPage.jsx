@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import ReelVedio from "../components/Deloper/ReelVedio";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllUnlikedReels } from "../Redux/Services/mediaFeedThunk";
+import { addView } from "../Redux/Services/mediaUploadThunk";
 
 const ReelsPage = () => {
   const [activeReelId, setActiveReelId] = useState(null);
@@ -14,6 +15,7 @@ const ReelsPage = () => {
     : {};
 
   const reels = useSelector((state) => state.mediaFeed.reels);
+  const viewFeed = useSelector((state) => state.mediaUpload.userViews);
   const dispatch = useDispatch();
   useEffect(() => {
     if (!reels || reels.length === 0) return;
@@ -42,6 +44,17 @@ const ReelsPage = () => {
       reelElements.forEach((el) => observer.unobserve(el));
     };
   }, [reels]);
+
+  useEffect(() => {
+    if (activeReelId && activeReelId !== null && activeReelId !== undefined) {
+      (async () => {
+        if (!viewFeed.includes(activeReelId)) {
+          const data = await dispatch(addView({ reelId: activeReelId }));
+          console.log(data, "data");
+        }
+      })();
+    }
+  }, [activeReelId]);
 
   useEffect(() => {
     (async () => {

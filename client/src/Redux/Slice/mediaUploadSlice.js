@@ -1,5 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { addPost, addReel, addStory } from "../Services/mediaUploadThunk";
+import {
+  addPost,
+  addReel,
+  addStory,
+  addView,
+} from "../Services/mediaUploadThunk";
 
 const mediaUploadSlice = createSlice({
   name: "mediaUpload",
@@ -8,6 +13,9 @@ const mediaUploadSlice = createSlice({
     reel: { error: null, loading: false, status: "" },
     post: { error: null, loading: false, status: "" },
     userStory: [],
+    userViews: [],
+    loading: false,
+    error: null,
   },
   reducers: {
     clearError: (state) => {
@@ -68,6 +76,20 @@ const mediaUploadSlice = createSlice({
         state.post.loading = false;
         state.post.error = action.payload.message || "Error uploading post";
         state.post.status = "failed";
+      });
+    builder
+      .addCase(addView.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(addView.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        state.userViews.push(action.payload.views.reelId);
+      })
+      .addCase(addView.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload.message || "Error adding view";
       });
   },
 });

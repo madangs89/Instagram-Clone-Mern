@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import VideoPost from "../components/Deloper/VideoPost";
-import { Heart, Video, View, X } from "lucide-react";
+import { Heart, Video, View, X, MessageCircle, Share, Bookmark, ArrowLeft, Volume2, VolumeX } from "lucide-react";
 import {
   getAllUnlikedPosts,
   getAllUnlikedReels,
@@ -24,14 +24,17 @@ const ExplorePage = () => {
   const dispatch = useDispatch();
   const data = useSelector((state) => state.user);
   const navigate = useNavigate();
+  const videoRef = useRef(null);
 
   const [show, setShow] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(null);
   const [modal, setModal] = useState(false);
   const [selectedData, setSelectedData] = useState({});
+  const [showAllComments, setShowAllComments] = useState(false);
   const [isMobile, setIsMobile] = useState(
     typeof window !== "undefined" ? window.innerWidth < 640 : false
   );
+  const [isMuted, setIsMuted] = useState(true);
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 640);
@@ -62,6 +65,8 @@ const ExplorePage = () => {
         setSelectedData(data.payload.post);
       }
       setModal(true);
+      setShowAllComments(false);
+      setIsMuted(true); // Reset mute state when opening new modal
     } catch (error) {
       console.error(error);
     }
@@ -81,8 +86,15 @@ const ExplorePage = () => {
     };
   }, [modal]);
 
+  // Handle mute/unmute for mobile videos
+  const toggleMute = () => {
+    setIsMuted(!isMuted);
+    if (videoRef.current) {
+      videoRef.current.muted = !isMuted;
+    }
+  };
+
   const handleChooser = () => {
-    // selectedData can be a post (with media array) or reel (maybe media string)
     const mediaArray = selectedData?.media;
     const isImage =
       selectedData?.mediaType === "image" ||
@@ -93,7 +105,7 @@ const ExplorePage = () => {
         ? mediaArray[0].url
         : typeof mediaArray === "string"
         ? mediaArray
-        : selectedData?.media?.url; // fallback
+        : selectedData?.media?.url;
 
     if (isImage) {
       const src =
@@ -102,14 +114,32 @@ const ExplorePage = () => {
           : mediaArray?.url || "";
       return <img className="w-full h-full object-cover" src={src} alt="" />;
     } else {
-      // For reliability in modal, use native video tag so aspect is preserved
+      // For mobile reel-style, for desktop keep controls
       return (
-        <video
-          src={videoSrc}
-          controls
-          autoPlay
-          className="w-full h-full object-cover"
-        />
+        <div className="relative w-full h-full">
+          <video
+            ref={videoRef}
+            src={videoSrc}
+            controls={!isMobile}
+            autoPlay={isMobile}
+            muted={isMuted}
+            loop={isMobile}
+            playsInline
+            className="w-full h-full object-cover"
+          />
+          {isMobile && (
+            <button
+              onClick={toggleMute}
+              className="absolute top-4 right-4 bg-black/50 rounded-full p-2 z-10"
+            >
+              {isMuted ? (
+                <VolumeX className="w-5 h-5 text-white" />
+              ) : (
+                <Volume2 className="w-5 h-5 text-white" />
+              )}
+            </button>
+          )}
+        </div>
       );
     }
   };
@@ -124,7 +154,7 @@ const ExplorePage = () => {
         {post?.contentType === "reel" && (
           <div className="flex items-center gap-2 text-sm text-white/80">
             <View />
-            <span>{selectedData?.viewCount ?? 0}</span>
+            <span>{post?.viewCount ?? 0}</span>
           </div>
         )}
       </div>
@@ -194,6 +224,7 @@ const ExplorePage = () => {
       dispatch(addAndRemoveLike(postId));
     }
   };
+
   useEffect(() => {
     (async () => {
       await dispatch(getAllUnlikedReels());
@@ -236,131 +267,312 @@ const ExplorePage = () => {
     }
   };
 
+  const closeModal = () => {
+    setModal(false);
+    setSelectedData({});
+    setComments([]);
+    setComment("");
+    setShowAllComments(false);
+    setIsMuted(true);
+  };
+
   return (
     <div className="grid relative grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 w-full min-h-screen overflow-y-scroll gap-2 p-2 sm:p-4 md:p-6">
       {modal && (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/70 p-4">
-          <button
-            onClick={() => setModal(false)}
-            aria-label="Close"
-            className="absolute top-4 right-4 text-white z-50"
-          >
-            <X strokeWidth={3} className="cursor-pointer" />
-          </button>
-
-          <div className="w-full max-w-[1100px] h-[90vh] flex flex-col md:flex-row bg-transparent rounded-md overflow-hidden">
-            {/* Left: Media */}
-            <div
-              className={`w-full md:w-2/3 ${
-                isMobile ? "h-2/3" : "h-full"
-              } bg-black flex items-center justify-center`}
-            >
-              <div className="w-full h-full flex items-center justify-center p-4">
-                {/* Keep media centered and contained so it won't crop */}
-                <div className="w-full h-full flex items-center justify-center">
-                  {handleChooser()}
+        <div className="fixed inset-0 z-[10000] bg-black">
+          {/* Mobile Modal */}
+          {isMobile ? (
+            <div className="flex flex-col h-full overflow-y-auto hide-scrollbar">
+              {/* Show All Comments View */}
+              {showAllComments ? (
+                <div className="flex flex-col h-full bg-black text-white">
+                  {/* Comments Header */}
+                  <div className="flex items-center p-4 border-b border-gray-800">
+                    <button
+                      onClick={() => setShowAllComments(false)}
+                      className="mr-4"
+                    >
+                      <ArrowLeft size={24} />
+                    </button>
+                    <h2 className="text-lg font-semibold">Comments</h2>
+                  </div>
+                  
+                  {/* Comments List */}
+                  <div className="flex-1 overflow-y-auto p-4 hide-scrollbar">
+                    <div className="space-y-4">
+                      {comments && comments.length > 0 ? (
+                        comments.map((c, index) => (
+                          <CommentShowingDiv
+                            key={`comment-${c._id || index}`}
+                            c={c}
+                            index={index}
+                            setComments={setComments}
+                            noReply
+                          />
+                        ))
+                      ) : (
+                        <div className="text-center text-gray-500 py-8">
+                          No comments yet
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Comment Input */}
+                  <div className="p-4 border-t border-gray-800">
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="text"
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        placeholder="Add a comment..."
+                        className="flex-1 bg-gray-800 rounded-full px-4 py-2 text-white placeholder:text-gray-400 focus:outline-none"
+                      />
+                      {comment && (
+                        <button
+                          onClick={addComments}
+                          className="text-blue-500 font-semibold"
+                        >
+                          Post
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Right: Comments / details */}
-            <div
-              className={`w-full md:w-1/3 ${
-                isMobile ? "h-1/3" : "h-full"
-              } bg-[#212328] text-white flex flex-col`}
-            >
-              {/* Header: post info */}
-              <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex gap-3">
-                    <div  className="w-10 h-10 cursor-pointer rounded-full bg-slate-600 flex items-center justify-center text-sm">
+              ) : (
+                /* Main Mobile View */
+                <>
+                  {/* Header */}
+                  <div className="flex items-center justify-between p-4 border-b border-gray-800 bg-black">
+                    <div className="flex items-center gap-3">
                       <img
                         src={selectedData?.userId?.avatar}
-                        className="w-full h-full object-cover rounded-full"
+                        className="w-8 h-8 object-cover rounded-full"
                         alt=""
                       />
-                    </div>
-                    <div onClick={() => navigate(`/profile/${selectedData?.userId?._id}`)} className="cursor-pointer">
-                      <div className="font-semibold text-sm">
-                        {selectedData?.userId?.userName || "unknown"}
-                        <FollowUnFolowButton
-                          id={selectedData?.userId?._id}
-                          border={"border-none"}
-                          clr={"text-blue-500"}
-                        />
-                      </div>
-                      <div className="text-xs text-white/60">
-                        {selectedData?.caption || ""}
+                      <div>
+                        <div 
+                          onClick={() => navigate(`/profile/${selectedData?.userId?._id}`)}
+                          className="font-semibold text-sm cursor-pointer text-white"
+                        >
+                          {selectedData?.userId?.userName || "unknown"}
+                        </div>
                       </div>
                     </div>
+                    <button
+                      onClick={closeModal}
+                      className="p-2"
+                    >
+                      <X size={24} className="text-white" />
+                    </button>
                   </div>
-                </div>
 
-                <div className="flex items-center gap-3">
-                  <div
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handlelikes(selectedData._id, selectedData?.contentType);
-                    }}
-                    className={`cursor-pointer transition-transform duration-200 active:scale-125`}
-                  >
-                    {data?.userLikes.includes(selectedData._id) ? (
-                      <Heart className="w-7 h-7 cursor-pointer text-red-500 fill-red-500 transition-all duration-200" />
-                    ) : (
-                      <Heart className="w-7 h-7 cursor-pointer text-white transition-all duration-200" />
+                  {/* Media - Keep original size */}
+                  <div className="flex items-center justify-center bg-black">
+                    {handleChooser()}
+                  </div>
+
+                  {/* Action Buttons - Below Media */}
+                  <div className="flex items-center justify-between px-4 py-3 bg-black">
+                    <div className="flex items-center gap-4">
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlelikes(selectedData._id, selectedData?.contentType);
+                        }}
+                        className="cursor-pointer"
+                      >
+                        {data?.userLikes.includes(selectedData._id) ? (
+                          <Heart className="w-6 h-6 text-red-500 fill-red-500" />
+                        ) : (
+                          <Heart className="w-6 h-6 text-white" />
+                        )}
+                      </div>
+                      <div className="cursor-pointer">
+                        <MessageCircle className="w-6 h-6 text-white" />
+                      </div>
+                      <div className="cursor-pointer">
+                        <Share className="w-6 h-6 text-white" />
+                      </div>
+                    </div>
+                    {selectedData?.contentType === "reel" && (
+                      <div className="flex items-center gap-2 text-sm text-white/80">
+                        <View className="w-5 h-5" />
+                        <span>{selectedData?.viewCount ?? 0}</span>
+                      </div>
                     )}
                   </div>
-                  {selectedData?.contentType === "reel" && (
-                    <div className="flex items-center gap-2 text-sm text-white/80">
-                      <View />
-                      <span>{selectedData?.viewCount ?? 0}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-              {/* Comments list (dummy for now) */}
-              <div className="px-4 py-3 flex-1 h-96  overflow-y-auto hide-scrollbar">
-                <div className="space-y-3">
-                  {comments && comments.length > 0 ? (
-                    comments.map((c, index) => (
-                      <CommentShowingDiv
-                        key={index}
-                        c={c}
-                        index={index}
-                        setComments={setComments}
-                        noReply
-                      />
-                    ))
-                  ) : (
-                    <div className="text-white text-center">
-                      No comments yet
-                    </div>
-                  )}
-                </div>
-              </div>
 
-              {/* Comment input (dummy) */}
-              <div className="px-4 py-3 border-t border-white/10">
-                <div className="flex items-center gap-3">
-                  <input
-                    type="text"
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                    placeholder="Add a comment..."
-                    className="flex-1 bg-transparent border border-white/10 py-2 px-3 rounded text-white placeholder:text-white/40 focus:outline-none"
-                  />
-                  {comment && (
-                    <button
-                      onClick={addComments}
-                      className="px-3 py-2 cursor-pointer bg-white/10 rounded text-white"
-                    >
-                      Post
-                    </button>
+                  {/* Likes Count */}
+                  <div className="px-4 pb-2 bg-black">
+                    <span className="text-white font-semibold text-sm">
+                      {selectedData?.likeCount ?? 0} likes
+                    </span>
+                  </div>
+
+                  {/* Caption */}
+                  {selectedData?.caption && (
+                    <div className="px-4 pb-3 bg-black">
+                      <span className="text-white text-sm">
+                        <span className="font-semibold mr-2">
+                          {selectedData?.userId?.userName}
+                        </span>
+                        {selectedData.caption}
+                      </span>
+                    </div>
                   )}
+
+                  {/* View Comments Button */}
+                  <div className="px-4 pb-3 bg-black">
+                    <button 
+                      onClick={() => setShowAllComments(true)}
+                      className="text-gray-400 text-sm"
+                    >
+                      View all {comments.length} comments
+                    </button>
+                  </div>
+
+                  {/* Comment Input */}
+                  <div className="p-4 border-t border-gray-800 bg-black">
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="text"
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        placeholder="Add a comment..."
+                        className="flex-1 bg-gray-800 rounded-full px-4 py-2 text-white placeholder:text-gray-400 focus:outline-none"
+                      />
+                      {comment && (
+                        <button
+                          onClick={addComments}
+                          className="text-blue-500 font-semibold"
+                        >
+                          Post
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          ) : (
+            /* Desktop Modal - Keep Original */
+            <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/70 p-4">
+              <button
+                onClick={closeModal}
+                aria-label="Close"
+                className="absolute top-4 right-4 text-white z-50"
+              >
+                <X strokeWidth={3} className="cursor-pointer" />
+              </button>
+
+              <div className="w-full max-w-[1100px] h-[90vh] flex flex-col md:flex-row bg-transparent rounded-md overflow-hidden">
+                {/* Left: Media */}
+                <div className="w-full md:w-2/3 h-full bg-black flex items-center justify-center">
+                  <div className="w-full h-full flex items-center justify-center p-4">
+                    <div className="w-full h-full flex items-center justify-center">
+                      {handleChooser()}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right: Comments / details */}
+                <div className="w-full md:w-1/3 h-full bg-[#212328] text-white flex flex-col">
+                  {/* Header: post info */}
+                  <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex gap-3">
+                        <div className="w-10 h-10 cursor-pointer rounded-full bg-slate-600 flex items-center justify-center text-sm">
+                          <img
+                            src={selectedData?.userId?.avatar}
+                            className="w-full h-full object-cover rounded-full"
+                            alt=""
+                          />
+                        </div>
+                        <div onClick={() => navigate(`/profile/${selectedData?.userId?._id}`)} className="cursor-pointer">
+                          <div className="font-semibold text-sm">
+                            {selectedData?.userId?.userName || "unknown"}
+                            <FollowUnFolowButton
+                              id={selectedData?.userId?._id}
+                              border={"border-none"}
+                              clr={"text-blue-500"}
+                            />
+                          </div>
+                          <div className="text-xs text-white/60">
+                            {selectedData?.caption || ""}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlelikes(selectedData._id, selectedData?.contentType);
+                        }}
+                        className={`cursor-pointer transition-transform duration-200 active:scale-125`}
+                      >
+                        {data?.userLikes.includes(selectedData._id) ? (
+                          <Heart className="w-7 h-7 cursor-pointer text-red-500 fill-red-500 transition-all duration-200" />
+                        ) : (
+                          <Heart className="w-7 h-7 cursor-pointer text-white transition-all duration-200" />
+                        )}
+                      </div>
+                      {selectedData?.contentType === "reel" && (
+                        <div className="flex items-center gap-2 text-sm text-white/80">
+                          <View />
+                          <span>{selectedData?.viewCount ?? 0}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Comments list */}
+                  <div className="px-4 py-3 flex-1 h-96 overflow-y-auto hide-scrollbar">
+                    <div className="space-y-3">
+                      {comments && comments.length > 0 ? (
+                        comments.map((c, index) => (
+                          <CommentShowingDiv
+                            key={`comment-${c._id || index}`}
+                            c={c}
+                            index={index}
+                            setComments={setComments}
+                            noReply
+                          />
+                        ))
+                      ) : (
+                        <div className="text-white text-center">
+                          No comments yet
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Comment input */}
+                  <div className="px-4 py-3 border-t border-white/10">
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="text"
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        placeholder="Add a comment..."
+                        className="flex-1 bg-transparent border border-white/10 py-2 px-3 rounded text-white placeholder:text-white/40 focus:outline-none"
+                      />
+                      {comment && (
+                        <button
+                          onClick={addComments}
+                          className="px-3 py-2 cursor-pointer bg-white/10 rounded text-white"
+                        >
+                          Post
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       )}
       {shuffledContent.map((post, index) => handleChooser2(post, index))}
