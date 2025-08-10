@@ -8,26 +8,28 @@ import likesRouter from "./routes/likes.route.js";
 import reelRouter from "./routes/reel.route.js";
 import { connectDB } from "./utils/ConnectDB.js";
 import commentRouter from "./routes/comment.route.js";
+import notificationRouter from "./routes/notification.route.js";
 dotenv.config({ path: "./.env" });
 
 const app = express();
-app.use(cors(
-  {
-    origin: [process.env.CLIENT_URL , process.env.AUTH_BACKEND ],
+app.use(
+  cors({
+    origin: [process.env.CLIENT_URL, process.env.AUTH_BACKEND],
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE" , "PATCH"],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
-  }
-));
-app.use(cookieParser())
+  })
+);
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/post" , postRouter)
-app.use("/reel" , reelRouter)
-app.use("/" , likesRouter)
+app.use("/post", postRouter);
+app.use("/reel", reelRouter);
+app.use("/notification", notificationRouter);
+app.use("/", likesRouter);
 
-app.use("/comment" , commentRouter)
+app.use("/comment", commentRouter);
 app.get("/", (req, res) => {
   res.send("Hello World");
 });

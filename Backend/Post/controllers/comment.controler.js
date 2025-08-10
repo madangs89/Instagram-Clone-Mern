@@ -1,5 +1,8 @@
 import Comment from "../models/comment.model.js";
 import Userdetails from "../models/user.model.js";
+import Reel from "../models/reel.model.js";
+import Post from "../models/post.model.js";
+import Notification from "../models/notification.model.js";
 
 export const addComment = async (req, res) => {
   try {
@@ -21,6 +24,35 @@ export const addComment = async (req, res) => {
       comment,
     });
 
+    if (!newComment) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Comment not created" });
+    }
+
+    let isValue = false;
+
+    const reelData = await Reel.findById(mediaId);
+    if (reelData) {
+      await Notification.create({
+        receiver: reelData.userId,
+        sender: req.user._id,
+        type: "comment",
+        reel: mediaId,
+        for: "reel",
+      });
+      isValue = true;
+    }
+    if (!isValue) {
+      const postData = await Post.findById(mediaId);
+      await Notification.create({
+        receiver: postData.userId,
+        sender: req.user._id,
+        type: "comment",
+        post: mediaId,
+        for: "post",
+      });
+    }
     const commentWithUser = await Comment.findById(newComment._id).populate(
       "userId"
     );

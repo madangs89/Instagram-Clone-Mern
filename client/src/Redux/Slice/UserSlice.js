@@ -7,6 +7,7 @@ import {
   getSugestedUser,
   getUser,
   like,
+  searchUser,
   unFollowUser,
   updateUser,
 } from "../Services/UserThunk";
@@ -43,6 +44,7 @@ const userSlice = createSlice({
       website: null,
     },
     sugestedUser: [],
+    searchedUser: [],
   },
   reducers: {
     setMuted(state) {
@@ -203,6 +205,19 @@ const userSlice = createSlice({
       state.sugestedUser = action.payload.suggestedUsers;
     });
     builder.addCase(getSugestedUser.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload.message || "Failed to fetch user data";
+    });
+    builder.addCase(searchUser.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(searchUser.fulfilled, (state, action) => {
+      state.loading = false;
+      state.error = null;
+      state.searchedUser = action.payload.users;
+    });
+    builder.addCase(searchUser.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload.message || "Failed to fetch user data";
     });

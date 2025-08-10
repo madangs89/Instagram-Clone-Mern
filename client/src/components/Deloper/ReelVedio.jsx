@@ -19,6 +19,7 @@ import {
   addComment,
   getAllComments,
 } from "../../Redux/Services/mediaUploadThunk";
+import ShareDialog from "./ShareDialog";
 
 export default function ReelVedio({ src, isActive, reel }) {
   const videoRef = useRef(null);
@@ -33,6 +34,22 @@ export default function ReelVedio({ src, isActive, reel }) {
   const [show, setShow] = useState(false);
   const [comments, setComments] = useState([]);
   const [comment, setComment] = useState("");
+  const [showShare, setShowShare] = useState(false);
+  const [sendingData, setSendingData] = useState({
+    sender: data._id,
+    tempId: Date.now(),
+    media: [
+      {
+        url: reel.media,
+        publicId: reel.publicId,
+        type: "video",
+      },
+    ],
+  });
+
+  const onCloseShare = () => {
+    setShowShare(false);
+  };
   const toggleMute = (e) => {
     e.stopPropagation(); // prevent togglePlayPause
     dispatch(setMuted());
@@ -160,7 +177,7 @@ export default function ReelVedio({ src, isActive, reel }) {
       </div>
 
       <div className="absolute bottom-9 z-[1000] flex flex-col  left-5 rounded-lg w-full">
-        <div className="h-full w-full flex-col flex gap-2">
+        <div className="h-full w-fit flex-col flex gap-2">
           <div
             onClick={() => navigate(`/profile/${reel?.userId?._id}`)}
             className="h-full  cursor-pointer w-full flex gap-4  items-center"
@@ -204,7 +221,13 @@ export default function ReelVedio({ src, isActive, reel }) {
           }}
           className="w-7 h-7 cursor-pointer text-white"
         />
-        <Send className="w-7 h-7 cursor-pointer text-white" />
+        <Send
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowShare(true);
+          }}
+          className="w-7 h-7 cursor-pointer z-[10000] text-white"
+        />
       </div>
 
       {show && (
@@ -216,6 +239,15 @@ export default function ReelVedio({ src, isActive, reel }) {
           setComment={setComment}
           onClose={onClose}
           reelId={reel._id}
+        />
+      )}
+
+      {showShare && (
+        <ShareDialog
+          post={reel}
+          sendingData={sendingData}
+          setSendingData={setSendingData}
+          onClose={onCloseShare}
         />
       )}
     </div>

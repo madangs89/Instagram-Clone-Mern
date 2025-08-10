@@ -8,11 +8,12 @@ import { getAllConversationAndGroup } from "../Redux/Services/MessageThunk";
 const MessagePage = () => {
   const location = useLocation();
   const [isChatOpen, setIsChatOpen] = useState(false);
+ 
   const dispatch = useDispatch();
   const allInbox = useSelector((state) => state.message);
   useEffect(() => {
     (async () => {
-      const data = dispatch(getAllConversationAndGroup());
+       dispatch(getAllConversationAndGroup());
     })();
   }, []);
 

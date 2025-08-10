@@ -115,6 +115,7 @@ export const getAllPostByIdForProfileVisit = async (req, res) => {
         return {
           ...post._doc,
           likeCount,
+          contentType: "post",
         };
       })
     );

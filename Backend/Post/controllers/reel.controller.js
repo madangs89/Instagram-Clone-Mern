@@ -108,6 +108,7 @@ export const getAllReelsByIdForProfileVisit = async (req, res) => {
         const likeCount = await Likes.countDocuments({ targetId: reel._id });
         return {
           ...reel._doc,
+          contentType: "reel",
           likeCount,
         };
       })

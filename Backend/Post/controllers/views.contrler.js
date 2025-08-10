@@ -5,6 +5,7 @@ export const createView = async (req, res) => {
   try {
     const { reelId } = req.body;
     const userId = req.user._id;
+    
     let userDetails = await Userdetails.findOne({ _id: userId });
     if (!userDetails) {
       userDetails = await Userdetails.create({

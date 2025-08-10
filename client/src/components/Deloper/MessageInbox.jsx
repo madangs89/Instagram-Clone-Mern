@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "../ui/input";
 import { ArrowLeft } from "lucide-react";
@@ -11,8 +11,10 @@ import {
   setSelectedIndex,
 } from "../../Redux/Slice/MessageSlice";
 import { formatDistanceToNow } from "date-fns";
+import MessageSearch from "./MessageSearch";
 const MessageInbox = ({ allInbox }) => {
   const navigate = useNavigate();
+  const [searchShow, setSearchShow] = useState(false);
   const user = useSelector((state) => state.auth);
   const data = useSelector((state) => state.user);
   const dispatch = useDispatch();
@@ -61,7 +63,7 @@ const MessageInbox = ({ allInbox }) => {
             className="w-6 h-6 md:hidden cursor-pointer"
           />
         </div>
-        <Input className="w-full mx-auto" />
+        <MessageSearch searchShow={searchShow} setSearchShow={setSearchShow} />
       </div>
       <h2 className="text-md font-bold px-4 mt-3">Messages</h2>
       <div className=" mb-8  h-[80vh] custom-scrollbar2 overflow-y-scroll">
@@ -83,9 +85,10 @@ const MessageInbox = ({ allInbox }) => {
                 </div>
                 <div className="text-xs text-gray-500">
                   {chat?.isGroup ? chat?.lastMessage : chat?.lastMessage} •{" "}
-                  {formatDistanceToNow(new Date(chat?.lastMessageTime), {
-                    addSuffix: false,
-                  })}
+                  {chat?.lastMessageTime &&
+                    formatDistanceToNow(new Date(chat?.lastMessageTime), {
+                      addSuffix: false,
+                    })}
                 </div>
               </div>
             </div>

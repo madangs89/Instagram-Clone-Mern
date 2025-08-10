@@ -8,12 +8,12 @@ import {
   getAllUnlikedPosts,
   getAllUnlikedStories,
 } from "../Redux/Services/mediaFeedThunk";
-import { getCurrentUserDetails } from "../Redux/Services/UserThunk";
+
 
 const Layout = () => {
   const dispatch = useDispatch();
   const auth = useSelector((state) => state.auth.isAuthenticated);
-  const data = useSelector((state) => state.auth);
+  // const data = useSelector((state) => state.auth);
   useEffect(() => {
     (async () => {
       await dispatch(getAllUnlikedPosts());
@@ -26,14 +26,6 @@ const Layout = () => {
     })();
   }, []);
 
-  // useEffect(() => {
-  //   console.log("get currect user hited", auth);
-  //   if (auth && data._id) {
-  //     (async () => {
-  //       await dispatch(getCurrentUserDetails(data?._id));
-  //     })();
-  //   }
-  // }, [auth]);
 
   console.log("userData", auth);
 

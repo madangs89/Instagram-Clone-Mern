@@ -6,6 +6,7 @@ import {
 } from "../utils/cloudinary.js";
 import fs from "fs";
 import mongoose from "mongoose";
+import axios from "axios";
 export const createUser = async (req, res) => {
   try {
     const {
@@ -385,5 +386,83 @@ export const getUsersNotInArray = async (req, res) => {
       success: false,
       error: error.message,
     });
+  }
+};
+export const gettingUsersInArray = async (req, res) => {
+  try {
+    let { userIdsArray } = req.query;
+    console.log("userIdsArray", userIdsArray);
+    console.log(req.query, "req.query");
+
+    const userId = req.user._id;
+    if (!userIdsArray) {
+      userIdsArray = [];
+    } else if (!Array.isArray(userIdsArray)) {
+      const data = userIdsArray.split(",");
+      userIdsArray = [...data];
+    }
+    console.log("gettin the request for users not in array");
+
+    console.log("userIdsArray", userIdsArray);
+    if (!userIdsArray) {
+      return res.status(400).json({
+        message: "Bad request: userIdsArray is required",
+        success: false,
+      });
+    }
+    // Convert string to array if necessary
+    if (typeof userIdsArray === "string") {
+      userIdsArray = [userIdsArray];
+    }
+
+    // Convert string IDs to ObjectId
+    userIdsArray = userIdsArray.map((id) => new mongoose.Types.ObjectId(id));
+
+    const users = await User.find({
+      _id: { $in: [...userIdsArray] },
+    }).select("userName name avatar");
+
+    // Format result to include only required fields
+    const formattedUsers = users.map((user) => ({
+      _id: user._id,
+      userName: user.userName,
+      name: user.name,
+      avatar: user.avatar,
+    }));
+
+    return res.status(200).json({
+      message: "Users fetched successfully",
+      success: true,
+      users: formattedUsers,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Server error",
+      success: false,
+      error: error.message,
+    });
+  }
+};
+
+export const searchQueryForUser = async (req, res) => {
+  try {
+    const { userName } = req.query;
+    const userId = req.user._id;
+    const users = await User.find({
+      $or: [
+        { userName: { $regex: userName, $options: "i" } },
+        { name: { $regex: userName, $options: "i" } },
+      ],
+      _id: { $ne: userId },
+    }).select("-__v -password");
+    return res.status(200).json({
+      message: "Users fetched successfully",
+      success: true,
+      users: [...users],
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error", success: false });
   }
 };

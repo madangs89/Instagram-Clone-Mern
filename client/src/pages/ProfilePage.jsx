@@ -14,6 +14,14 @@ import Story from "../components/Deloper/Story";
 import FollowUnFolowButton from "../components/Deloper/FollowUnFolowButton";
 import { Plus } from "lucide-react";
 import FullPageLoader from "../components/Deloper/FullPageLoader";
+import { getConversationByUserId } from "../Redux/Services/MessageThunk";
+import {
+  setSelectedIndex,
+  updateAllConversationAndGroup,
+} from "../Redux/Slice/MessageSlice";
+import { toast } from "sonner";
+import Swal from "sweetalert2";
+import { logoutUser } from "../Redux/Services/AuthThunk";
 const dummyHighlights = [
   { id: 1, label: "🪔", image: "/highlight1.jpg" },
   { id: 2, label: "💪", image: "/highlight2.jpg" },
@@ -54,7 +62,71 @@ const ProfilePage = () => {
     setActiveTab(tab);
   };
 
-  console.log(userData.getCurrentUser, "userData.getCurrentUser");
+  const handleMessageClick = async (id, user) => {
+    const data = {
+      otherUserId: [id],
+      isGroup: false,
+    };
+    try {
+      const res = await dispatch(getConversationByUserId(data));
+      if (res.payload.success) {
+        const actualData = {
+          userId: user?._id,
+          conversationId: res.payload?.conversation[0]?._id,
+          unreadCount: res.payload?.conversation[0]?.unreadCount || [],
+          userName: user?.userName,
+          avatar: user?.avatar,
+          name: user?.name,
+          lastMessage: res.payload?.conversation[0]?.lastMessage,
+          lastMessageTime: res.payload?.conversation[0]?.lastMessageTime,
+        };
+        dispatch(setSelectedIndex(actualData));
+        dispatch(updateAllConversationAndGroup(actualData));
+        navigate(`/message/${res.payload.conversation[0]._id}`);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const hadleLogout = async () => {
+    try {
+      const result = await Swal.fire({
+        title: "Log out?",
+        text: "You’ll need to log in again.",
+        icon: "question",
+        background: "#000", // Black background
+        color: "#fff", // White text
+        iconColor: "#fff",
+        showCancelButton: true,
+        confirmButtonText: "Log out",
+        cancelButtonText: "Cancel",
+        reverseButtons: true,
+        width: "380px", // Smaller width
+        padding: "0.8rem", // Less padding
+        customClass: {
+          popup: "instagram-alert-popup",
+          confirmButton: "instagram-confirm-btn",
+          cancelButton: "instagram-cancel-btn",
+        },
+      });
+      if (result.isConfirmed) {
+        const data = await dispatch(logoutUser());
+        if (data.payload.success) {
+          toast.success("Logout successful", {
+            style: {
+              background: "#000",
+              color: "#fff",
+            },
+          });
+          navigate("/");
+          window.location.reload();
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
   if (data.loading) {
     return <FullPageLoader />;
   }
@@ -62,7 +134,6 @@ const ProfilePage = () => {
     <div className="flex-1 min-h-screen flex flex-col bg-black px-4 md:px-20 overflow-x-hidden text-white">
       {/* Profile Info */}
       <div className="w-full flex flex-col justify-center md:flex-row py-6 border-b border-neutral-800">
-        
         {/* Profile Picture */}
         <div className="w-full md:w-1/3 flex items-center justify-center mb-4 md:mb-0">
           {auth._id == params.id ? (
@@ -98,11 +169,20 @@ const ProfilePage = () => {
           <div className="flex items-center gap-4 text-xl font-semibold">
             <p>{data?.getCurrentUser?.userName}</p>
             {auth._id == params.id && (
-              <Link to={`/profile/edit/${auth._id}`}>
-                <Button variant="black" className="bg-[#27272a]">
-                  Edit Profile
+              <div className="flex gap-2">
+                <Link to={`/profile/edit/${auth._id}`}>
+                  <Button variant="black" className="bg-[#27272a]">
+                    Edit Profile
+                  </Button>
+                </Link>
+                <Button
+                  onClick={hadleLogout}
+                  variant="destructive"
+                  className="bg-[#27272a] md:hidden cursor-pointer"
+                >
+                  Logout
                 </Button>
-              </Link>
+              </div>
             )}
           </div>
           <div className="flex gap-4 text-sm md:text-base">
@@ -134,7 +214,13 @@ const ProfilePage = () => {
             !data.following.includes(params.id) && (
               <div className="flex gap-4 text-sm text-white md:text-base">
                 <FollowUnFolowButton id={params.id} />
-                <Button variant="black" className="bg-[#27272a]">
+                <Button
+                  onClick={() =>
+                    handleMessageClick(params.id, data?.getCurrentUser)
+                  }
+                  variant="black"
+                  className="bg-[#27272a] cursor-pointer"
+                >
                   Message
                 </Button>
               </div>
@@ -144,14 +230,26 @@ const ProfilePage = () => {
             data.following.includes(params.id) && (
               <div className="flex gap-4 text-sm text-white md:text-base">
                 <FollowUnFolowButton clr="text-blue-500" id={params.id} />
-                <Button variant="black" className="bg-[#27272a]">
+                <Button
+                  onClick={() =>
+                    handleMessageClick(params.id, data?.getCurrentUser)
+                  }
+                  variant="black"
+                  className="bg-[#27272a] cursor-pointer"
+                >
                   Message
                 </Button>
               </div>
             )}
-          <div className="flex gap-4 text-sm text-white md:text-base">
-            <p>{data?.getCurrentUser?.website}</p>
-            <p>{data?.getCurrentUser?.gender}</p>
+          <div className="flex flex-col gap-4 text-sm text-white md:text-base">
+            {data?.getCurrentUser?.website != "" && (
+              <p>{data?.getCurrentUser?.website}</p>
+            )}
+
+            {data?.getCurrentUser?.gender != "" &&
+              data?.getCurrentUser?.gender != "none" && (
+                <p>{data?.getCurrentUser?.gender}</p>
+              )}
           </div>
         </div>
       </div>
@@ -185,7 +283,7 @@ const ProfilePage = () => {
       <div className="border-t border-neutral-800 mt-6 flex justify-center gap-10">
         <button
           onClick={() => setActiveTab("posts")}
-          className={`py-3 font-medium ${
+          className={`py-3 font-medium cursor-pointer ${
             activeTab === "posts"
               ? "border-t-2 border-white text-white"
               : "text-gray-500"
@@ -195,9 +293,9 @@ const ProfilePage = () => {
         </button>
         <button
           onClick={() => handler("reels")}
-          className={`py-3 font-medium ${
+          className={`py-3 font-medium cursor-pointer ${
             activeTab === "reels"
-              ? "border-t-2 border-white text-white"
+              ? "border-t-2 border-white  text-white"
               : "text-gray-500"
           }`}
         >
@@ -205,9 +303,9 @@ const ProfilePage = () => {
         </button>
         <button
           onClick={() => setActiveTab("saved")}
-          className={`py-3 font-medium ${
+          className={`py-3 font-medium cursor-pointer ${
             activeTab === "saved"
-              ? "border-t-2 border-white text-white"
+              ? "border-t-2 border-white  text-white"
               : "text-gray-500"
           }`}
         >
@@ -219,7 +317,15 @@ const ProfilePage = () => {
         <div className="grid grid-cols-3 min-h-[600px] gap-1 mt-4">
           {data?.userPosts?.map((post, index) => {
             return post.mediaType == "image" ? (
-              <div key={index} className="w-full aspect-[3/4] bg-neutral-900">
+              <div
+                onClick={() =>
+                  navigate(
+                    `/explore/${post.contentType.toLowerCase()}/${post._id}`
+                  )
+                }
+                key={index}
+                className="w-full aspect-[3/4] cursor-pointer bg-neutral-900"
+              >
                 <img
                   src={post?.media[0]?.url}
                   alt="post"
@@ -228,6 +334,11 @@ const ProfilePage = () => {
               </div>
             ) : (
               <VideoPost
+                onClick={() =>
+                  navigate(
+                    `/explore/${post.contentType.toLowerCase()}/${post._id}`
+                  )
+                }
                 aspectRatio="aspect-[3/4]"
                 key={index}
                 src={post?.media[0]?.url}
@@ -249,7 +360,26 @@ const ProfilePage = () => {
             </div>
           ) : (
             data.userReels.map((post, index) => (
-              <VideoPost key={index} src={post?.media} isActive={"false"} />
+              <div
+                key={index}
+                className="cursor-pointer relative bg-red-500 w-full h-fit"
+              >
+                <VideoPost
+                  src={post?.media}
+                  className="cursor-pointer"
+                  isActive={"false"}
+                />
+                <div
+                  onClick={(e) => {
+                    e.stopPropagation();
+
+                    navigate(
+                      `/explore/${post.contentType.toLowerCase()}/${post._id}`
+                    );
+                  }}
+                  className="absolute bottom-0 w-full h-full bg-transparent left-0"
+                ></div>
+              </div>
             ))
           )}
         </div>

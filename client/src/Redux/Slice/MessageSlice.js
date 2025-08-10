@@ -84,7 +84,6 @@ const messageSlice = createSlice({
         }
       }
     },
-
     updateMessageReaction: (state, action) => {
       state.currentMesageAllReactions = state.currentMesageAllReactions.filter(
         (item) => item.userId != action.payload.userId
@@ -98,6 +97,30 @@ const messageSlice = createSlice({
             (item) => item.userId != action.payload.userId
           );
       }
+    },
+    updateAllConversationAndGroup: (state, action) => {
+      const index = state.allConversationsAndGroups.findIndex(
+        (item) => item._id == action.payload._id
+      );
+      console.log("Called teh function ", action.payload, index);
+      if (index == -1) {
+        state.allConversationsAndGroups.push(action.payload);
+      }
+    },
+    updateUpSideDownTheAllConversationsAndGroups: (state, action) => {
+      const { payload: conversationId } = action;
+      const index = state.allConversationsAndGroups.findIndex(
+        (conv) => conv.conversationId === conversationId
+      );
+
+      // If conversation not found or already on top, do nothing
+      if (index <= 0) return;
+
+      const [targetConversation] = state.allConversationsAndGroups.splice(
+        index,
+        1
+      );
+      state.allConversationsAndGroups.unshift(targetConversation);
     },
   },
   extraReducers: (builder) => {
@@ -211,7 +234,9 @@ export const {
   setSelectedIndex,
   updateCurrentUserMessage,
   updatingStatusForMessages,
+  updateUpSideDownTheAllConversationsAndGroups,
   clearSelectedCurrentUserMessage,
   updateMessageReactionEmoji,
+  updateAllConversationAndGroup,
 } = messageSlice.actions;
 export const messageReducer = messageSlice.reducer;

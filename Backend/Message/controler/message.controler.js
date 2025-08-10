@@ -55,10 +55,9 @@ export const getAllMessages = async (req, res) => {
   try {
     const { conversationId } = req.params;
 
-    const messages = await Message.find({ conversationId })
-      .sort({
-        createdAt: 1,
-      })
+    const messages = await Message.find({ conversationId }).sort({
+      createdAt: 1,
+    });
 
     if (!messages || messages.length === 0)
       return res
@@ -77,7 +76,7 @@ export const getAllConversationAndGroup = async (req, res) => {
     const userId = req.user._id;
     const conversations = await Conversation.find({
       members: { $in: [userId] },
-    });
+    }).sort({ updatedAt: -1 });
     let data = [];
     for (const conversation of conversations) {
       if (conversation.isGroup == true) {
@@ -99,9 +98,7 @@ export const getAllConversationAndGroup = async (req, res) => {
         if (otherMember) {
           const userDataRes = await api.get(`/user/details/${otherMember}`);
           // console.log(userDataRes, "userDataRes");
-
           const userData = userDataRes.data.user;
-
           data.push({
             isGroup: false,
             userId: userData._id,
@@ -120,23 +117,25 @@ export const getAllConversationAndGroup = async (req, res) => {
       const existingUserIds = data
         .filter((d) => !d.isGroup && d.userId)
         .map((d) => d.userId);
-      console.log(existingUserIds, "existingUserIds");
+      const userFollowers = await api.get(`/user/details/${userId}`);
 
+      const filteredFollowers = userFollowers.data.user.following.filter(
+        (f) => !existingUserIds.includes(f) // keep only users NOT in existingUserIds
+      );
       const token =
         req.cookies?.token || req.headers.authorization?.split(" ")[1];
 
-      const remainingUsersRes = await api.get("/user/get/not-array/users", {
+      const remainingUsersRes = await api.get("/user/get/in-array/users", {
         params: {
-          userIdsArray: existingUserIds,
+          userIdsArray: filteredFollowers,
         },
         paramsSerializer: (params) => {
           return new URLSearchParams(params).toString();
         },
         headers: {
-          Authorization: `Bearer ${token}`, // ✅ Forward the token
+          Authorization: `Bearer ${token}`,
         },
       });
-
       data = [...data, ...remainingUsersRes.data.users];
     }
 
@@ -290,7 +289,49 @@ export const removeMessageReaction = async (req, res) => {
     });
   }
 };
+
+export const getConversationByUserIds = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { otherUserId, isGroup } = req.body;
+    const conversation = await Conversation.find({
+      members: {
+        $all: [userId, ...otherUserId],
+      },
+      isGroup,
+    });
+    console.log(conversation, "conversation");
+
+    if (!conversation || conversation.length == 0) {
+      const newConversation = await Conversation.create({
+        members: [userId, ...otherUserId],
+        isGroup,
+      });
+      console.log(newConversation, "newConversation");
+      return res.status(200).json({
+        message: "Fetched conversation",
+        success: true,
+        conversation: newConversation,
+      });
+    }
+
+    return res.status(200).json({
+      message: "Fetched conversation",
+      success: true,
+      conversation,
+    });
+  } catch (error) {
+    console.error("Error in getConverationByUserIds:", error);
+    return res.status(500).json({
+      message: "Server error",
+      success: false,
+      error: error.message,
+    });
+  }
+};
+
 //not handled
+
 export const deleteMessage = async (req, res) => {
   try {
     const { messageId, conversationId } = req.params;
@@ -347,6 +388,7 @@ export const deleteMessage = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
 export const createGroup = async (req, res) => {};
 
 export const addMembersToGroup = async (req, res) => {};

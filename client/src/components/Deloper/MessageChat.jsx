@@ -27,6 +27,7 @@ import {
   clearSelectedCurrentUserMessage,
   updateCurrentUserMessage,
   updateMessageReactionEmoji,
+  updateUpSideDownTheAllConversationsAndGroups,
   updatingStatusForMessages,
 } from "../../Redux/Slice/MessageSlice";
 import { Check } from "lucide-react";
@@ -164,18 +165,6 @@ const MessageChat = ({ setIsChatOpen }) => {
     }
   };
 
-  // const handleScroll = async (e) => {
-  //   if (e.target.scrollTop === 0) {
-  //     isFetchingOlderMessagesRef.current = true;
-  //     const oldScrollHeight = e.target.scrollHeight;
-  //     setPage(page + 1);
-  //     const data = {
-  //       id: id,
-  //       page: page + 1,
-  //     };
-  //     await dispatch(getCurrentUserMessage(data));
-  //   }
-  // };
   const handleSubmitMessage = async () => {
     try {
       if (!input && !file) return;
@@ -231,6 +220,7 @@ const MessageChat = ({ setIsChatOpen }) => {
               })
             );
             setInput("");
+            dispatch(updateUpSideDownTheAllConversationsAndGroups(id));
           }
           setFile(null);
         }
@@ -248,6 +238,7 @@ const MessageChat = ({ setIsChatOpen }) => {
             })
           );
           setInput("");
+          dispatch(updateUpSideDownTheAllConversationsAndGroups(id));
         }
       }
     } catch (error) {
@@ -359,7 +350,13 @@ const MessageChat = ({ setIsChatOpen }) => {
     <div className="flex flex-col h-[100dvh] text-white w-full bg-black">
       {/* Header */}
       <div className="p-4 flex items-center  justify-between border-b font-semibold sticky top-0 bg-black z-10 border-[0.1px] border-[#2f2f2f] text-sm sm:text-base">
-        <div className="flex gap-2 items-center justify-center">
+        <div
+          onClick={() =>
+            selectedIndex.isGroup == false &&
+            navigate(`/profile/${selectedIndex?.userId}`)
+          }
+          className="flex gap-2 cursor-pointer items-center justify-center"
+        >
           <img
             className="w-10 h-10 rounded-full  object-cover"
             src={

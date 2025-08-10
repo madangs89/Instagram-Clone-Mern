@@ -115,3 +115,17 @@ export const getSugestedUser = createAsyncThunk(
     }
   }
 );
+export const searchUser = createAsyncThunk(
+  "user/searchUser",
+  async (name, { rejectWithValue }) => {
+    try {
+      const response = await api.get(
+        `/user/get/search/users/data?userName=${name}`
+      );
+      console.log(response, "response , sugested Users");
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Erorr");
+    }
+  }
+);

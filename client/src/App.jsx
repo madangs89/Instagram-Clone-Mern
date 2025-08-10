@@ -20,6 +20,8 @@ import ReelsPage from "./pages/ReelsPage";
 import StoryPage from "./pages/StoryPage";
 import MessagePage from "./pages/MessagePage";
 import ExplorePage from "./pages/ExplorePage";
+import Searchpage from "./pages/Searchpage";
+import ExploreDetailsPage from "./pages/ExploreDetailsPage";
 
 const App = () => {
   const auth = useSelector((state) => state.auth.isAuthenticated);
@@ -53,9 +55,11 @@ const App = () => {
             <Route path="/profile/:id" element={<ProfilePage />} />
             <Route path="/profile/edit/:username" element={<EditProfile />} />
             <Route path="/create" element={<Upload />} />
+            <Route path="/search" element={<Searchpage />} />
             <Route path="/reels" element={<ReelsPage />} />
             <Route path="/story/:id" element={<StoryPage />} />
             <Route path="/explore" element={<ExplorePage />} />
+            <Route path="/explore/:type/:id" element={<ExploreDetailsPage />} />
             <Route path="/message/*" element={<MessagePage />} />
             {/* <Route path="messages" element={<Messages />} /> */}
             {/* Add more pages here */}

@@ -6,6 +6,7 @@ import {
   getAllConversationAndGroup,
   getAllMessageReaction,
   getAllMessages,
+  getConversationByUserIds,
   removeMessageReaction,
 } from "../controler/message.controler.js";
 import { authMiddleware } from "../middelware/auth.middleware.message.js";
@@ -30,4 +31,9 @@ messageRouter.get(
   "/all/messages/:conversationId",
   authMiddleware,
   getAllMessages
+);
+messageRouter.post(
+  "/get/conversation",
+  authMiddleware,
+  getConversationByUserIds
 );

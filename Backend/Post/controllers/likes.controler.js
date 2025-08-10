@@ -1,6 +1,8 @@
 import Likes from "../models/likes.model.js";
+import Notification from "../models/notification.model.js";
+import Post from "../models/post.model.js";
+import Reel from "../models/reel.model.js";
 import Userdetails from "../models/user.model.js";
-
 
 export const likePost = async (req, res) => {
   try {
@@ -8,7 +10,9 @@ export const likePost = async (req, res) => {
     const existing = await Likes.findOne({ userId: req.user._id, targetId });
     if (existing) {
       await Likes.findOneAndDelete({ userId: req.user._id, targetId });
-      return res.status(200).json({ message: "Post unliked", success: true , like: existing});
+      return res
+        .status(200)
+        .json({ message: "Post unliked", success: true, like: existing });
     }
     const like = new Likes({
       userId: req.user._id,
@@ -16,6 +20,32 @@ export const likePost = async (req, res) => {
       targetType,
     });
     await like.save();
+
+    if (targetType == "post" || targetType == "Post") {
+      const Data = await Post.findById(targetId);
+      if (Data) {
+        await Notification.create({
+          receiver: Data.userId,
+          sender: req.user._id,
+          type: "like",
+          post: targetId,
+          for: "post",
+        });
+      }
+    }
+    if (targetType == "reel" || targetType == "Reel") {
+      const Data = await Reel.findById(targetId);
+      if (Data) {
+        await Notification.create({
+          receiver: Data.userId,
+          sender: req.user._id,
+          type: "like",
+          reel: targetId,
+          for: "reel",
+        });
+      }
+    }
+
     const data = await Userdetails.findById(req.user._id);
     if (!data) {
       await Userdetails.create({
@@ -25,7 +55,7 @@ export const likePost = async (req, res) => {
         avatar: req.user.avatar,
       });
     }
-    return res.status(201).json({ success: true, like , message: "Post liked" });
+    return res.status(201).json({ success: true, like, message: "Post liked" });
   } catch (err) {
     res
       .status(500)

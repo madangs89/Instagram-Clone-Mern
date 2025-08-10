@@ -18,6 +18,7 @@ import {
   addComment,
   getAllComments,
 } from "../../Redux/Services/mediaUploadThunk";
+import ShareDialog from "./ShareDialog";
 
 export default function PostCard({ post, isActive }) {
   const [comment, setComment] = useState("");
@@ -25,10 +26,26 @@ export default function PostCard({ post, isActive }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [show, setShow] = useState(false);
+  const [showShare, setShowShare] = useState(false);
   const [comments, setComments] = useState([]);
+  const [sendingData, setSendingData] = useState({
+    sender: data._id,
+    tempId: Date.now(),
+    media: [
+      {
+        url: post.media[0].url,
+        publicId: post.media[0].publicId,
+        type: post.mediaType,
+      },
+    ],
+  });
 
   const onClose = () => {
     setShow(false);
+  };
+
+  const onCloseShare = () => {
+    setShowShare(false);
   };
 
   const addComments = async () => {
@@ -178,7 +195,10 @@ export default function PostCard({ post, isActive }) {
             onClick={handleMessageCircleClick}
             className="w-7 h-7 cursor-pointer"
           />
-          <Send className="w-7 h-7 cursor-pointer" />
+          <Send
+            onClick={() => setShowShare(true)}
+            className="w-7 h-7 cursor-pointer"
+          />
         </div>
         <Bookmark className="w-7 h-7 cursor-pointer" />
       </div>
@@ -216,6 +236,15 @@ export default function PostCard({ post, isActive }) {
           comments={comments}
           setComment={setComment}
           onClose={onClose}
+        />
+      )}
+
+      {showShare && (
+        <ShareDialog
+          post={post}
+          sendingData={sendingData}
+          setSendingData={setSendingData}
+          onClose={onCloseShare}
         />
       )}
     </div>

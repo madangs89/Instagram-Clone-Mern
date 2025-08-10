@@ -38,9 +38,7 @@ export const getCurrentUserMessage = createAsyncThunk(
   "message/currentUserMessage",
   async (data, { rejectWithValue }) => {
     try {
-      const response = await api.get(
-        `/message/all/messages/${data.id}`
-      );
+      const response = await api.get(`/message/all/messages/${data.id}`);
       console.log(response.data.messages, "response in message thunk");
 
       return response?.data?.messages;
@@ -107,6 +105,17 @@ export const removeMessageReaction = createAsyncThunk(
       const response = await api.delete(`/message/delete/reactions`, { data });
       console.log(response.data, "response in message thunk");
       return response?.data.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Erorr");
+    }
+  }
+);
+export const getConversationByUserId = createAsyncThunk(
+  "message/getConversationByUserId",
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await api.post(`/message/get/conversation`, data);
+      return response?.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Erorr");
     }

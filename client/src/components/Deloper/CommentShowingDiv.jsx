@@ -4,9 +4,11 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { deleteComment } from "../../Redux/Services/mediaUploadThunk";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 const CommentShowingDiv = ({ c, noReply, setComments }) => {
   const user = useSelector((state) => state.user._id);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const handleDeleteComment = async (id) => {
     try {
       const data = await dispatch(deleteComment(id));
@@ -33,7 +35,7 @@ const CommentShowingDiv = ({ c, noReply, setComments }) => {
         />
       </div>
 
-      <div className="flex-1 flex items-center justify-between">
+      <div onClick={()=>navigate(`/profile/${c.userId._id}`)} className="flex-1 cursor-pointer flex items-center justify-between">
         <div className="">
           <div className="text-white font-semibold text-sm">
             {c.userId.userName}{" "}

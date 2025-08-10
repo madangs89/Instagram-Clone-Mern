@@ -14,7 +14,7 @@ const likesSchema = new mongoose.Schema(
     },
     targetType: {
       type: String,
-      enum: ["Post", "Reel", "Bio"],
+      enum: ["Post", "Reel", "Bio" ],
       required: true,
     },
   },

@@ -1,10 +1,56 @@
 import React from "react";
 import { iconMap, instagramLinks } from "../../utils/utilitity";
-import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { LogOut } from "lucide-react";
+import { logoutUser } from "../../Redux/Services/AuthThunk";
+import Swal from "sweetalert2";
+import { toast } from "sonner";
 
 const LeftHome = () => {
   const userDeatils = useSelector((state) => state.auth);
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const hadleLogout = async () => {
+    try {
+      const result = await Swal.fire({
+        title: "Log out?",
+        text: "You’ll need to log in again.",
+        icon: "question",
+        background: "#000", // Black background
+        color: "#fff", // White text
+        iconColor: "#fff",
+        showCancelButton: true,
+        confirmButtonText: "Log out",
+        cancelButtonText: "Cancel",
+        reverseButtons: true,
+        width: "380px", // Smaller width
+        padding: "0.8rem", // Less padding
+        customClass: {
+          popup: "instagram-alert-popup",
+          confirmButton: "instagram-confirm-btn",
+          cancelButton: "instagram-cancel-btn",
+        },
+      });
+      if (result.isConfirmed) {
+        const data = await dispatch(logoutUser());
+        if (data.payload.success) {
+          toast.success("Logout successful", {
+            style: {
+              background: "#000",
+              color: "#fff",
+            },
+          });
+          navigate("/");
+          window.location.reload();
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <div className="hidden sticky top-0 left-0 lg:flex flex-col bg-black z-10 items-start px-3 pl-5 pt-10 md:w-1/5 h-screen border-r border-[#404040] ">
       <div className="logo text-white font-bold text-2xl">
@@ -31,7 +77,15 @@ const LeftHome = () => {
         {instagramLinks.map((link) => {
           const Icon = iconMap[link.icon];
           return (
-            <Link to={link.href === "/profile" ? `/profile/${userDeatils?._id}` : link.href} key={link.name} className="w-full">
+            <Link
+              to={
+                link.href === "/profile"
+                  ? `/profile/${userDeatils?._id}`
+                  : link.href
+              }
+              key={link.name}
+              className="w-full"
+            >
               <div className="flex items-center gap-3 py-2 px-1 rounded-md transition-all duration-200 ease-in-out hover:bg-[#404040]">
                 <Icon className="w-6 h-6 text-white" />
                 <span className="text-white font-semibold text-md">
@@ -41,6 +95,13 @@ const LeftHome = () => {
             </Link>
           );
         })}
+        <div
+          onClick={hadleLogout}
+          className="flex w-full cursor-pointer items-center gap-3 py-2 px-1 rounded-md transition-all duration-200 ease-in-out hover:bg-[#404040]"
+        >
+          <LogOut className="w-6 h-6 text-white" />
+          <span className="text-white font-semibold text-md">Logout</span>
+        </div>
       </div>
     </div>
   );
