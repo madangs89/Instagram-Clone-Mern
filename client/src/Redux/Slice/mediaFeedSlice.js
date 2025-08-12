@@ -4,6 +4,8 @@ import {
   getAllUnlikedPosts,
   getAllUnlikedReels,
   getAllUnlikedStories,
+  getAllUserNotification,
+  markTheNotificationAsRead,
   veiwStory,
 } from "../Services/mediaFeedThunk";
 
@@ -15,6 +17,8 @@ const mediaFeedSlice = createSlice({
     posts: [],
     reels: [],
     story: [],
+    notifications: [],
+    notificationsUnreadCount: 0,
     curretStoryView: [],
     filteredStory: [],
   },
@@ -163,6 +167,40 @@ const mediaFeedSlice = createSlice({
         state.curretStoryView = action.payload?.story[0]?.viewers;
       })
       .addCase(curretStoryView.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload.message || "Error fetching posts";
+      });
+    builder
+      .addCase(getAllUserNotification.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getAllUserNotification.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        state.notifications = action.payload.notifications;
+      })
+      .addCase(getAllUserNotification.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload.message || "Error fetching posts";
+      });
+    builder
+      .addCase(markTheNotificationAsRead.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(markTheNotificationAsRead.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        // state.notifications = action.payload.notifications;
+        const notificationId = action.payload.id;
+        state.notifications.forEach((notification) => {
+          if (notification._id === notificationId) {
+            notification.isRead = true;
+          }
+        });
+      })
+      .addCase(markTheNotificationAsRead.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload.message || "Error fetching posts";
       });

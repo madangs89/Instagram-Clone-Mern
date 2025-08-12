@@ -31,7 +31,7 @@ const MobileNavTop = () => {
       <div className="flex gap-2">
         {Object.entries(aboveIcons).map(([key, Icon]) => (
           <Link
-            to={key === "plus-square" ? "/create" : `/${key}`}
+            to={key === "plus-square" ? "/create" : `/notifications`}
             key={key}
             className="flex flex-col items-center"
           >

@@ -34,7 +34,6 @@ const CommentShowingDiv = ({ c, noReply, setComments }) => {
           alt=""
         />
       </div>
-
       <div onClick={()=>navigate(`/profile/${c.userId._id}`)} className="flex-1 cursor-pointer flex items-center justify-between">
         <div className="">
           <div className="text-white font-semibold text-sm">

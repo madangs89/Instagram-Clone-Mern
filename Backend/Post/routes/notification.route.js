@@ -6,16 +6,15 @@ import {
   markAllAsRead,
   markNotificationAsRead,
 } from "../controllers/notification.contrler.js";
+import { authMiddleware } from "../middelwares/auth.middelware.js";
 
 const notificationRouter = express.Router();
 
 // Create a new notification
-notificationRouter.post("/", createNotification);
+notificationRouter.post("/", authMiddleware, createNotification);
 
 // Get all notifications for a user
-notificationRouter.get("/:userId", getUserNotifications);
-
-// Mark a single notification as read
+notificationRouter.get("/", authMiddleware, getUserNotifications);
 notificationRouter.patch("/read/:id", markNotificationAsRead);
 
 // Mark all notifications for a user as read

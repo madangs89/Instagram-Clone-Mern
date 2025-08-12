@@ -7,6 +7,10 @@ import {
 import fs from "fs";
 import mongoose from "mongoose";
 import axios from "axios";
+const api = axios.create({
+  baseURL: `${process.env.POST_BACKEND}`,
+  withCredentials: true,
+});
 export const createUser = async (req, res) => {
   try {
     const {
@@ -152,6 +156,21 @@ export const followUser = async (req, res) => {
     }
     await followingUser.save();
     await followerUser.save();
+    const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
+
+    const notification = await api.post(
+      `/notification`,
+      {
+        sender: followerId,
+        receiver: follwingId,
+        type: "follow",
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return res.status(200).json({ message: "User followed", success: true });
   } catch (error) {
     console.log(error);
@@ -460,6 +479,38 @@ export const searchQueryForUser = async (req, res) => {
       message: "Users fetched successfully",
       success: true,
       users: [...users],
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error", success: false });
+  }
+};
+
+export const getAllFollowerAndFollowing = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const user = await User.findById(userId)
+      .select("-__v -password")
+      .populate({
+        path: "followers",
+        select: "-__v -password",
+        options: { sort: { _id: -1 } },
+      })
+      .populate({
+        path: "following",
+        select: "-__v -password",
+        options: { sort: { _id: -1 } },
+      });
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ message: "User not found", success: false });
+    }
+    return res.status(200).json({
+      message: "User fetched successfully",
+      success: true,
+      user,
     });
   } catch (error) {
     console.error(error);

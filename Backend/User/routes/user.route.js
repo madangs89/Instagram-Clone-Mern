@@ -2,6 +2,7 @@ import express from "express";
 import {
   createUser,
   followUser,
+  getAllFollowerAndFollowing,
   getAlluser,
   getSugestedusers,
   gettingArrayOfUsers,
@@ -29,3 +30,4 @@ userRouter.get("/get/in-array/users", authMiddleware, gettingUsersInArray);
 userRouter.get("/sugested/users/data", authMiddleware, getSugestedusers);
 userRouter.get("/get/array/users", gettingArrayOfUsers);
 userRouter.get("/get/search/users/data", authMiddleware, searchQueryForUser);
+userRouter.get("/get/user/data/followers/following/:id", authMiddleware, getAllFollowerAndFollowing);

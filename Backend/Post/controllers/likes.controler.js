@@ -3,7 +3,6 @@ import Notification from "../models/notification.model.js";
 import Post from "../models/post.model.js";
 import Reel from "../models/reel.model.js";
 import Userdetails from "../models/user.model.js";
-
 export const likePost = async (req, res) => {
   try {
     const { targetId, targetType } = req.body;

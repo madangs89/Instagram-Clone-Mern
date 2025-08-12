@@ -2,9 +2,8 @@ import Notification from "../models/notification.model.js";
 
 export const createNotification = async (req, res) => {
   try {
-    const { receiver, sender, type, post } = req.body;
-
-    // Avoid self-notifications (optional)
+    const { receiver, type, post } = req.body;
+    const sender = req.user._id;
     if (receiver === sender) {
       return res.status(400).json({ message: "You cannot notify yourself" });
     }
@@ -24,14 +23,23 @@ export const createNotification = async (req, res) => {
 
 export const getUserNotifications = async (req, res) => {
   try {
-    const userId = req.params.userId;
+    const userId = req.user._id;
+
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
 
     const notifications = await Notification.find({ receiver: userId })
-      .populate("sender", "username profilePic")
-      .populate("post", "image caption")
+      .populate("sender")
+      .populate("post", "media")
+      .populate("reel", "media")
       .sort({ createdAt: -1 });
 
-    res.status(200).json(notifications);
+    res.status(200).json({
+      notifications,
+      success: true,
+      message: "Notifications fetched successfully",
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -51,7 +59,11 @@ export const markNotificationAsRead = async (req, res) => {
       return res.status(404).json({ message: "Notification not found" });
     }
 
-    res.status(200).json(notification);
+    return res.status(200).json({
+      message: "Notification marked as read",
+      success: true,
+      id: notification._id,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

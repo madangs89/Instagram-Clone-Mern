@@ -53,6 +53,7 @@ export default function PostCard({ post, isActive }) {
       const data = {
         mediaId: post._id,
         comment,
+        contentType: post.contentType,
       };
       const result = await dispatch(addComment(data));
       console.log(result.payload.success, "result while adding the comment");

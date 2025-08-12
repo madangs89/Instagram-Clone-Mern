@@ -86,3 +86,25 @@ export const getPostById = createAsyncThunk(
     }
   }
 );
+export const getAllUserNotification = createAsyncThunk(
+  "mediaFeed/getAllUserNotification",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get(`/notification`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Error");
+    }
+  }
+);
+export const markTheNotificationAsRead = createAsyncThunk(
+  "mediaFeed/markTheNotificationAsRead",
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await api.patch(`/notification/read/${id}`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Error");
+    }
+  }
+);

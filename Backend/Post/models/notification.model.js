@@ -20,7 +20,6 @@ const notificationSchema = new mongoose.Schema(
     for: {
       type: String,
       enum: ["post", "reel"],
-      required: true,
     },
     post: {
       type: mongoose.Schema.Types.ObjectId,

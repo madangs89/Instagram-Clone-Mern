@@ -6,8 +6,10 @@ import Notification from "../models/notification.model.js";
 
 export const addComment = async (req, res) => {
   try {
-    const { mediaId, comment } = req.body;
+    const { mediaId, comment, contentType } = req.body;
     const userId = req.user._id;
+
+    console.log(contentType);
 
     const user = await Userdetails.findById(userId);
     if (!user) {
@@ -30,10 +32,8 @@ export const addComment = async (req, res) => {
         .json({ success: false, message: "Comment not created" });
     }
 
-    let isValue = false;
-
-    const reelData = await Reel.findById(mediaId);
-    if (reelData) {
+    if (contentType == "reel" || contentType == "Reel") {
+      const reelData = await Reel.findById(mediaId);
       await Notification.create({
         receiver: reelData.userId,
         sender: req.user._id,
@@ -41,9 +41,8 @@ export const addComment = async (req, res) => {
         reel: mediaId,
         for: "reel",
       });
-      isValue = true;
     }
-    if (!isValue) {
+    if (contentType == "post" || contentType == "Post") {
       const postData = await Post.findById(mediaId);
       await Notification.create({
         receiver: postData.userId,

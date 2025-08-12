@@ -22,6 +22,7 @@ import MessagePage from "./pages/MessagePage";
 import ExplorePage from "./pages/ExplorePage";
 import Searchpage from "./pages/Searchpage";
 import ExploreDetailsPage from "./pages/ExploreDetailsPage";
+import NotificationsPage from "./pages/NotificationsPage";
 
 const App = () => {
   const auth = useSelector((state) => state.auth.isAuthenticated);
@@ -59,6 +60,7 @@ const App = () => {
             <Route path="/reels" element={<ReelsPage />} />
             <Route path="/story/:id" element={<StoryPage />} />
             <Route path="/explore" element={<ExplorePage />} />
+            <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/explore/:type/:id" element={<ExploreDetailsPage />} />
             <Route path="/message/*" element={<MessagePage />} />
             {/* <Route path="messages" element={<Messages />} /> */}

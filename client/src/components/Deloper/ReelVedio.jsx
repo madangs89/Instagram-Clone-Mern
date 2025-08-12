@@ -115,6 +115,7 @@ export default function ReelVedio({ src, isActive, reel }) {
       const data = {
         mediaId: id,
         comment,
+        contentType: "reel",
       };
       const result = await dispatch(addComment(data));
       console.log(result.payload.success, "result while adding the comment");
