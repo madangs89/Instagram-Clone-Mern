@@ -9,6 +9,7 @@ import reelRouter from "./routes/reel.route.js";
 import { connectDB } from "./utils/ConnectDB.js";
 import commentRouter from "./routes/comment.route.js";
 import notificationRouter from "./routes/notification.route.js";
+import { createClient } from "redis";
 dotenv.config({ path: "./.env" });
 
 const app = express();
@@ -20,6 +21,12 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+export const redis = createClient({
+  url: "rediss://default:AVgAAAIjcDEwZWNhMmEzNDViMjE0M2I4OGU5NjUzNzg3MGRmM2UyNHAxMA@crucial-boar-22528.upstash.io:6379",
+});
+await redis.connect();
+
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

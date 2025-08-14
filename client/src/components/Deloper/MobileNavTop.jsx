@@ -1,8 +1,10 @@
 import { Heart, PlusSquare } from "lucide-react";
 import React from "react";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
 const MobileNavTop = () => {
+  const mediaFeed = useSelector((state) => state.mediaFeed);
   const aboveIcons = {
     "plus-square": PlusSquare,
     heart: Heart,
@@ -33,9 +35,15 @@ const MobileNavTop = () => {
           <Link
             to={key === "plus-square" ? "/create" : `/notifications`}
             key={key}
-            className="flex flex-col items-center"
+            className="flex relative flex-col items-center"
           >
             <Icon className="h-6 w-6" />
+
+            {key == "heart" && mediaFeed.notificationsUnreadCount > 0 && (
+              <div className="absolute text-white -top-0.5 left-2.5 w-4 h-4 flex items-center text-[12px] justify-center  bg-red-500 rounded-full">
+                {mediaFeed.notificationsUnreadCount}
+              </div>
+            )}
           </Link>
         ))}
       </div>

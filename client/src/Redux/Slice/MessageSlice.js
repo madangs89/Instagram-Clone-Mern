@@ -5,6 +5,7 @@ import {
   getAllConversationAndGroup,
   getAllMessageReaction,
   getCurrentUserMessage,
+  getUnReadMessageCount,
   removeMessageReaction,
 } from "../Services/MessageThunk";
 const messageSlice = createSlice({
@@ -14,6 +15,7 @@ const messageSlice = createSlice({
     selectedIndex: {},
     currentUserMessage: [],
     currentMesageAllReactions: [],
+    unreadMessageCount: 0,
     loading: false,
     loading2: false,
     error: null,
@@ -26,6 +28,9 @@ const messageSlice = createSlice({
           data.conversationId = conversationId;
         }
       });
+    },
+    updateUnReadMessageCount: (state, action) => {
+      state.unreadMessageCount -= action.payload;
     },
     setSelectedIndex: (state, action) => {
       state.selectedIndex = action.payload;
@@ -109,10 +114,9 @@ const messageSlice = createSlice({
     },
     updateUpSideDownTheAllConversationsAndGroups: (state, action) => {
       const { payload: conversationId } = action;
-      const index = state.allConversationsAndGroups.findIndex(
-        (conv) => conv.conversationId === conversationId
+      const index = state?.allConversationsAndGroups.findIndex(
+        (conv) => conv.conversationId == conversationId
       );
-
       // If conversation not found or already on top, do nothing
       if (index <= 0) return;
 
@@ -121,6 +125,125 @@ const messageSlice = createSlice({
         1
       );
       state.allConversationsAndGroups.unshift(targetConversation);
+    },
+    updatingTheChatIfTheyInConversation: (state, action) => {
+      console.log(action.payload, "Checking for upadting the index");
+      state.allConversationsAndGroups =
+        state?.allConversationsAndGroups.forEach((data) => {
+          if (data?.conversationId == action.payload.conversationId) {
+            data.lastMessage = action.payload.text
+              ? action.payload.text
+              : "A message has been sent";
+            data.lastMessageTime = Date.now();
+          }
+        });
+
+      if (
+        state.selectedIndex?.conversationId == action.payload.conversationId
+      ) {
+        state.currentUserMessage.push(action.payload);
+      }
+    },
+
+    updateSeenAndMarkAsReadOrIncreaseTheCount: (state, action) => {
+      const { conversationId, userId } = action.payload;
+
+      if (state.selectedIndex?.conversationId == conversationId) {
+        const index = state.allConversationsAndGroups.findIndex(
+          (item) => item.conversationId == conversationId
+        );
+        if (index !== -1) {
+          state.allConversationsAndGroups[index].unreadCount.forEach((item) => {
+            if (item.userId == userId) {
+              item.count = 0;
+            }
+          });
+        }
+      } else {
+        const index = state?.allConversationsAndGroups.findIndex(
+          (item) => item.conversationId == conversationId
+        );
+        if (index !== -1) {
+          state.allConversationsAndGroups[index].unreadCount.forEach((item) => {
+            if (item.userId == userId) {
+              item.count += 1;
+            }
+          });
+        }
+      }
+    },
+
+    handlerForNewMessage: (state, action) => {
+      const { conversationData, userId } = action.payload;
+      console.log(userId, "Checking for upadting the index");
+
+      if (
+        state.selectedIndex?.conversationId === conversationData.conversationId
+      ) {
+        state.currentUserMessage.push(conversationData);
+      }
+      // Find conversation index
+      const index = state.allConversationsAndGroups.findIndex(
+        (item) => item?.conversationId == conversationData?.conversationId
+      );
+      if (index != -1) {
+        // Update unread count for this user
+        state.allConversationsAndGroups[index].unreadCount =
+          state.allConversationsAndGroups[index].unreadCount.map((item) => {
+            if (
+              item.userId == userId &&
+              state.selectedIndex?.conversationId !=
+                conversationData.conversationId
+            ) {
+              return { ...item, count: item.count + 1 };
+            } else if (
+              item.userId == userId &&
+              state.selectedIndex?.conversationId ==
+                conversationData.conversationId
+            ) {
+              return { ...item, count: 0 };
+            }
+            return item;
+          });
+
+        state.allConversationsAndGroups[index].lastMessage =
+          conversationData.text
+            ? conversationData.text
+            : "A message has been sent";
+        state.allConversationsAndGroups[index].lastMessageTime = Date.now();
+        // Move updated conversation to the top
+        const updatedConversation = state.allConversationsAndGroups[index];
+        state.allConversationsAndGroups.splice(index, 1);
+        state.allConversationsAndGroups.unshift(updatedConversation);
+      }
+    },
+    handleMakeTheUnreadCountToZero: (state, action) => {
+      const { conversationId, userId } = action.payload;
+      const index = state?.allConversationsAndGroups.findIndex(
+        (item) => item.conversationId == conversationId
+      );
+      if (index !== -1) {
+        state.allConversationsAndGroups[index].unreadCount.forEach((item) => {
+          if (item.userId == userId) {
+            item.count = 0;
+          }
+        });
+      }
+    },
+    handleMarkAsRead: (state, action) => {
+      const { conversationId } = action.payload;
+
+      if (state.selectedIndex?.conversationId == conversationId) {
+        state.currentUserMessage.forEach((item) => {
+          item.status.forEach((status) => {
+            status.state = "read";
+          });
+        });
+      }
+      state.unreadMessageCount -= action.payload.modified;
+    },
+    handleClearSelectedIndex: (state) => {
+      state.selectedIndex = {};
     },
   },
   extraReducers: (builder) => {
@@ -158,10 +281,6 @@ const messageSlice = createSlice({
       .addCase(getCurrentUserMessage.fulfilled, (state, action) => {
         state.loading2 = false;
         state.error = null;
-        // state.currentUserMessage = [
-        //   ...action.payload,
-        //   ...state.currentUserMessage,
-        // ];
         state.currentUserMessage.unshift(...action.payload);
       })
       .addCase(getCurrentUserMessage.rejected, (state, action) => {
@@ -225,6 +344,20 @@ const messageSlice = createSlice({
         state.loading = false;
         state.error = action.payload.message || "Error fetching posts";
       });
+    builder
+      .addCase(getUnReadMessageCount.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getUnReadMessageCount.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        state.unreadMessageCount = action.payload.unreadCount;
+      })
+      .addCase(getUnReadMessageCount.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload.message || "Error fetching posts";
+      });
   },
 });
 
@@ -232,11 +365,18 @@ const messageSlice = createSlice({
 export const {
   rechangeInbox,
   setSelectedIndex,
+  handleClearSelectedIndex,
   updateCurrentUserMessage,
   updatingStatusForMessages,
   updateUpSideDownTheAllConversationsAndGroups,
   clearSelectedCurrentUserMessage,
   updateMessageReactionEmoji,
   updateAllConversationAndGroup,
+  updatingTheChatIfTheyInConversation,
+  updateSeenAndMarkAsReadOrIncreaseTheCount,
+  handlerForNewMessage,
+  handleMakeTheUnreadCountToZero,
+  handleMarkAsRead,
+  updateUnReadMessageCount,
 } = messageSlice.actions;
 export const messageReducer = messageSlice.reducer;

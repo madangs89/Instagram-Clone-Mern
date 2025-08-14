@@ -1,3 +1,4 @@
+import { redis } from "../index.js";
 import Likes from "../models/likes.model.js";
 import Notification from "../models/notification.model.js";
 import Post from "../models/post.model.js";
@@ -23,25 +24,27 @@ export const likePost = async (req, res) => {
     if (targetType == "post" || targetType == "Post") {
       const Data = await Post.findById(targetId);
       if (Data) {
-        await Notification.create({
+        const notification = await Notification.create({
           receiver: Data.userId,
           sender: req.user._id,
           type: "like",
           post: targetId,
           for: "post",
         });
+        redis.publish("newNotification", JSON.stringify(notification));
       }
     }
     if (targetType == "reel" || targetType == "Reel") {
       const Data = await Reel.findById(targetId);
       if (Data) {
-        await Notification.create({
+        const notification = await Notification.create({
           receiver: Data.userId,
           sender: req.user._id,
           type: "like",
           reel: targetId,
           for: "reel",
         });
+        redis.publish("newNotification", JSON.stringify(notification));
       }
     }
 

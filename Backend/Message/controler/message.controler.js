@@ -1,3 +1,4 @@
+import { redis } from "../index.js";
 import Conversation from "../models/Conversation.model.js";
 import Message from "../models/Message.js";
 import { uploadToCloudinarySingle } from "../utils/cloudinary.js";
@@ -13,38 +14,105 @@ export const createMessage = async (req, res) => {
   try {
     const { conversationId, text, media, status } = req.body;
     const sender = req.user._id;
-    if (!conversationId || !sender)
+
+    if (!conversationId || !sender) {
       return res
         .status(400)
         .json({ message: "Missing fields", success: false });
-    if (!text && !media)
+    }
+    if (!text && !media) {
       return res
         .status(400)
         .json({ message: "Media Or Text is required", success: false });
+    }
+
+    // Convert "sending" → "sent"
     status.forEach((item) => {
-      if (item.state == "sending") {
+      if (item.state === "sending") {
         item.state = "sent";
       }
     });
-    const messageData = await Message.create({
+
+    // Create message
+    const messageData = new Message({
       conversationId,
       sender,
       text,
       media,
       status,
     });
-    let conversation = await Conversation.findByIdAndUpdate(conversationId, {
-      lastMessage: text ? text : "A message has been sent",
-      lastMessageTime: new Date(),
-    });
-    await conversation.save();
-    if (!messageData)
+    // Fetch conversation
+    let conversation = await Conversation.findById(conversationId);
+    if (!conversation) {
       return res
-        .status(500)
-        .json({ message: "Problem creating message", success: false });
-    return res
-      .status(201)
-      .json({ message: "Message created", success: true, messageData });
+        .status(404)
+        .json({ message: "Conversation not found", success: false });
+    }
+
+    // Update last message info
+    conversation.lastMessage = text ? text : "A message has been sent";
+    conversation.lastMessageTime = new Date();
+
+    // Ensure unreadCount array has all members
+    conversation.members.forEach((memberId) => {
+      if (!conversation.unreadCount.find((u) => u.userId === memberId)) {
+        conversation.unreadCount.push({ userId: memberId, count: 0 });
+      }
+    });
+
+    // Always reset sender's unread count
+    const senderIndex = conversation.unreadCount.findIndex(
+      (u) => u.userId === String(sender)
+    );
+    if (senderIndex !== -1) {
+      conversation.unreadCount[senderIndex].count = 0;
+    }
+
+    const receivers = conversation.members.filter(
+      (member) => member !== String(sender)
+    );
+
+    // Update message status and unread counts
+    for (const user of messageData.status) {
+      const index = conversation.unreadCount.findIndex(
+        (u) => u.userId == user.userId
+      );
+      const userInfo = await redis.hGet("onlineUsers", user.userId);
+      if (userInfo) {
+        const { socketId, conversationId: cId } = JSON.parse(userInfo);
+        if (cId === conversationId) {
+          // User is viewing this chat — mark as read
+          user.state = "read";
+          user.readAt = new Date();
+          if (index !== -1) conversation.unreadCount[index].count = 0;
+        } else {
+          // User online but not in chat — mark delivered & increment count
+          user.state = "delivered";
+          user.receivedAt = new Date();
+          if (index !== -1) conversation.unreadCount[index].count += 1;
+        }
+      } else {
+        // User offline — increment count
+        if (index !== -1) conversation.unreadCount[index].count += 1;
+      }
+    }
+
+    await conversation.save();
+    await messageData.save();
+
+    // Publish message to Redis for receivers
+    for (const receiverId of receivers) {
+      await redis.publish(
+        "newMessage",
+        JSON.stringify({ receiverId, message: messageData })
+      );
+    }
+
+    return res.status(201).json({
+      message: "Message created",
+      success: true,
+      messageData,
+    });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Server error", success: false });
@@ -157,13 +225,15 @@ export const createConversation = async (req, res) => {
   try {
     let { members } = req.body;
     const userId = req.user._id;
-
     if (!Array.isArray(members) || typeof userIdsArray === "string") {
       members = [members];
     }
     if (!members || members.length == 0 || !Array.isArray(members))
       return res.status(400).json({ message: "Missing fields" });
-
+    unreadCount = [
+      { userId, count: 0 },
+      ...members.map((member) => ({ userId: member, count: 0 })),
+    ];
     const conversation = await Conversation.create({
       members: [userId, ...members],
     });
@@ -307,7 +377,6 @@ export const getConversationByUserIds = async (req, res) => {
         members: [userId, ...otherUserId],
         isGroup,
       });
-      console.log(newConversation, "newConversation");
       return res.status(200).json({
         message: "Fetched conversation",
         success: true,
@@ -330,8 +399,101 @@ export const getConversationByUserIds = async (req, res) => {
   }
 };
 
-//not handled
+export const markAllMessageAsRead = async (req, res) => {
+  try {
+    const { conversationId } = req.params;
+    const userId = String(req.user._id);
+    const conversation = await Conversation.findById(conversationId);
+    if (!conversation) {
+      return res
+        .status(404)
+        .json({ message: "Conversation not found", success: false });
+    }
 
+    // Reset unread count for this user
+    const unreadIndex = conversation.unreadCount.findIndex(
+      (u) => u.userId === userId
+    );
+    if (unreadIndex !== -1) {
+      conversation.unreadCount[unreadIndex].count = 0;
+    }
+    await conversation.save();
+
+    // Update all messages for this user where status is "sent" or "delivered"
+    const result = await Message.updateMany(
+      {
+        conversationId,
+        "status.userId": userId,
+        "status.state": { $in: ["sent", "delivered"] },
+      },
+      {
+        $set: {
+          "status.$[elem].state": "read",
+          "status.$[elem].readAt": new Date(),
+        },
+      },
+      {
+        arrayFilters: [
+          {
+            "elem.userId": userId,
+            "elem.state": { $in: ["sent", "delivered"] },
+          },
+        ],
+      }
+    );
+
+    const receivers = conversation.members.filter((member) => member != userId);
+    const modified = result.modifiedCount;
+
+    for (const receiverId of receivers) {
+      await redis.publish(
+        "readTheConversation",
+        JSON.stringify({ receiverId, conversationId, modified })
+      );
+    }
+    return res
+      .status(200)
+      .json({ message: "Marked all as read", success: true });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error", success: false });
+  }
+};
+
+export const getUnreadChatsCount = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // Find all conversations where the user exists in unreadCount
+    const conversations = await Conversation.find({
+      "unreadCount.userId": userId,
+    });
+
+    // Sum up unread counts for this user
+    let totalUnread = 0;
+    conversations.forEach((conv) => {
+      const userUnread = conv.unreadCount.find((u) => u.userId === userId);
+      if (userUnread) {
+        totalUnread += userUnread.count;
+      }
+    });
+
+    return res.status(200).json({
+      message: "Fetched unread count",
+      success: true,
+      unreadCount: totalUnread,
+    });
+  } catch (error) {
+    console.error("Error in getUnreadChatsCount:", error);
+    return res.status(500).json({
+      message: "Server error",
+      success: false,
+      error: error.message,
+    });
+  }
+};
+
+//not handled
 export const deleteMessage = async (req, res) => {
   try {
     const { messageId, conversationId } = req.params;

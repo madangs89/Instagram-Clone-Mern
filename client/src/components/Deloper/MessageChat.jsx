@@ -25,10 +25,16 @@ import {
 import Loader from "./Loader";
 import {
   clearSelectedCurrentUserMessage,
+  handleClearSelectedIndex,
+  handleMarkAsRead,
+  handlerForNewMessage,
   updateCurrentUserMessage,
   updateMessageReactionEmoji,
+  updateSeenAndMarkAsReadOrIncreaseTheCount,
+  updateUnReadMessageCount,
   updateUpSideDownTheAllConversationsAndGroups,
   updatingStatusForMessages,
+  updatingTheChatIfTheyInConversation,
 } from "../../Redux/Slice/MessageSlice";
 import { Check } from "lucide-react";
 import EmojiPicker from "emoji-picker-react";
@@ -62,6 +68,8 @@ const MessageChat = ({ setIsChatOpen }) => {
   const [currentlySelectedMessageId, setCurrentlySelectedMessageId] =
     useState(null);
   const dispatch = useDispatch();
+  const [tempIds, setTempIds] = useState(null);
+  const socket = useSelector((state) => state.socket.socket);
 
   const [keyboardEmojiShow, setKeyboardEmojiShow] = useState(false);
   const [page, setPage] = useState(1);
@@ -144,31 +152,42 @@ const MessageChat = ({ setIsChatOpen }) => {
   }, [id]);
 
   const checkTheStatus = (status) => {
-    let sent = 0,
-      sennding = 0,
-      delivered = 0,
-      seen = 0;
-    status.forEach((item) => {
-      if (item.state === "sent") sent++;
-      if (item.state === "sending") sennding++;
-      if (item.state === "delivered") delivered++;
-      if (item.state === "seen") seen++;
-    });
-    if (sennding) {
-      return <Clock3 className="text-gray-500 w-4 h-4 flex-shrink-0" />;
-    } else if (sennding == 0 && sent > delivered && sent > seen) {
+    if (status[0].state == "sent") {
       return <Check className="text-gray-500 w-4 h-4 flex-shrink-0" />;
-    } else if (sennding == 0 && delivered > sent && delivered > seen) {
+    } else if (status[0].state == "sending") {
+      return <Clock3 className="text-gray-500 w-4 h-4 flex-shrink-0" />;
+    } else if (status[0].state == "delivered") {
       return <CheckCheck className="text-gray-500 w-4 h-4 flex-shrink-0" />;
-    } else if (sennding == 0 && seen > sent && seen > delivered) {
+    } else if (status[0].state == "read") {
       return <CheckCheck className="text-green-500 w-4 h-4 flex-shrink-0" />;
     }
   };
+
+  // socket
+  useEffect(() => {
+    if (!socket) return;
+    socket.on("message", (data) => {
+      console.log("newMessage came", data);
+      dispatch(
+        handlerForNewMessage({ conversationData: data, userId: user._id })
+      );
+    });
+    socket.on("markAsRead", (data) => {
+      dispatch(handleMarkAsRead(data));
+      console.log("markAsRead", data);
+    });
+    // socket.on("markAsRead", (data) => {
+    //   dispatch(handleMarkAsRead(data));
+    //   console.log("markAsRead", data);
+    // });
+  }, [socket]);
 
   const handleSubmitMessage = async () => {
     try {
       if (!input && !file) return;
       let media = [];
+      const generatedTempId = Date.now();
+      setTempIds(generatedTempId);
       if (isFileSelected && file) {
         media.push({
           url: URL.createObjectURL(file),
@@ -179,7 +198,7 @@ const MessageChat = ({ setIsChatOpen }) => {
       const data = {
         conversationId: id,
         text: input,
-        tempId: Date.now(),
+        tempId: generatedTempId,
         status: [
           {
             userId: !selectedIndex.isGroup && selectedIndex?.userId,
@@ -209,18 +228,18 @@ const MessageChat = ({ setIsChatOpen }) => {
           const originalData = {
             ...data,
             media: newMedia,
+            sender: user._id,
           };
           const answer = await dispatch(createMessage(originalData));
           if (answer?.payload?.conversationId) {
+            console.log(result.payload, "result in message chat");
             dispatch(
               updatingStatusForMessages({
-                newStatus: "sent",
+                newStatus: answer.payload.status[0].state,
                 tempId: data.tempId,
                 realMessageId: answer.payload._id,
               })
             );
-            setInput("");
-            dispatch(updateUpSideDownTheAllConversationsAndGroups(id));
           }
           setFile(null);
         }
@@ -232,7 +251,7 @@ const MessageChat = ({ setIsChatOpen }) => {
           console.log(result.payload, "result in message chat");
           dispatch(
             updatingStatusForMessages({
-              newStatus: "sent",
+              newStatus: result.payload.status[0].state,
               tempId: data.tempId,
               realMessageId: result.payload._id,
             })
@@ -245,7 +264,6 @@ const MessageChat = ({ setIsChatOpen }) => {
       console.log(error);
     }
   };
-
   const handleOnEmojiClick = (emojiObject) => {
     console.log(emojiObject, "emojiObject");
     setSelectedEmoji((prev) => ({ ...prev, emoji: emojiObject.emoji }));
@@ -271,7 +289,6 @@ const MessageChat = ({ setIsChatOpen }) => {
       console.log(error);
     }
   };
-
   const handleOpenEmoji = (id) => {
     setShowEmoji(true);
     setSelectedEmoji({
@@ -280,7 +297,6 @@ const MessageChat = ({ setIsChatOpen }) => {
       userId: user._id,
     });
   };
-
   const handleTouchStart = (data) => {
     timerRef.current = setTimeout(() => {
       console.log("📱 Long press detected on mobile");
@@ -336,7 +352,17 @@ const MessageChat = ({ setIsChatOpen }) => {
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [input, file]); // no need for isFileSelected here
+  }, [input, file]);
+
+  const handleArrowClick = () => {
+    socket.emit("openedConversation", {
+      userId: user._id,
+      conversationId: "",
+    });
+    dispatch(handleClearSelectedIndex());
+    navigate(`/message`);
+    setIsChatOpen(false);
+  };
 
   if (messageSlice.loading2) {
     return (
@@ -381,10 +407,7 @@ const MessageChat = ({ setIsChatOpen }) => {
           </div>
         </div>
         <ArrowLeft
-          onClick={() => {
-            navigate(`/message`);
-            setIsChatOpen(false);
-          }}
+          onClick={handleArrowClick}
           className="w-6 h-6 cursor-pointer"
         />
       </div>
@@ -487,7 +510,6 @@ const MessageChat = ({ setIsChatOpen }) => {
                 }}
                 onTouchEnd={handleTouchEnd}
                 onMouseEnter={() => {
-                  console.log(msg, "msg mouse enter");
                   setHoverShow({
                     id: msg._id ? msg._id : msg?.tempId,
                     right: msg?.sender == user?._id ? true : false,
@@ -546,17 +568,25 @@ const MessageChat = ({ setIsChatOpen }) => {
                           key={index}
                         >
                           {media.type.includes("image") ? (
-                            <img
-                              src={media.url}
-                              alt=""
-                              className="max-w-64 max-h-64 rounded-md aspect-auto object-cover"
-                            />
+                            <div className="flex items-end justify-end flex-col">
+                              <img
+                                src={media.url}
+                                alt=""
+                                className="max-w-64 max-h-64 rounded-md aspect-auto object-cover"
+                              />
+                              {msg?.sender == user._id &&
+                                checkTheStatus(msg.status)}
+                            </div>
                           ) : (
-                            <video
-                              src={media.url}
-                              controls
-                              className="max-w-64 max-h-64 rounded-md object-cover"
-                            />
+                            <div className="flex items-end justify-end flex-col">
+                              <video
+                                src={media.url}
+                                controls
+                                className="max-w-64 max-h-64 rounded-md object-cover"
+                              />
+                              {msg?.sender == user._id &&
+                                checkTheStatus(msg.status)}
+                            </div>
                           )}
                           {!msg.text &&
                             msg.reactions &&
@@ -628,7 +658,7 @@ const MessageChat = ({ setIsChatOpen }) => {
                       }`}
                     >
                       {msg.text}
-                      {checkTheStatus(msg.status)}
+                      {msg?.sender == user._id && checkTheStatus(msg.status)}
                       {msg.reactions && msg.reactions.length != 0 && (
                         <div
                           onClick={() => handleMessageShowReactions(msg._id)}

@@ -121,3 +121,26 @@ export const getConversationByUserId = createAsyncThunk(
     }
   }
 );
+
+export const markAllChatsAsRead = createAsyncThunk(
+  "message/markAllChatsAsRead",
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await api.post(`/message/markAsRead/${id}`);
+      return response?.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Erorr");
+    }
+  }
+);
+export const getUnReadMessageCount = createAsyncThunk(
+  "message/getUnReadMessageCount",
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await api.get(`/message/unreadChatsCount`);
+      return response?.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Erorr");
+    }
+  }
+);

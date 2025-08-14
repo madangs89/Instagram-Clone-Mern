@@ -1,8 +1,11 @@
+import { redis } from "../index.js";
 import Notification from "../models/notification.model.js";
 
 export const createNotification = async (req, res) => {
   try {
     const { receiver, type, post } = req.body;
+    console.log(receiver, type, post);
+
     const sender = req.user._id;
     if (receiver === sender) {
       return res.status(400).json({ message: "You cannot notify yourself" });
@@ -14,7 +17,7 @@ export const createNotification = async (req, res) => {
       type,
       post: post || undefined,
     });
-
+    redis.publish("newNotification", JSON.stringify(notification));
     res.status(201).json(notification);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -28,15 +31,20 @@ export const getUserNotifications = async (req, res) => {
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
-
     const notifications = await Notification.find({ receiver: userId })
       .populate("sender")
       .populate("post", "media")
       .populate("reel", "media")
       .sort({ createdAt: -1 });
 
+    const unReadNotificationCount = await Notification.countDocuments({
+      receiver: userId,
+      isRead: false,
+    });
+
     res.status(200).json({
       notifications,
+      unReadNotificationCount,
       success: true,
       message: "Notifications fetched successfully",
     });

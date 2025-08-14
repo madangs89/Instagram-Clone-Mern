@@ -39,13 +39,6 @@ export default function NotificationsPage() {
   const notifications = useSelector((state) => state.mediaFeed.notifications);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  // const markAsRead = (id) => {
-  //   setNotifications((prev) =>
-  //     prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-  //   );
-  // };
-
   useEffect(() => {
     (async () => {
       try {

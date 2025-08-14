@@ -31,7 +31,7 @@ const notificationSchema = new mongoose.Schema(
     },
     isRead: {
       type: Boolean,
-      default: false, // Marks whether user has seen it
+      default: false, 
     },
   },
   { timestamps: true }

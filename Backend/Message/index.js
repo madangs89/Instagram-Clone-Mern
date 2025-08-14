@@ -5,6 +5,7 @@ import { connectDB } from "./utils/ConnectDB.js";
 import cookieParser from "cookie-parser";
 import { messageRouter } from "./routes/message.routes.js";
 import { uploadRouter } from "./routes/upload.routes.js";
+import { createClient } from "redis";
 dotenv.config({ path: "./.env" });
 
 const app = express();
@@ -20,15 +21,17 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+export const redis = createClient({
+  url: "rediss://default:AVgAAAIjcDEwZWNhMmEzNDViMjE0M2I4OGU5NjUzNzg3MGRmM2UyNHAxMA@crucial-boar-22528.upstash.io:6379",
+});
 
-
+await redis.connect();
 app.get("/", (req, res) => {
   res.send("Hello World");
 });
 
-
-app.use("/message" , messageRouter)
-app.use("/message" , uploadRouter)
+app.use("/message", messageRouter);
+app.use("/message", uploadRouter);
 app.listen(process.env.PORT, async () => {
   connectDB();
   console.log(`Server is running on  http://localhost:${process.env.PORT}`);

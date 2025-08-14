@@ -1,5 +1,5 @@
 import { uploadToCloudinarySingle } from "../utils/cloudinary.js";
-
+import fs from "fs";
 export const uploadToClodinary = async (req, res) => {
   try {
     const file = req.file;
@@ -11,13 +11,12 @@ export const uploadToClodinary = async (req, res) => {
       url: data.secure_url,
       type: [data.resource_type],
     };
-    res
-      .status(200)
-      .json({
-        message: "File uploaded successfully",
-        data: responseData,
-        success: true,
-      });
+    fs.unlinkSync(file.path);
+    res.status(200).json({
+      message: "File uploaded successfully",
+      data: responseData,
+      success: true,
+    });
   } catch (error) {
     console.log(error);
   }

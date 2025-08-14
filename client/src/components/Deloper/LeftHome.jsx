@@ -6,10 +6,13 @@ import { LogOut } from "lucide-react";
 import { logoutUser } from "../../Redux/Services/AuthThunk";
 import Swal from "sweetalert2";
 import { toast } from "sonner";
+import { useEffect } from "react";
+import { updateTheNotificationCount } from "../../Redux/Slice/mediaFeedSlice";
 
 const LeftHome = () => {
   const userDeatils = useSelector((state) => state.auth);
-
+  const mediaFeed = useSelector((state) => state.mediaFeed);
+  const meessage = useSelector((state) => state.message);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -51,6 +54,7 @@ const LeftHome = () => {
       console.log(error);
     }
   };
+
   return (
     <div className="hidden sticky top-0 left-0 lg:flex flex-col bg-black z-10 items-start px-3 pl-5 pt-10 md:w-1/5 h-screen border-r border-[#404040] ">
       <div className="logo text-white font-bold text-2xl">
@@ -86,8 +90,19 @@ const LeftHome = () => {
               key={link.name}
               className="w-full"
             >
-              <div className="flex items-center gap-3 py-2 px-1 rounded-md transition-all duration-200 ease-in-out hover:bg-[#404040]">
-                <Icon className="w-6 h-6 text-white" />
+              <div className="flex items-center relative gap-3 py-2 px-1 rounded-md transition-all duration-200 ease-in-out hover:bg-[#404040]">
+                <Icon className="w-7 h-7 text-white" />
+                {link.href == "/notifications" &&
+                  mediaFeed.notificationsUnreadCount > 0 && (
+                    <div className="absolute text-white top-2 left-5 w-4 h-4 flex items-center text-[12px] justify-center  bg-red-500 rounded-full">
+                      {mediaFeed.notificationsUnreadCount}
+                    </div>
+                  )}
+                {link.href == "/message" && meessage.unreadMessageCount > 0 && (
+                  <div className="absolute text-white top-2 left-5 w-4 h-4 flex items-center text-[12px] justify-center  bg-red-500 rounded-full">
+                    {meessage.unreadMessageCount}
+                  </div>
+                )}
                 <span className="text-white font-semibold text-md">
                   {link.name}
                 </span>

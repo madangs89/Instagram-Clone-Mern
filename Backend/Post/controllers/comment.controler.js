@@ -3,13 +3,12 @@ import Userdetails from "../models/user.model.js";
 import Reel from "../models/reel.model.js";
 import Post from "../models/post.model.js";
 import Notification from "../models/notification.model.js";
+import { redis } from "../index.js";
 
 export const addComment = async (req, res) => {
   try {
     const { mediaId, comment, contentType } = req.body;
     const userId = req.user._id;
-
-    console.log(contentType);
 
     const user = await Userdetails.findById(userId);
     if (!user) {
@@ -31,26 +30,27 @@ export const addComment = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Comment not created" });
     }
-
     if (contentType == "reel" || contentType == "Reel") {
       const reelData = await Reel.findById(mediaId);
-      await Notification.create({
+      const notification = await Notification.create({
         receiver: reelData.userId,
         sender: req.user._id,
         type: "comment",
         reel: mediaId,
         for: "reel",
       });
+      redis.publish("newNotification", JSON.stringify(notification));
     }
     if (contentType == "post" || contentType == "Post") {
       const postData = await Post.findById(mediaId);
-      await Notification.create({
+      const notification = await Notification.create({
         receiver: postData.userId,
         sender: req.user._id,
         type: "comment",
         post: mediaId,
         for: "post",
       });
+      redis.publish("newNotification", JSON.stringify(notification));
     }
     const commentWithUser = await Comment.findById(newComment._id).populate(
       "userId"

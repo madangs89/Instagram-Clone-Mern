@@ -20,9 +20,11 @@ import ReelsPage from "./pages/ReelsPage";
 import StoryPage from "./pages/StoryPage";
 import MessagePage from "./pages/MessagePage";
 import ExplorePage from "./pages/ExplorePage";
+import { io } from "socket.io-client";
 import Searchpage from "./pages/Searchpage";
 import ExploreDetailsPage from "./pages/ExploreDetailsPage";
 import NotificationsPage from "./pages/NotificationsPage";
+import { clearSocket, setSocket } from "./Redux/Slice/SocketSlice";
 
 const App = () => {
   const auth = useSelector((state) => state.auth.isAuthenticated);
@@ -43,6 +45,22 @@ const App = () => {
       })();
     }
   }, [auth, data._id, dispatch]);
+
+  useEffect(() => {
+    if (auth && data._id) {
+      const socket = io("http://localhost:3005", {
+        query: {
+          userId: data._id,
+        },
+      });
+      dispatch(setSocket(socket));
+      return () => {
+        socket.emit("removeUser", { userId: data._id });
+        // dispatch(clearSocket());
+      };
+    }
+  }, [auth, data._id]);
+
   return (
     <Router>
       <Routes>

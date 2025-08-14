@@ -7,6 +7,8 @@ import {
   getAllMessageReaction,
   getAllMessages,
   getConversationByUserIds,
+  getUnreadChatsCount,
+  markAllMessageAsRead,
   removeMessageReaction,
 } from "../controler/message.controler.js";
 import { authMiddleware } from "../middelware/auth.middleware.message.js";
@@ -37,3 +39,9 @@ messageRouter.post(
   authMiddleware,
   getConversationByUserIds
 );
+messageRouter.post(
+  "/markAsRead/:conversationId",
+  authMiddleware,
+  markAllMessageAsRead
+);
+messageRouter.get("/unreadChatsCount", authMiddleware, getUnreadChatsCount);

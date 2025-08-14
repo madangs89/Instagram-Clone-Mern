@@ -40,8 +40,6 @@ const ExploreDetailsPage = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  console.log(selectedData, "selectedData");
-
   useEffect(() => {
     const fetchData = async () => {
       if (type === "reel") {
@@ -85,11 +83,14 @@ const ExploreDetailsPage = () => {
     }
   };
 
+  console.log(selectedData);
+
   const addComments = async () => {
     const result = await dispatch(
       addComment({
         mediaId: selectedData._id,
         comment,
+        contentType: selectedData.contentType,
       })
     );
     if (result?.payload?.success) {

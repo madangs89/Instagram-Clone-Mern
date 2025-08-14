@@ -99,6 +99,10 @@ const mediaFeedSlice = createSlice({
         state.filteredStory.unshift(newUserStory);
       }
     },
+
+    updateTheNotificationCount: (state) => {
+      state.notificationsUnreadCount += 1;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -178,6 +182,7 @@ const mediaFeedSlice = createSlice({
       .addCase(getAllUserNotification.fulfilled, (state, action) => {
         state.loading = false;
         state.error = null;
+        state.notificationsUnreadCount = action.payload.unReadNotificationCount;
         state.notifications = action.payload.notifications;
       })
       .addCase(getAllUserNotification.rejected, (state, action) => {
@@ -199,6 +204,7 @@ const mediaFeedSlice = createSlice({
             notification.isRead = true;
           }
         });
+        state.notificationsUnreadCount -= 1;
       })
       .addCase(markTheNotificationAsRead.rejected, (state, action) => {
         state.loading = false;
@@ -211,6 +217,7 @@ export const {
   addFilteredStory,
   updateStoryView,
   resetStoryView,
+  updateTheNotificationCount,
   addToStoryUpdate,
 } = mediaFeedSlice.actions;
 export const mediaFeedReducer = mediaFeedSlice.reducer;
