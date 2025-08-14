@@ -9,6 +9,7 @@ const config = cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+
 export const uploadToCloudinarySingle = async (filePath) => {
   try {
     const data = {

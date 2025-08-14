@@ -4,6 +4,7 @@ import {
   uploadToCloudinarySingle,
 } from "../utils/cloudinaary.js";
 import axios from "axios";
+import fs from "fs";
 
 export const createStory = async (req, res) => {
   try {
@@ -35,6 +36,7 @@ export const createStory = async (req, res) => {
       const { secure_url, public_id } = result;
       storyData.mediaUrl = secure_url;
       storyData.publicId = public_id;
+      fs.unlinkSync(req.file.path);
     }
     const newStory = await Story.create(storyData);
 

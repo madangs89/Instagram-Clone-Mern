@@ -364,7 +364,7 @@ const StoryPage = () => {
         )}
         <div className="absolute top-2 w-full px-2 flex gap-2 z-50">
           {currentUser.media.map((_, i) => (
-            <div key={i} className="w-full h-1 bg-red-500">
+            <div key={i} className="w-full h-1 bg-[#525252]">
               <div
                 className="h-1 bg-white transition-[width] ease-linear"
                 style={{ width: `${progress[i]?.percent ?? 0}%` }}
@@ -375,7 +375,7 @@ const StoryPage = () => {
         <div className="absolute top-4.5 z-[1000] flex flex-col left-2 rounded-lg w-full">
           <div
             onClick={() => navigate(`/profile/${currentUser.userId}`)}
-            className="flex cursor-pointer gap-2 items-center"
+            className="flex w-fit cursor-pointer gap-2 items-center"
           >
             <img
               src={currentUser.avatar}

@@ -165,8 +165,14 @@ const ProfilePage = () => {
             <p>{data?.getCurrentUser?.userName}</p>
             {auth._id == params.id && (
               <div className="flex gap-2">
-                <Link to={`/profile/edit/${auth._id}`}>
-                  <Button variant="black" className="bg-[#27272a]">
+                <Link
+                  className="cursor-pointer"
+                  to={`/profile/edit/${auth._id}`}
+                >
+                  <Button
+                    variant="black"
+                    className="bg-[#27272a] cursor-pointer"
+                  >
                     Edit Profile
                   </Button>
                 </Link>
@@ -182,7 +188,7 @@ const ProfilePage = () => {
           </div>
           <div className="flex gap-4 text-sm md:text-base">
             <p>
-              <strong>0</strong> posts
+              <strong>{data?.userPosts?.length}</strong> posts
             </p>
             <p
               onClick={() => {
@@ -214,7 +220,6 @@ const ProfilePage = () => {
                 {line}
               </p>
             ))}
-            {/* {data.bio || "No bio available."} */}
           </div>
           {auth._id != params.id &&
             data.following &&
@@ -252,11 +257,6 @@ const ProfilePage = () => {
             {data?.getCurrentUser?.website != "" && (
               <p>{data?.getCurrentUser?.website}</p>
             )}
-
-            {data?.getCurrentUser?.gender != "" &&
-              data?.getCurrentUser?.gender != "none" && (
-                <p>{data?.getCurrentUser?.gender}</p>
-              )}
           </div>
         </div>
       </div>
@@ -304,17 +304,6 @@ const ProfilePage = () => {
                   />
                 </div>
               ) : (
-                // <VideoPost
-                //   onClick={() =>
-                //     navigate(
-                //       `/explore/${post.contentType.toLowerCase()}/${post._id}`
-                //     )
-                //   }
-                //   aspectRatio="aspect-[3/4]"
-                //   key={index}
-                //   src={post?.media[0]?.url}
-                //   isActive={"false"}
-                // />
                 <div
                   key={index}
                   className="cursor-pointer relative bg-red-500 w-full h-fit"

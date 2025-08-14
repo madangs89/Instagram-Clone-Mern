@@ -66,14 +66,14 @@ export default function NotificationsPage() {
   };
 
   const getIfWantToShowMedia = (n) => {
-    if (n.for == "post" || n.for == "Post") {
-      if (n.post) {
-        if (n.post.media[0].url.includes("mp4")) {
+    if (n?.for == "post" || n?.for == "Post") {
+      if (n?.post) {
+        if (n?.post?.media[0]?.url.includes("mp4")) {
           return (
             <video
               onClick={() => navigate(`/explore/post/${n.post._id}`)}
               className="w-5 h-5 object-cover cursor-pointer"
-              src={n.post.media[0].url}
+              src={n?.post?.media[0]?.url}
             ></video>
           );
         } else {
@@ -81,19 +81,19 @@ export default function NotificationsPage() {
             <img
               onClick={() => navigate(`/explore/post/${n.post._id}`)}
               className="w-5 h-5 object-cover cursor-pointer"
-              src={n.post.media[0].url}
+              src={n?.post?.media[0]?.url}
             ></img>
           );
         }
       }
-    } else if (n.for == "reel" || n.for == "Reel") {
-      if (n.reel) {
-        if (n.reel.media) {
+    } else if (n?.for == "reel" || n?.for == "Reel") {
+      if (n?.reel) {
+        if (n?.reel?.media) {
           return (
             <video
-              onClick={() => navigate(`/explore/reel/${n.reel._id}`)}
+              onClick={() => navigate(`/explore/reel/${n?.reel?._id}`)}
               className="w-5 h-5 object-cover cursor-pointer"
-              src={n.reel.media}
+              src={n?.reel?.media}
             ></video>
           );
         }
@@ -117,7 +117,7 @@ export default function NotificationsPage() {
           notifications.map((n, index) => (
             <div
               key={index}
-              onClick={() => handleClick(n._id)}
+              onClick={() => handleClick(n?._id)}
               className={`flex items-center gap-4 p-3 rounded-xl  transition-all duration-300
              bg-black hover:bg-[#262626] 
               }`}
@@ -125,8 +125,8 @@ export default function NotificationsPage() {
               {/* Avatar */}
               <div className="relative">
                 <img
-                  src={n.sender.avatar}
-                  alt={n.sender.name}
+                  src={n?.sender?.avatar}
+                  alt={n?.sender?.name}
                   className="w-12 h-12 rounded-full object-cover"
                 />
                 {!n?.isRead && (
@@ -137,7 +137,7 @@ export default function NotificationsPage() {
               <div className="flex-1">
                 <p
                   className={`text-sm sm:text-base ${
-                    !n.read ? "font-semibold" : "font-normal text-gray-300"
+                    !n?.read ? "font-semibold" : "font-normal text-gray-300"
                   }`}
                 >
                   <span className="font-bold">{n?.sender.name}</span>{" "}

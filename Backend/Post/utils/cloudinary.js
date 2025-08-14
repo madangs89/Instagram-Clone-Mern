@@ -16,12 +16,13 @@ export const uploadToCloudinarySingle = async (filePath) => {
       api_key: process.env.CLOUDINARY_API_KEY,
       api_secret: process.env.CLOUDINARY_API_SECRET,
     };
-    console.log("cloudinary data", data);
 
     const result = await cloudinary.uploader.upload(filePath, {
       // Specify the folder in Cloudinary
       resource_type: "auto", // Automatically determine the resource type
     });
+    console.log("Cloudinary upload result:", result);
+
     return result;
   } catch (error) {
     console.log(error);

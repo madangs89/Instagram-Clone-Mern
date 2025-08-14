@@ -5,6 +5,7 @@ import { updateUser } from "../Redux/Services/UserThunk";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import Loader from "../components/Deloper/Loader";
+import { ArrowLeft} from "lucide-react";
 const EditProfile = () => {
   const user = useSelector((state) => state.user); // Assuming user slice has current user data
   const dispatch = useDispatch();
@@ -86,10 +87,15 @@ const EditProfile = () => {
 
   useEffect(() => {
     setDisable(checkButtonDisabled());
-  }, [formData,  user , selectedFile]);
+  }, [formData, user, selectedFile]);
 
   return (
-    <div className="bg-black text-white overflow-x-hidden flex-1 overflow-y-scroll h-screen w-full flex items-center justify-center">
+    <div className="bg-black relative text-white overflow-x-hidden flex-1 overflow-y-scroll h-screen w-full flex items-center justify-center">
+      <ArrowLeft
+        className="absolute top-3 right-3 cursor-pointer"
+        onClick={() => navigate(-1)}
+      />
+
       <div className="w-full max-w-md px-4 mt-24 py-24 overflow-y-auto">
         <h1 className="text-2xl font-semibold mb-6 text-center">
           Edit Profile

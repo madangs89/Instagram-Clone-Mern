@@ -8,7 +8,6 @@ import { deleteCloudinaryImage } from "../utils/cloudinary.js";
 export const createReel = async (req, res) => {
   try {
     const { caption } = req.body;
-    console.log("Gettging a new Request");
     if (!caption) {
       return res
         .status(400)
