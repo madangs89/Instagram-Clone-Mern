@@ -409,7 +409,6 @@ export const markAllMessageAsRead = async (req, res) => {
         .status(404)
         .json({ message: "Conversation not found", success: false });
     }
-
     // Reset unread count for this user
     const unreadIndex = conversation.unreadCount.findIndex(
       (u) => u.userId === userId
@@ -444,10 +443,13 @@ export const markAllMessageAsRead = async (req, res) => {
 
     const receivers = conversation.members.filter((member) => member != userId);
     const modified = result.modifiedCount;
-
     for (const receiverId of receivers) {
       await redis.publish(
         "readTheConversation",
+        JSON.stringify({ receiverId: userId, conversationId, modified })
+      );
+      await redis.publish(
+        "markAsRead",
         JSON.stringify({ receiverId, conversationId, modified })
       );
     }
@@ -459,7 +461,6 @@ export const markAllMessageAsRead = async (req, res) => {
     return res.status(500).json({ message: "Server error", success: false });
   }
 };
-
 export const getUnreadChatsCount = async (req, res) => {
   try {
     const userId = req.user._id;

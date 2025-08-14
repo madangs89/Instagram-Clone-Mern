@@ -64,6 +64,9 @@ const userSlice = createSlice({
         state.userLikes.push(action.payload);
       }
     },
+    addLikes: (state, action) => {
+      state.userLikes.push(action.payload);
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -224,6 +227,6 @@ const userSlice = createSlice({
   },
 });
 
-export const { setMuted, addAndRemoveFollower, addAndRemoveLike } =
+export const { setMuted, addAndRemoveFollower, addAndRemoveLike, addLikes } =
   userSlice.actions;
 export const userReducer = userSlice.reducer;

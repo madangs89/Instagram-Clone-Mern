@@ -167,19 +167,18 @@ const MessageChat = ({ setIsChatOpen }) => {
   useEffect(() => {
     if (!socket) return;
     socket.on("message", (data) => {
-      console.log("newMessage came", data);
       dispatch(
         handlerForNewMessage({ conversationData: data, userId: user._id })
       );
     });
     socket.on("markAsRead", (data) => {
       dispatch(handleMarkAsRead(data));
-      console.log("markAsRead", data);
+      dispatch(handleMarkAsRead(data));
     });
-    // socket.on("markAsRead", (data) => {
-    //   dispatch(handleMarkAsRead(data));
-    //   console.log("markAsRead", data);
-    // });
+    socket.on("readTheConversation", (data) => {
+      console.log("readTheConversation", data);
+      dispatch(handleMarkAsRead(data));
+    });
   }, [socket]);
 
   const handleSubmitMessage = async () => {
@@ -536,7 +535,10 @@ const MessageChat = ({ setIsChatOpen }) => {
                   msg.media.length > 0 &&
                   msg.media.map((media, index) => {
                     return (
-                      <div className="flex relative items-center justify-center gap-5">
+                      <div
+                        key={index}
+                        className="flex relative items-center justify-center gap-5"
+                      >
                         {!msg.text &&
                           msg?.sender == user?._id &&
                           hoverShow?.id == (msg?.tempId || msg?._id) && (
@@ -793,5 +795,4 @@ const MessageChat = ({ setIsChatOpen }) => {
     </div>
   );
 };
-
 export default MessageChat;

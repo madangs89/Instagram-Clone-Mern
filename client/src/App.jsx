@@ -25,11 +25,13 @@ import Searchpage from "./pages/Searchpage";
 import ExploreDetailsPage from "./pages/ExploreDetailsPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import { clearSocket, setSocket } from "./Redux/Slice/SocketSlice";
+import { handleIncreaseMessageCount } from "./Redux/Slice/MessageSlice";
 
 const App = () => {
   const auth = useSelector((state) => state.auth.isAuthenticated);
   const dispatch = useDispatch();
   const data = useSelector((state) => state.auth);
+  const socket = useSelector((state) => state.socket.socket);
 
   useEffect(() => {
     (async () => {
@@ -60,6 +62,14 @@ const App = () => {
       };
     }
   }, [auth, data._id]);
+
+  useEffect(() => {
+    if (!socket) return;
+    socket.on("message", (data) => {
+      console.log("new", data);
+      dispatch(handleIncreaseMessageCount(data));
+    });
+  }, [socket]);
 
   return (
     <Router>

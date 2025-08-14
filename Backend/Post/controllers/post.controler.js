@@ -112,14 +112,18 @@ export const getAllPostByIdForProfileVisit = async (req, res) => {
     const postsWithLikeCounts = await Promise.all(
       posts.map(async (post) => {
         const likeCount = await Likes.countDocuments({ targetId: post._id });
+        const isPostLiked = await Likes.findOne({
+          userId: req.user._id,
+          targetId: post._id,
+        });
         return {
           ...post._doc,
           likeCount,
           contentType: "post",
+          isLiked: isPostLiked ? true : false,
         };
       })
     );
-
     return res.status(200).json({
       success: true,
       posts: postsWithLikeCounts,
@@ -176,6 +180,11 @@ export const getPostById = async (req, res) => {
     const { postId } = req.params;
     const post = await Post.findById(postId).populate("userId");
     let totalLikes = await Likes.countDocuments({ targetId: postId });
+    const isPostLiked = await Likes.findOne({
+      userId: req.user._id,
+      targetId: postId,
+    });
+
     if (!totalLikes) {
       totalLikes = 0;
     }
@@ -183,6 +192,7 @@ export const getPostById = async (req, res) => {
       ...post._doc,
       contentType: "post",
       likeCount: totalLikes,
+      isLiked: isPostLiked ? true : false,
     };
     return res.status(200).json({ success: true, post: newData });
   } catch (error) {

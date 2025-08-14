@@ -37,11 +37,8 @@ const MessageInbox = ({ allInbox }) => {
           userId: user._id,
         });
       }
-      const markAsReadData = await dispatch(
-        markAllChatsAsRead(chat.conversationId)
-      );
-      console.log(markAsReadData , "markAsReadData data");
-      
+      await dispatch(markAllChatsAsRead(chat.conversationId));
+
       dispatch(
         handleMakeTheUnreadCountToZero({
           conversationId: chat.conversationId,
@@ -76,9 +73,11 @@ const MessageInbox = ({ allInbox }) => {
       }
     }
   };
+
   useEffect(() => {
     if (!socket) return;
     socket.on("message", (data) => {
+
       dispatch(
         handlerForNewMessage({ conversationData: data, userId: user._id })
       );
@@ -86,6 +85,11 @@ const MessageInbox = ({ allInbox }) => {
     socket.on("markAsRead", (data) => {
       dispatch(handleMarkAsRead(data));
       console.log("markAsRead", data);
+    });
+
+    socket.on("readTheConversation", (data) => {
+      console.log("readTheConversation", data);
+      dispatch(handleMarkAsRead(data));
     });
     return () => {
       socket.emit("openedConversation", {

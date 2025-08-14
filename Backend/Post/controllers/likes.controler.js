@@ -23,7 +23,7 @@ export const likePost = async (req, res) => {
 
     if (targetType == "post" || targetType == "Post") {
       const Data = await Post.findById(targetId);
-      if (Data) {
+      if (Data && Data.userId != req.user._id && !existing) {
         const notification = await Notification.create({
           receiver: Data.userId,
           sender: req.user._id,
@@ -36,7 +36,7 @@ export const likePost = async (req, res) => {
     }
     if (targetType == "reel" || targetType == "Reel") {
       const Data = await Reel.findById(targetId);
-      if (Data) {
+      if (Data && Data.userId != req.user._id && !existing) {
         const notification = await Notification.create({
           receiver: Data.userId,
           sender: req.user._id,

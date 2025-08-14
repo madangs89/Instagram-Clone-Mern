@@ -22,6 +22,7 @@ const MobileNav = () => {
   };
   const userData = useSelector((state) => state.user);
   const location = useLocation();
+  const meessage = useSelector((state) => state.message);
 
   const isToShowNav = location.pathname.includes("message");
 
@@ -59,21 +60,21 @@ const MobileNav = () => {
   return (
     <>
       <div className="flex lg:hidden fixed bottom-0 justify-between items-center bg-black text-white p-3 px-10 w-full z-50">
-        {/* {Object.entries(iconMap).map(([key, Icon]) => (
-          <div key={key} className="flex flex-col items-center">
-            <Icon className="h-7 w-7" />
-          </div>
-        ))} */}
         {instagramLinks.map((link) => {
           const Icon = iconMap[link.icon];
           return (
             <div
               key={link.name}
-              className="flex cursor-pointer flex-col items-center"
+              className="flex relative cursor-pointer flex-col items-center"
             >
               <Link to={link.href}>
                 <Icon className="h-7 w-7" />
               </Link>
+              {link.href == "/message" && meessage.unreadMessageCount > 0 && (
+                <div className="absolute text-white top-2 left-4 w-4 h-4 flex items-center text-[12px] justify-center  bg-red-500 rounded-full">
+                  {meessage.unreadMessageCount}
+                </div>
+              )}
             </div>
           );
         })}

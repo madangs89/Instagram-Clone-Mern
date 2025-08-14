@@ -9,7 +9,6 @@ export const addComment = async (req, res) => {
   try {
     const { mediaId, comment, contentType } = req.body;
     const userId = req.user._id;
-
     const user = await Userdetails.findById(userId);
     if (!user) {
       await Userdetails.create({
@@ -32,25 +31,29 @@ export const addComment = async (req, res) => {
     }
     if (contentType == "reel" || contentType == "Reel") {
       const reelData = await Reel.findById(mediaId);
-      const notification = await Notification.create({
-        receiver: reelData.userId,
-        sender: req.user._id,
-        type: "comment",
-        reel: mediaId,
-        for: "reel",
-      });
-      redis.publish("newNotification", JSON.stringify(notification));
+      if (reelData && reelData.userId != req.user._id) {
+        const notification = await Notification.create({
+          receiver: reelData.userId,
+          sender: req.user._id,
+          type: "comment",
+          reel: mediaId,
+          for: "reel",
+        });
+        redis.publish("newNotification", JSON.stringify(notification));
+      }
     }
     if (contentType == "post" || contentType == "Post") {
       const postData = await Post.findById(mediaId);
-      const notification = await Notification.create({
-        receiver: postData.userId,
-        sender: req.user._id,
-        type: "comment",
-        post: mediaId,
-        for: "post",
-      });
-      redis.publish("newNotification", JSON.stringify(notification));
+      if (postData && postData.userId != req.user._id) {
+        const notification = await Notification.create({
+          receiver: postData.userId,
+          sender: req.user._id,
+          type: "comment",
+          post: mediaId,
+          for: "post",
+        });
+        redis.publish("newNotification", JSON.stringify(notification));
+      }
     }
     const commentWithUser = await Comment.findById(newComment._id).populate(
       "userId"

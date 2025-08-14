@@ -14,8 +14,8 @@ const postRouter = express.Router();
 
 postRouter.post("/", authMiddleware, upload.array("media"), createPost);
 postRouter.get("/", authMiddleware, getAllUnlikedPosts);
-postRouter.get("/get/post/:postId", getPostById);
-postRouter.get("/posts/:id", getAllPostByIdForProfileVisit);
+postRouter.get("/get/post/:postId", authMiddleware, getPostById);
+postRouter.get("/posts/:id", authMiddleware, getAllPostByIdForProfileVisit);
 postRouter.patch("/:postId", authMiddleware, updatePost);
 postRouter.delete("/:postId", authMiddleware, deletePost);
 

@@ -231,7 +231,7 @@ const messageSlice = createSlice({
       }
     },
     handleMarkAsRead: (state, action) => {
-      const { conversationId } = action.payload;
+      const { conversationId, modified } = action.payload;
 
       if (state.selectedIndex?.conversationId == conversationId) {
         state.currentUserMessage.forEach((item) => {
@@ -240,10 +240,17 @@ const messageSlice = createSlice({
           });
         });
       }
-      state.unreadMessageCount -= action.payload.modified;
+      state.unreadMessageCount -= modified;
     },
     handleClearSelectedIndex: (state) => {
       state.selectedIndex = {};
+    },
+    handleIncreaseMessageCount: (state, action) => {
+      if (
+        state.selectedIndex?.conversationId != action.payload.conversationId
+      ) {
+        state.unreadMessageCount += 1;
+      }
     },
   },
   extraReducers: (builder) => {
@@ -378,5 +385,6 @@ export const {
   handleMakeTheUnreadCountToZero,
   handleMarkAsRead,
   updateUnReadMessageCount,
+  handleIncreaseMessageCount,
 } = messageSlice.actions;
 export const messageReducer = messageSlice.reducer;

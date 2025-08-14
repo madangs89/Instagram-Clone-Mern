@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { getReelById, getPostById } from "../Redux/Services/mediaFeedThunk";
 import { getAllComments, addComment } from "../Redux/Services/mediaUploadThunk";
-import { addAndRemoveLike } from "../Redux/Slice/UserSlice";
+import { addAndRemoveLike, addLikes } from "../Redux/Slice/UserSlice";
 import { like } from "../Redux/Services/UserThunk";
 import CommentShowingDiv from "../components/Deloper/CommentShowingDiv";
 import FollowUnFolowButton from "../components/Deloper/FollowUnFolowButton";
@@ -24,7 +24,6 @@ const ExploreDetailsPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const data = useSelector((state) => state.user);
-
   const [selectedData, setSelectedData] = useState({});
   const [comments, setComments] = useState([]);
   const [comment, setComment] = useState("");
@@ -58,6 +57,9 @@ const ExploreDetailsPage = () => {
       dispatch(getAllComments(selectedData._id)).then((res) =>
         setComments(res.payload.comments || [])
       );
+    }
+    if (selectedData?.isLiked) {
+      dispatch(addLikes(selectedData._id));
     }
   }, [selectedData, dispatch]);
 
@@ -145,10 +147,12 @@ const ExploreDetailsPage = () => {
     }
   };
 
+  console.log(selectedData, "selectedData");
+
   /** ------------------ MOBILE LAYOUT ------------------ **/
   if (isMobile) {
     return (
-      <div className="fixed inset-0 z-50 bg-black text-white flex flex-col">
+      <div className="fixed inset-0 z-50 bg-black overflow-y-auto  text-white flex flex-col">
         {!showAllComments ? (
           <>
             {/* Header */}
@@ -167,6 +171,15 @@ const ExploreDetailsPage = () => {
                 <span className="font-semibold text-white">
                   {selectedData?.userId?.userName}
                 </span>
+                {data?._id == selectedData?.userId?._id ? (
+                  <span className="text-xs text-white/60">You</span>
+                ) : (
+                  <FollowUnFolowButton
+                    id={selectedData?.userId?._id}
+                    border="border-none"
+                    clr="text-blue-500"
+                  />
+                )}
               </div>
               <X className="cursor-pointer" onClick={() => navigate(-1)} />
             </div>
@@ -303,11 +316,15 @@ const ExploreDetailsPage = () => {
                   className="font-semibold text-white cursor-pointer text-sm flex items-center gap-2"
                 >
                   {selectedData?.userId?.userName}
-                  <FollowUnFolowButton
-                    id={selectedData?.userId?._id}
-                    border="border-none"
-                    clr="text-blue-500"
-                  />
+                  {data?._id == selectedData?.userId?._id ? (
+                    <span className="text-xs text-white/60">You</span>
+                  ) : (
+                    <FollowUnFolowButton
+                      id={selectedData?.userId?._id}
+                      border="border-none"
+                      clr="text-blue-500"
+                    />
+                  )}
                 </div>
                 <div className="text-xs text-white/60">
                   {selectedData?.caption || ""}

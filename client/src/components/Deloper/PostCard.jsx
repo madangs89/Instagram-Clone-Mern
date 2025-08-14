@@ -201,7 +201,7 @@ export default function PostCard({ post, isActive }) {
             className="w-7 h-7 cursor-pointer"
           />
         </div>
-        <Bookmark className="w-7 h-7 cursor-pointer" />
+        {/* <Bookmark className="w-7 h-7 cursor-pointer" /> */}
       </div>
 
       {/* Caption */}

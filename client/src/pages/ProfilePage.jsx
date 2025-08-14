@@ -281,16 +281,6 @@ const ProfilePage = () => {
         >
           Reels
         </button>
-        <button
-          onClick={() => setActiveTab("saved")}
-          className={`py-3 font-medium cursor-pointer ${
-            activeTab === "saved"
-              ? "border-t-2 border-white  text-white"
-              : "text-gray-500"
-          }`}
-        >
-          Saved
-        </button>
       </div>
       {/* Post Grid */}
       {activeTab === "posts" && (
@@ -314,17 +304,37 @@ const ProfilePage = () => {
                   />
                 </div>
               ) : (
-                <VideoPost
-                  onClick={() =>
-                    navigate(
-                      `/explore/${post.contentType.toLowerCase()}/${post._id}`
-                    )
-                  }
-                  aspectRatio="aspect-[3/4]"
+                // <VideoPost
+                //   onClick={() =>
+                //     navigate(
+                //       `/explore/${post.contentType.toLowerCase()}/${post._id}`
+                //     )
+                //   }
+                //   aspectRatio="aspect-[3/4]"
+                //   key={index}
+                //   src={post?.media[0]?.url}
+                //   isActive={"false"}
+                // />
+                <div
                   key={index}
-                  src={post?.media[0]?.url}
-                  isActive={"false"}
-                />
+                  className="cursor-pointer relative bg-red-500 w-full h-fit"
+                >
+                  <VideoPost
+                    src={post?.media[0]?.url}
+                    className="cursor-pointer"
+                    isActive={"false"}
+                  />
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+
+                      navigate(
+                        `/explore/${post.contentType.toLowerCase()}/${post._id}`
+                      );
+                    }}
+                    className="absolute bottom-0 w-full h-full bg-transparent left-0"
+                  ></div>
+                </div>
               );
             })
           ) : (
@@ -371,13 +381,9 @@ const ProfilePage = () => {
         </div>
       )}
 
-      {activeTab === "saved" && (
-        <div className="flex justify-center min-h-[500px] items-center h-40 text-gray-500 text-sm mt-6">
-          No saved posts yet.
-        </div>
+      {show && (
+        <FollowerFollowingShowing onClose={onClose} F={F} id={params.id} />
       )}
-
-      {show && <FollowerFollowingShowing onClose={onClose} F={F} id={params.id} />}
     </div>
   );
 };

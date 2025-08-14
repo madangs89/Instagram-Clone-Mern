@@ -17,8 +17,12 @@ reelRouter.post("/", authMiddleware, upload.single("reel"), createReel);
 reelRouter.post("/view/create", authMiddleware, createView);
 reelRouter.get("/", authMiddleware, gettingAllUnSeenReels);
 reelRouter.get("/all", getAllReel);
-reelRouter.get("/get/reel/:reelId", getReelById);
-reelRouter.get("/reels/:userId", getAllReelsByIdForProfileVisit);
+reelRouter.get("/get/reel/:reelId", authMiddleware, getReelById);
+reelRouter.get(
+  "/reels/:userId",
+  authMiddleware,
+  getAllReelsByIdForProfileVisit
+);
 reelRouter.patch("/:reelId", authMiddleware, updateReel);
 reelRouter.delete("/:reelId", authMiddleware, deleteReel);
 export default reelRouter;

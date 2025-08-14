@@ -66,7 +66,7 @@ await customSubClient.subscribe("readTheConversation", async (data) => {
 
   if (isUserOnline) {
     const { socketId } = JSON.parse(isUserOnline);
-    console.log("marksRead", receiverId, conversationId, modified);
+    console.log("readTheConversation", receiverId, conversationId, modified);
 
     io.to(socketId).emit("readTheConversation", {
       conversationId,
@@ -75,7 +75,6 @@ await customSubClient.subscribe("readTheConversation", async (data) => {
     });
   }
 });
-
 io.on("connection", (socket) => {
   const userId = socket.handshake.query.userId;
   console.log("a user connected", userId, socket.id);

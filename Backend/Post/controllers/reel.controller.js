@@ -106,10 +106,15 @@ export const getAllReelsByIdForProfileVisit = async (req, res) => {
     const reelsWithLikeCounts = await Promise.all(
       reels.map(async (reel) => {
         const likeCount = await Likes.countDocuments({ targetId: reel._id });
+        const isReelLiked = await Likes.findOne({
+          userId: req.user._id,
+          targetId: reel._id,
+        });
         return {
           ...reel._doc,
           contentType: "reel",
           likeCount,
+          isLiked: isReelLiked ? true : false,
         };
       })
     );
@@ -176,6 +181,10 @@ export const getReelById = async (req, res) => {
     const { reelId } = req.params;
     const reel = await Reel.findById(reelId).populate("userId");
     let totalLikes = await Likes.countDocuments({ targetId: reel });
+    const isReelLiked = await Likes.findOne({
+      userId: req.user._id,
+      targetId: reel._id,
+    });
     if (!totalLikes) {
       totalLikes = 0;
     }
@@ -183,6 +192,7 @@ export const getReelById = async (req, res) => {
       ...reel._doc,
       contentType: "reel",
       likeCount: totalLikes,
+      isLiked: isReelLiked ? true : false,
     };
     return res.status(200).json({ success: true, reel: newData });
   } catch (error) {
