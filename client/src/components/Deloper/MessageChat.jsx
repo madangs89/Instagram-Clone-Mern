@@ -26,7 +26,9 @@ import Loader from "./Loader";
 import {
   clearSelectedCurrentUserMessage,
   handleClearSelectedIndex,
+  handleIncreaseMessageCount,
   handleMarkAsRead,
+  handleMessageAsDelivered,
   handlerForNewMessage,
   updateCurrentUserMessage,
   updateMessageReactionEmoji,
@@ -170,6 +172,7 @@ const MessageChat = ({ setIsChatOpen }) => {
       dispatch(
         handlerForNewMessage({ conversationData: data, userId: user._id })
       );
+    
     });
     socket.on("markAsRead", (data) => {
       dispatch(handleMarkAsRead(data));
@@ -179,6 +182,17 @@ const MessageChat = ({ setIsChatOpen }) => {
       console.log("readTheConversation", data);
       dispatch(handleMarkAsRead(data));
     });
+    socket.on("userComesOnline", (data) => {
+      console.log("userComesOnline", data);
+      dispatch(handleMessageAsDelivered(data));
+    });
+
+    return () => {
+      socket.off("message");
+      socket.off("markAsRead");
+      socket.off("readTheConversation");
+      socket.off("userComesOnline");
+    };
   }, [socket]);
 
   const handleSubmitMessage = async () => {
@@ -371,6 +385,18 @@ const MessageChat = ({ setIsChatOpen }) => {
     );
   }
 
+  const handleTimer = (msg, index) => {
+    const dateA = new Date(msg?.createdAt);
+    const dateB = new Date(
+      messageSlice.currentUserMessage[index - 1]?.createdAt
+    );
+    const diffMs = dateA - dateB;
+    const diffMins = Math.round(diffMs / 1000 / 60);
+    console.log(diffMins, "diffMins");
+
+    return diffMins > 5 ? true : false;
+  };
+
   return (
     <div className="flex flex-col h-[100dvh] text-white w-full bg-black">
       {/* Header */}
@@ -539,6 +565,15 @@ const MessageChat = ({ setIsChatOpen }) => {
                         key={index}
                         className="flex relative items-center justify-center gap-5"
                       >
+                        {msg?.sender != user._id && (
+                          <div className="w-7 h-7 absolute bottom-0 z-10 left-0  rounded-full">
+                            <img
+                              src={selectedIndex.avatar}
+                              className="w-full h-full object-cover rounded-full"
+                              alt=""
+                            />
+                          </div>
+                        )}
                         {!msg.text &&
                           msg?.sender == user?._id &&
                           hoverShow?.id == (msg?.tempId || msg?._id) && (
@@ -652,24 +687,39 @@ const MessageChat = ({ setIsChatOpen }) => {
                           </button>
                         </div>
                       )}
-                    <div
-                      className={`md:max-w-96 max-w-64 relative flex items-end justify-center gap-2 px-4 py-2 rounded-lg text-sm break-words ${
-                        msg?.sender != user._id
-                          ? "bg-blue-500 text-white"
-                          : "bg-[#262626] text-white"
-                      }`}
-                    >
-                      {msg.text}
-                      {msg?.sender == user._id && checkTheStatus(msg.status)}
-                      {msg.reactions && msg.reactions.length != 0 && (
-                        <div
-                          onClick={() => handleMessageShowReactions(msg._id)}
-                          className="absolute -bottom-2 cursor-pointer bg-gray-500 text-[10px] rounded-full px-2 py-0.5 right-0"
-                        >
-                          {msg.reactions.map((item) => item.emoji)}
+
+                    <div className="flex items-center justify-center gap-4">
+                      {msg?.sender != user._id && handleTimer(msg, index) ? (
+                        <div className="w-7 h-7 rounded-full">
+                          <img
+                            src={selectedIndex.avatar}
+                            className="w-full h-full object-cover rounded-full"
+                            alt=""
+                          />
                         </div>
+                      ) : (
+                        <h1 className="w-7 h-7 "></h1>
                       )}
+                      <div
+                        className={`md:max-w-96 max-w-64 relative flex items-end justify-center gap-2 px-4 py-2 rounded-lg text-sm break-words ${
+                          msg?.sender != user._id
+                            ? "bg-blue-500 text-white"
+                            : "bg-[#262626] text-white"
+                        }`}
+                      >
+                        {msg.text}
+                        {msg?.sender == user._id && checkTheStatus(msg.status)}
+                        {msg.reactions && msg.reactions.length != 0 && (
+                          <div
+                            onClick={() => handleMessageShowReactions(msg._id)}
+                            className="absolute -bottom-2 cursor-pointer bg-gray-500 text-[10px] rounded-full px-2 py-0.5 right-0"
+                          >
+                            {msg.reactions.map((item) => item.emoji)}
+                          </div>
+                        )}
+                      </div>
                     </div>
+
                     {msg?.sender != user?._id &&
                       hoverShow?.id == (msg?.tempId || msg?._id) && (
                         <div className={`hidden md:flex text-white gap-2 `}>

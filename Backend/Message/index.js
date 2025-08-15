@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import { messageRouter } from "./routes/message.routes.js";
 import { uploadRouter } from "./routes/upload.routes.js";
 import { createClient } from "redis";
+import { handleBulkRead } from "./controler/message.controler.js";
 dotenv.config({ path: "./.env" });
 
 const app = express();
@@ -25,7 +26,24 @@ export const redis = createClient({
   url: "rediss://default:AVgAAAIjcDEwZWNhMmEzNDViMjE0M2I4OGU5NjUzNzg3MGRmM2UyNHAxMA@crucial-boar-22528.upstash.io:6379",
 });
 
+redis.on("error", (err) => console.log("Redis Client Error", err));
+const subClient = redis.duplicate();
+export const pubClient = redis.duplicate();
+
 await redis.connect();
+await subClient.connect();
+await pubClient.connect();
+
+await subClient.subscribe("userOnline", async (data) => {
+  console.log(data, "data when user comes online");
+  const { userId } = JSON.parse(data);
+
+  const result = await handleBulkRead(userId);
+  console.log(result, "result when user comes online");
+
+  pubClient.publish("userComesOnline", JSON.stringify(result));
+});
+
 app.get("/", (req, res) => {
   res.send("Hello World");
 });

@@ -58,7 +58,6 @@ const App = () => {
       dispatch(setSocket(socket));
       return () => {
         socket.emit("removeUser", { userId: data._id });
-        // dispatch(clearSocket());
       };
     }
   }, [auth, data._id]);
@@ -66,9 +65,12 @@ const App = () => {
   useEffect(() => {
     if (!socket) return;
     socket.on("message", (data) => {
-      console.log("new", data);
       dispatch(handleIncreaseMessageCount(data));
     });
+
+    return () => {
+      socket.emit("removeUser", { userId: data._id });
+    };
   }, [socket]);
 
   return (

@@ -252,6 +252,22 @@ const messageSlice = createSlice({
         state.unreadMessageCount += 1;
       }
     },
+
+    handleMessageAsDelivered: (state, action) => {
+      const data = action.payload;
+      if (!Array.isArray(data) && data.length == 0) {
+        return;
+      }
+      if (data?.includes(state.selectedIndex?.conversationId)) {
+        state.currentUserMessage.forEach((item) => {
+          if (data?.includes(item.conversationId)) {
+            item.status.forEach((status) => {
+              status.state = "delivered";
+            });
+          }
+        });
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -386,5 +402,6 @@ export const {
   handleMarkAsRead,
   updateUnReadMessageCount,
   handleIncreaseMessageCount,
+  handleMessageAsDelivered,
 } = messageSlice.actions;
 export const messageReducer = messageSlice.reducer;

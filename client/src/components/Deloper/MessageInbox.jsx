@@ -76,16 +76,6 @@ const MessageInbox = ({ allInbox }) => {
 
   useEffect(() => {
     if (!socket) return;
-    socket.on("message", (data) => {
-
-      dispatch(
-        handlerForNewMessage({ conversationData: data, userId: user._id })
-      );
-    });
-    socket.on("markAsRead", (data) => {
-      dispatch(handleMarkAsRead(data));
-      console.log("markAsRead", data);
-    });
 
     socket.on("readTheConversation", (data) => {
       console.log("readTheConversation", data);
@@ -96,6 +86,8 @@ const MessageInbox = ({ allInbox }) => {
         userId: user._id,
         conversationId: "",
       });
+
+      socket.off("readTheConversation");
     };
   }, [socket]);
 

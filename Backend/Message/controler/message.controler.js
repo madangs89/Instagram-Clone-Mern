@@ -2,7 +2,6 @@ import { redis } from "../index.js";
 import Conversation from "../models/Conversation.model.js";
 import Message from "../models/Message.js";
 import { uploadToCloudinarySingle } from "../utils/cloudinary.js";
-
 import axios from "axios";
 
 const api = axios.create({
@@ -491,6 +490,63 @@ export const getUnreadChatsCount = async (req, res) => {
       success: false,
       error: error.message,
     });
+  }
+};
+
+export const handleBulkRead = async (userId) => {
+  try {
+    const messages = await Message.find({
+      "status.userId": userId,
+      "status.state": "sent",
+    }).select("conversationId sender");
+    if (messages.length === 0) {
+      return [];
+    }
+
+    // Bulk update messages
+    await Message.updateMany(
+      { _id: { $in: messages.map((msg) => msg._id) } },
+      {
+        $set: {
+          "status.$[elem].state": "delivered",
+          "status.$[elem].receivedAt": new Date(),
+        },
+      },
+      {
+        arrayFilters: [
+          {
+            "elem.userId": userId,
+            "elem.state": "sent",
+          },
+        ],
+      }
+    );
+
+    // Build mapping of sender -> unique conversationIds
+    const senderMap = new Map();
+
+    for (const msg of messages) {
+      const sender = msg.sender;
+      const convoId = msg.conversationId.toString();
+
+      if (!senderMap.has(sender)) {
+        senderMap.set(sender, new Set());
+      }
+
+      senderMap.get(sender).add(convoId);
+    }
+
+    // Convert to desired array format
+    const result = Array.from(senderMap.entries()).map(
+      ([sender, convoSet]) => ({
+        sender,
+        conversationIds: Array.from(convoSet),
+      })
+    );
+    return result;
+  } catch (error) {
+    console.error("Error in handleBulkRead:", error);
+    return [];
   }
 };
 

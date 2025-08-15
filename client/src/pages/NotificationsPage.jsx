@@ -155,6 +155,11 @@ export default function NotificationsPage() {
             </div>
           ))}
       </div>
+      {notifications.length == 0 && (
+        <div className="flex items-center justify-center h-full">
+          <p className="text-lg font-normal">No notifications found</p>
+        </div>
+      )}
     </div>
   );
 }
