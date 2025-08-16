@@ -33,6 +33,7 @@ export const pubClient = redis.duplicate();
 await redis.connect();
 await subClient.connect();
 await pubClient.connect();
+redis.on("error", (err) => console.log("Redis Client Error", err));
 
 await subClient.subscribe("userOnline", async (data) => {
   console.log(data, "data when user comes online");

@@ -19,6 +19,8 @@ await subClient.connect();
 
 io.adapter(createAdapter(pubClient, subClient));
 
+pubClient.on("error", (err) => console.log("Redis Client Error", err));
+
 // 🔹 Create a **separate** subscriber for custom events
 // Publisher client
 const customPubClient = pubClient.duplicate();

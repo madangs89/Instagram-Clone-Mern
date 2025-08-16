@@ -145,12 +145,14 @@ const MessageChat = ({ setIsChatOpen }) => {
   useEffect(() => {
     setPage(1);
     dispatch(clearSelectedCurrentUserMessage());
-    (async () => {
-      const data = {
-        id: id,
-      };
-      await dispatch(getCurrentUserMessage(data));
-    })();
+    if (id != "myAi") {
+      (async () => {
+        const data = {
+          id: id,
+        };
+        await dispatch(getCurrentUserMessage(data));
+      })();
+    }
   }, [id]);
 
   const checkTheStatus = (status) => {
@@ -172,7 +174,6 @@ const MessageChat = ({ setIsChatOpen }) => {
       dispatch(
         handlerForNewMessage({ conversationData: data, userId: user._id })
       );
-    
     });
     socket.on("markAsRead", (data) => {
       dispatch(handleMarkAsRead(data));
@@ -196,6 +197,9 @@ const MessageChat = ({ setIsChatOpen }) => {
   }, [socket]);
 
   const handleSubmitMessage = async () => {
+    if (id == "myAi") {
+      return;
+    }
     try {
       if (!input && !file) return;
       let media = [];
@@ -746,7 +750,9 @@ const MessageChat = ({ setIsChatOpen }) => {
             );
           })
         ) : (
-          <div>No messages yet</div>
+          <div className="text-center">
+            {id == "myAi" ? "I am Your AI" : "No messages yet"}
+          </div>
         )}
       </div>
       {/* Showing Emoji For KeyBoard */}

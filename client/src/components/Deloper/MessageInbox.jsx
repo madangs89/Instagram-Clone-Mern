@@ -123,6 +123,24 @@ const MessageInbox = ({ allInbox }) => {
       </div>
       <h2 className="text-md font-bold px-4 mt-3">Messages</h2>
       <div className=" mb-8  h-[80vh] custom-scrollbar2 overflow-y-scroll">
+        {/* this is for ai */}
+        <div
+          key={1234124}
+          onClick={() => navigate(`/message/${"myAi"}`)}
+          className="flex items-center justify-between px-4 py-3 cursor-pointer transition-[background] duration-200 ease-in hover:bg-[#262626]"
+        >
+          <div className="flex gap-2 items-center justify-center">
+            <img
+              className="w-10 h-10 rounded-full  object-cover"
+              src={"https://api.dicebear.com/9.x/bottts/svg"}
+              alt=""
+            />
+            <div className="flex flex-col">
+              <div className="font-medium">{"My Ai"}</div>
+            </div>
+          </div>
+        </div>
+
         {allInbox &&
           allInbox.length > 0 &&
           allInbox.map((chat, index) => (
@@ -156,6 +174,7 @@ const MessageInbox = ({ allInbox }) => {
             </div>
           ))}
       </div>
+      //{" "}
     </div>
   );
 };

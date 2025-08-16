@@ -27,6 +27,9 @@ export const redis = createClient({
 });
 await redis.connect();
 
+redis.on("error", (err) => console.log("Redis Client Error", err));
+
+
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
