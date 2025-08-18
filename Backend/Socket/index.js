@@ -21,15 +21,14 @@ io.adapter(createAdapter(pubClient, subClient));
 
 pubClient.on("error", (err) => console.log("Redis Client Error", err));
 
-// 🔹 Create a **separate** subscriber for custom events
-// Publisher client
+
 const customPubClient = pubClient.duplicate();
 await customPubClient.connect();
 
-// Subscriber client
+
 const customSubClient = pubClient.duplicate();
 await customSubClient.connect();
-// Handle newMessage from other microservices
+
 await customSubClient.subscribe("newMessage", async (data) => {
   const { receiverId, message } = JSON.parse(data);
   const isUserOnline = await pubClient.hGet("onlineUsers", receiverId);
@@ -90,7 +89,7 @@ await customSubClient.subscribe("userComesOnline", async (data) => {
       if (isUserOnline) {
         const { socketId } = JSON.parse(isUserOnline);
         console.log("marking the message as delivered", socketId);
-        
+
         io.to(socketId).emit("userComesOnline", conversationId);
       }
     }
