@@ -61,7 +61,6 @@ const App = () => {
       };
     }
   }, [auth, data._id]);
-
   useEffect(() => {
     if (!socket) return;
     socket.on("message", (data) => {
@@ -72,7 +71,6 @@ const App = () => {
       socket.emit("removeUser", { userId: data._id });
     };
   }, [socket]);
-
   return (
     <Router>
       <Routes>

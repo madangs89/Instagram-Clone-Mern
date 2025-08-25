@@ -20,12 +20,8 @@ await subClient.connect();
 io.adapter(createAdapter(pubClient, subClient));
 
 pubClient.on("error", (err) => console.log("Redis Client Error", err));
-
-
 const customPubClient = pubClient.duplicate();
 await customPubClient.connect();
-
-
 const customSubClient = pubClient.duplicate();
 await customSubClient.connect();
 
