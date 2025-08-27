@@ -20,6 +20,10 @@ app.use(cookieParser());
 
 app.use("/auth", authRouter);
 
+app.get("/", (req, res) => {
+  res.send("Welcome to the Auth API");
+});
+
 app.listen(process.env.PORT, async () => {
   console.log(`Server is running on  http://localhost:${process.env.PORT}`);
 });
