@@ -67,7 +67,6 @@ export const register = async (req, res) => {
         .status(400)
         .json({ message: "All fields are required", success: false });
     }
-    console.log("cheking the user");
     const { data } = await axios.get(
       `${process.env.USER_BACKEND}/user/${userName}/${email}`
     );
@@ -76,7 +75,6 @@ export const register = async (req, res) => {
         .status(400)
         .json({ message: "User already exists", success: false });
     }
-    console.log("usernot found createing new user");
     const newUser = await axios.post(`${process.env.USER_BACKEND}/user`, {
       userName,
       password,
