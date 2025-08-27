@@ -29,6 +29,17 @@ const messageSlice = createSlice({
         }
       });
     },
+    updateCurrentUserMessageForBotChat: (state, action) => {
+      console.log(action.payload, "action.payload from bot");
+
+      state.currentUserMessage.push(action.payload);
+    },
+    updateCurrentUserMessageForBotChat2: (state, action) => {
+      const lastIndex = state.currentUserMessage.length - 1;
+      if (lastIndex >= 0) {
+        state.currentUserMessage[lastIndex].text += action.payload;
+      }
+    },
     updateUnReadMessageCount: (state, action) => {
       state.unreadMessageCount -= action.payload;
     },
@@ -403,5 +414,7 @@ export const {
   updateUnReadMessageCount,
   handleIncreaseMessageCount,
   handleMessageAsDelivered,
+  updateCurrentUserMessageForBotChat,
+  updateCurrentUserMessageForBotChat2,
 } = messageSlice.actions;
 export const messageReducer = messageSlice.reducer;

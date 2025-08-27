@@ -30,7 +30,10 @@ import {
   handleMarkAsRead,
   handleMessageAsDelivered,
   handlerForNewMessage,
+  setSelectedIndex,
   updateCurrentUserMessage,
+  updateCurrentUserMessageForBotChat,
+  updateCurrentUserMessageForBotChat2,
   updateMessageReactionEmoji,
   updateSeenAndMarkAsReadOrIncreaseTheCount,
   updateUnReadMessageCount,
@@ -60,6 +63,8 @@ const MessageChat = ({ setIsChatOpen }) => {
     emoji: null,
     userId: null,
   });
+  const [history, setHistory] = useState([]);
+  const [botLoading, setBotLoading] = useState(false);
   const isFetchingOlderMessagesRef = useRef(false);
   const [mobileEmoji, setMobileEmoji] = useState(false);
   const [mobileViewData, setMobileViewData] = useState(null);
@@ -144,6 +149,8 @@ const MessageChat = ({ setIsChatOpen }) => {
   }, [messageSlice.currentUserMessage]);
   useEffect(() => {
     setPage(1);
+    console.log("clearing");
+    setHistory([]);
     dispatch(clearSelectedCurrentUserMessage());
     if (id != "myAi") {
       (async () => {
@@ -152,6 +159,27 @@ const MessageChat = ({ setIsChatOpen }) => {
         };
         await dispatch(getCurrentUserMessage(data));
       })();
+    } else {
+      const d = {
+        isGroup: false,
+        userId: "myAi",
+        name: "My AI",
+        userName: "my_ai",
+        avatar: "https://api.dicebear.com/9.x/bottts/svg",
+        conversationId: "myAi",
+      };
+      dispatch(setSelectedIndex(d));
+      setHistory((prev) => [
+        ...prev,
+        {
+          role: "model",
+          parts: [
+            {
+              text: `_id:${user._id} , Name:${user.name} , username:${user.userName} , email:${user.email}`,
+            },
+          ],
+        },
+      ]);
     }
   }, [id]);
 
@@ -198,87 +226,188 @@ const MessageChat = ({ setIsChatOpen }) => {
 
   const handleSubmitMessage = async () => {
     if (id == "myAi") {
-      return;
-    }
-    try {
-      if (!input && !file) return;
-      let media = [];
-      const generatedTempId = Date.now();
-      setTempIds(generatedTempId);
-      if (isFileSelected && file) {
-        media.push({
-          url: URL.createObjectURL(file),
-          publicId: Date.now(),
-          type: file.type.includes("image") ? ["image"] : ["video"],
-        });
-      }
-      const data = {
-        conversationId: id,
-        text: input,
-        tempId: generatedTempId,
-        status: [
-          {
-            userId: !selectedIndex.isGroup && selectedIndex?.userId,
-            state: "sending",
-            receivedAt: "",
-            readAt: "",
-          },
-        ],
-        reactions: [],
+      const d = {
+        isGroup: false,
+        userId: "myAi",
+        name: "My AI",
+        userName: "my_ai",
+        avatar: "https://api.dicebear.com/9.x/bottts/svg",
+        conversationId: "myAi",
       };
-      if (file && isFileSelected) {
-        let newMedia = [];
-        const tempData = { ...data, media, sender: user._id };
-        dispatch(updateCurrentUserMessage(tempData));
-        setIsFileSelected(false);
+      dispatch(setSelectedIndex(d));
+
+      if (input) {
+        const newHistory = [
+          ...history,
+          {
+            role: "user",
+            parts: [{ text: input }],
+          },
+        ];
+        setHistory(newHistory);
+        const message = {
+          _id: new Date().getTime() + Math.random() * 1000,
+          conversationId: "myAi",
+          sender: user._id,
+          isDeleted: false,
+          text: input,
+          reactions: [],
+          status: [
+            {
+              userId: "myAi",
+              state: "read",
+              receivedAt: new Date().toISOString(),
+              readAt: new Date().toISOString(),
+            },
+          ],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        dispatch(updateCurrentUserMessageForBotChat(message));
+
         setInput("");
-        const formData = new FormData();
-        formData.append("media", file);
-        const result = await dispatch(uploadMediatoClodinary(formData));
-        if (result?.payload?.success) {
-          const finalData = result.payload.data;
-          newMedia.push({
-            url: finalData.url,
-            publicId: finalData.publicId,
-            type: finalData.type,
-          });
-          const originalData = {
-            ...data,
-            media: newMedia,
-            sender: user._id,
+
+        try {
+          setBotLoading(true);
+
+          console.log(newHistory, "newHistory");
+
+          const result = await fetch(
+            `${import.meta.env.VITE_USER_URL}/bot/chat`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                // you can add auth headers here if needed
+                // Authorization: `Bearer ${token}`
+              },
+              body: JSON.stringify({
+                message: newHistory,
+              }),
+            }
+          );
+          const reader = result.body.getReader();
+          const decoder = new TextDecoder("utf-8");
+
+          const gptRes = {
+            _id: new Date().getTime() + Math.random() * 1000,
+            conversationId: "myAi",
+            sender: "myAi",
+            isDeleted: false,
+            text: "",
+            reactions: [],
+            status: [
+              {
+                userId: user._id,
+                state: "read",
+                receivedAt: new Date().toISOString(),
+                readAt: new Date().toISOString(),
+              },
+            ],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
           };
-          const answer = await dispatch(createMessage(originalData));
-          if (answer?.payload?.conversationId) {
+          let isCreated = false;
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value, { stream: true });
+            // console.log("Received:", chunk);
+            if (isCreated == false) {
+              gptRes.text = chunk;
+              dispatch(updateCurrentUserMessageForBotChat(gptRes));
+              isCreated = true;
+            } else {
+              dispatch(updateCurrentUserMessageForBotChat2(chunk));
+            }
+          }
+
+          setBotLoading(false);
+        } catch (error) {
+          console.log(error);
+        }
+        return;
+      }
+      try {
+        if (!input && !file && id == "myAi") return;
+        let media = [];
+        const generatedTempId = Date.now();
+        setTempIds(generatedTempId);
+        if (isFileSelected && file) {
+          media.push({
+            url: URL.createObjectURL(file),
+            publicId: Date.now(),
+            type: file.type.includes("image") ? ["image"] : ["video"],
+          });
+        }
+        const data = {
+          conversationId: id,
+          text: input,
+          tempId: generatedTempId,
+          status: [
+            {
+              userId: !selectedIndex.isGroup && selectedIndex?.userId,
+              state: "sending",
+              receivedAt: "",
+              readAt: "",
+            },
+          ],
+          reactions: [],
+        };
+        if (file && isFileSelected) {
+          let newMedia = [];
+          const tempData = { ...data, media, sender: user._id };
+          dispatch(updateCurrentUserMessage(tempData));
+          setIsFileSelected(false);
+          setInput("");
+          const formData = new FormData();
+          formData.append("media", file);
+          const result = await dispatch(uploadMediatoClodinary(formData));
+          if (result?.payload?.success) {
+            const finalData = result.payload.data;
+            newMedia.push({
+              url: finalData.url,
+              publicId: finalData.publicId,
+              type: finalData.type,
+            });
+            const originalData = {
+              ...data,
+              media: newMedia,
+              sender: user._id,
+            };
+            const answer = await dispatch(createMessage(originalData));
+            if (answer?.payload?.conversationId) {
+              console.log(result.payload, "result in message chat");
+              dispatch(
+                updatingStatusForMessages({
+                  newStatus: answer.payload.status[0].state,
+                  tempId: data.tempId,
+                  realMessageId: answer.payload._id,
+                })
+              );
+            }
+            setFile(null);
+          }
+        } else {
+          const tempData = { ...data, media, sender: user._id };
+          dispatch(updateCurrentUserMessage(tempData));
+          const result = await dispatch(createMessage(data));
+          if (result?.payload?.conversationId) {
             console.log(result.payload, "result in message chat");
             dispatch(
               updatingStatusForMessages({
-                newStatus: answer.payload.status[0].state,
+                newStatus: result.payload.status[0].state,
                 tempId: data.tempId,
-                realMessageId: answer.payload._id,
+                realMessageId: result.payload._id,
               })
             );
+            setInput("");
+            dispatch(updateUpSideDownTheAllConversationsAndGroups(id));
           }
-          setFile(null);
         }
-      } else {
-        const tempData = { ...data, media, sender: user._id };
-        dispatch(updateCurrentUserMessage(tempData));
-        const result = await dispatch(createMessage(data));
-        if (result?.payload?.conversationId) {
-          console.log(result.payload, "result in message chat");
-          dispatch(
-            updatingStatusForMessages({
-              newStatus: result.payload.status[0].state,
-              tempId: data.tempId,
-              realMessageId: result.payload._id,
-            })
-          );
-          setInput("");
-          dispatch(updateUpSideDownTheAllConversationsAndGroups(id));
-        }
+      } catch (error) {
+        console.log(error);
       }
-    } catch (error) {
-      console.log(error);
     }
   };
   const handleOnEmojiClick = (emojiObject) => {
@@ -295,6 +424,7 @@ const MessageChat = ({ setIsChatOpen }) => {
     setMobileEmoji(false);
 
     try {
+      if (id == "myAi") return;
       const data = dispatch(
         addReactions({
           emoji: emojiObject.emoji,
@@ -406,10 +536,11 @@ const MessageChat = ({ setIsChatOpen }) => {
       {/* Header */}
       <div className="p-4 flex items-center  justify-between border-b font-semibold sticky top-0 bg-black z-10 border-[0.1px] border-[#2f2f2f] text-sm sm:text-base">
         <div
-          onClick={() =>
+          onClick={() => {
             selectedIndex.isGroup == false &&
-            navigate(`/profile/${selectedIndex?.userId}`)
-          }
+              id !== "myAi" &&
+              navigate(`/profile/${selectedIndex?.userId}`);
+          }}
           className="flex gap-2 cursor-pointer items-center justify-center"
         >
           <img
@@ -431,7 +562,12 @@ const MessageChat = ({ setIsChatOpen }) => {
               {selectedIndex.isGroup
                 ? selectedIndex?.groupName
                 : selectedIndex?.name}{" "}
-              • {selectedIndex.isGroup ? "Group" : "User"}
+              •{" "}
+              {id != "myAi"
+                ? selectedIndex.isGroup
+                  ? "Group"
+                  : "User"
+                : "Bot"}
             </div>
           </div>
         </div>
@@ -751,7 +887,9 @@ const MessageChat = ({ setIsChatOpen }) => {
           })
         ) : (
           <div className="text-center">
-            {id == "myAi" ? "I am Your AI" : "No messages yet"}
+            {id == "myAi"
+              ? "I am Your AI. Please Make Sure to Ask Me Anything! And data is not stored."
+              : "No messages yet"}
           </div>
         )}
       </div>
@@ -836,7 +974,10 @@ const MessageChat = ({ setIsChatOpen }) => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               ref={inputRef}
-              placeholder="Type a message..."
+              disabled={botLoading}
+              placeholder={
+                botLoading ? "Bot is Answering Wait!!" : "Type a message..."
+              }
               className=" flex-1 focus:outline-none"
             />
             {(input || (isFileSelected && file)) && (
@@ -844,6 +985,11 @@ const MessageChat = ({ setIsChatOpen }) => {
                 onClick={handleSubmitMessage}
                 className="w-5 h-5 cursor-pointer text-blue-500"
               />
+            )}
+            {id === "myAi" && botLoading && (
+              <div className="flex items-center justify-center">
+                <Loader />
+              </div>
             )}
           </div>
         </div>
