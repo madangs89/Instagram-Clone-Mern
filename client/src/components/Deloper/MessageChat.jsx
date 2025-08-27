@@ -23,6 +23,7 @@ import {
   uploadMediatoClodinary,
 } from "../../Redux/Services/MessageThunk";
 import Loader from "./Loader";
+import sonner from "sonner";
 import {
   clearSelectedCurrentUserMessage,
   handleClearSelectedIndex,
@@ -308,11 +309,12 @@ const MessageChat = ({ setIsChatOpen }) => {
             updatedAt: new Date().toISOString(),
           };
           let isCreated = false;
+          let gptResText = "";
           while (true) {
             const { value, done } = await reader.read();
             if (done) break;
             const chunk = decoder.decode(value, { stream: true });
-            // console.log("Received:", chunk);
+            gptResText += chunk;
             if (isCreated == false) {
               gptRes.text = chunk;
               dispatch(updateCurrentUserMessageForBotChat(gptRes));
@@ -321,10 +323,14 @@ const MessageChat = ({ setIsChatOpen }) => {
               dispatch(updateCurrentUserMessageForBotChat2(chunk));
             }
           }
-
+          setHistory((prev) => [
+            ...prev,
+            { role: "model", parts: [{ text: gptResText }] },
+          ]);
           setBotLoading(false);
         } catch (error) {
           console.log(error);
+          sonner.error("Please Try again later");
         }
         return;
       }
