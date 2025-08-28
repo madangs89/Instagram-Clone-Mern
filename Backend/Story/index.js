@@ -4,7 +4,7 @@ import cors from "cors";
 import { connectDB } from "./utils/ConnectDB.js";
 import cookieParser from "cookie-parser";
 import { storyRouter } from "./routes/user.route.js";
-dotenv.config({ path: "./.env" });
+dotenv.config();
 
 const app = express();
 app.use(
