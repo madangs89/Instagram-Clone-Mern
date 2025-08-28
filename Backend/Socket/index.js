@@ -142,7 +142,7 @@ io.on("connection", (socket) => {
 });
 
 app.get("/", (req, res) => {
-  res.send("Hello World");
+  res.send("Hello World from Socket");
 });
 
 s.listen(process.env.PORT || 3005, () => {

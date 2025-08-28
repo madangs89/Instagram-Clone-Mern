@@ -22,7 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/story" , storyRouter)
 
 app.get("/", (req, res) => {
-  res.send("Hello World");
+  res.send("Hello World From Story");
 });
 app.listen(process.env.PORT, async () => {
   connectDB();

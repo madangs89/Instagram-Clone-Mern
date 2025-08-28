@@ -24,23 +24,20 @@ app.use(express.urlencoded({ extended: true }));
 
 console.log("Redis URL:", process.env.REDIS_URL);
 
-
 export const redis = createClient({
-  url: "rediss://default:AVgAAAIjcDEwZWNhMmEzNDViMjE0M2I4OGU5NjUzNzg3MGRmM2UyNHAxMA@crucial-boar-22528.upstash.io:6379",
-  // socket: {
-  //   tls: true, // enable TLS
-  //   rejectUnauthorized: false, // helps avoid local SSL cert issues
-  // },
+  url: process.env.REDIS_URL,
 });
 
 redis.on("error", (err) => console.log("Redis Client Error", err));
 const subClient = redis.duplicate();
 export const pubClient = redis.duplicate();
+redis.on("error", (err) => console.log("Redis Client Error", err));
+pubClient.on("error", (err) => console.log("Redis Client Error", err));
+subClient.on("error", (err) => console.log("Redis Client Error", err));
 
 await redis.connect();
 await subClient.connect();
 await pubClient.connect();
-redis.on("error", (err) => console.log("Redis Client Error", err));
 
 await subClient.subscribe("userOnline", async (data) => {
   console.log(data, "data when user comes online");
@@ -53,7 +50,7 @@ await subClient.subscribe("userOnline", async (data) => {
 });
 
 app.get("/", (req, res) => {
-  res.send("Hello World");
+  res.send("Hello World From Message");
 });
 
 app.use("/message", messageRouter);

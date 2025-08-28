@@ -41,7 +41,7 @@ app.use("/", likesRouter);
 
 app.use("/comment", commentRouter);
 app.get("/", (req, res) => {
-  res.send("Hello World");
+  res.send("Hello World From Post");
 });
 app.listen(process.env.PORT, async () => {
   connectDB();
