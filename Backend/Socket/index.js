@@ -3,13 +3,11 @@ import { createClient } from "redis";
 import { createAdapter } from "@socket.io/redis-adapter";
 import dotevn from "dotenv";
 dotevn.config();
-
 const io = new Server(3005, {
   cors: {
     origin: process.env.CLIENT_URL,
   },
 });
-
 // Main Redis clients for adapter
 const pubClient = createClient({
   url: process.env.REDIS_URL,

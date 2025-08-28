@@ -23,7 +23,7 @@ import {
   uploadMediatoClodinary,
 } from "../../Redux/Services/MessageThunk";
 import Loader from "./Loader";
-import sonner from "sonner";
+import { toast } from "sonner";
 import {
   clearSelectedCurrentUserMessage,
   handleClearSelectedIndex,
@@ -330,7 +330,7 @@ const MessageChat = ({ setIsChatOpen }) => {
           setBotLoading(false);
         } catch (error) {
           console.log(error);
-          sonner.error("Please Try again later");
+          toast.error("Please Try again later");
         }
         return;
       }
