@@ -3,7 +3,7 @@ import Userdetails from "../models/user.model.js";
 import Reel from "../models/reel.model.js";
 import Post from "../models/post.model.js";
 import Notification from "../models/notification.model.js";
-import { redis } from "../index.js";
+import { redis } from "../postIndex.js";
 
 export const addComment = async (req, res) => {
   try {

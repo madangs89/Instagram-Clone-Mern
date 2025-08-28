@@ -1,4 +1,4 @@
-import { redis } from "../index.js";
+import { redis } from "../postIndex.js";
 import Likes from "../models/likes.model.js";
 import Notification from "../models/notification.model.js";
 import Post from "../models/post.model.js";

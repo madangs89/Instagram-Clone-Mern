@@ -1,4 +1,4 @@
-import { redis } from "../index.js";
+import { redis } from "../postIndex.js";
 import Notification from "../models/notification.model.js";
 
 export const createNotification = async (req, res) => {
