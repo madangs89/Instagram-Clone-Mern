@@ -156,7 +156,6 @@ export const deletePost = async (req, res) => {
   try {
     const { postId } = req.params;
     const post = await Post.findById(postId);
-    console.log(post.userId, req.user._id, post.userId == req.user._id);
 
     if (!post || post.userId != req.user._id) {
       return res.status(403).json({ message: "Unauthorized", success: false });

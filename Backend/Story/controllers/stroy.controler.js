@@ -67,9 +67,6 @@ export const getStoriesForUserToSee = async (req, res) => {
         .status(404)
         .json({ message: "User following list not found", success: false });
     }
-
-    console.log(userFollowingList.data, userFollowingList.data.user.following);
-
     const following = Array.isArray(userFollowingList.data.user.following)
       ? userFollowingList.data.user.following
       : [];

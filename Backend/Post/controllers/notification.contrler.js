@@ -4,8 +4,6 @@ import Notification from "../models/notification.model.js";
 export const createNotification = async (req, res) => {
   try {
     const { receiver, type, post } = req.body;
-    console.log(receiver, type, post);
-
     const sender = req.user._id;
     if (receiver === sender) {
       return res.status(400).json({ message: "You cannot notify yourself" });

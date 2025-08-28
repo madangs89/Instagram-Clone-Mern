@@ -24,7 +24,6 @@ Outside of that context, you may respond as a general assistant.
       },
     });
     for await (const chunk of response) {
-      console.log(chunk.text);
       const text = chunk.candidates?.[0]?.content?.parts?.[0]?.text || "";
       if (text) {
         res.write(text + "\n"); // ✅ force flush with newline

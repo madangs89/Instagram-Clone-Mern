@@ -4,7 +4,6 @@ export const uploadToClodinary = async (req, res) => {
   try {
     const file = req.file;
     if (!file) return res.status(400).json({ message: "No file uploaded" });
-    // console.log(file.mimetype, file.size, file.path);
     const data = await uploadToCloudinarySingle(file.path);
     const responseData = {
       publicId: data.public_id,

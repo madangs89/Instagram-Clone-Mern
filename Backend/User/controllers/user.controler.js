@@ -27,8 +27,6 @@ export const createUser = async (req, res) => {
         .status(400)
         .json({ message: "All fields are required", success: false });
     }
-    console.log(publicKey, encryptedPrivateKey);
-
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await User.create({
       userName,
@@ -53,8 +51,6 @@ export const createUser = async (req, res) => {
 };
 export const getuser = async (req, res) => {
   try {
-    console.log("getting the request for login");
-
     const user = await User.findOne({
       $or: [{ userName: req.params.username }, { email: req.params.email }],
     }).select("-__v -encryptedPrivateKey");
@@ -63,8 +59,6 @@ export const getuser = async (req, res) => {
         .status(200)
         .json({ message: "User not found", success: false });
     }
-    console.log(user);
-
     return res
       .status(200)
       .json({ message: "User fetched successfully", success: true, user });
@@ -249,8 +243,6 @@ export const getUserById = async (req, res) => {
         .status(404)
         .json({ message: "User not found", success: false });
     }
-    console.log("user fecthed successfully", user);
-
     return res
       .status(200)
       .json({ message: "User fetched successfully", success: true, user });
@@ -301,9 +293,6 @@ export const getSugestedusers = async (req, res) => {
         .select("-__v -password");
       finalResutl.push(...notFollwingUSerrByFreidsAndOwn);
     }
-
-    console.log("finalResutl", finalResutl);
-
     return res.status(200).json({
       message: "Users fetched successfully",
       success: true,
@@ -354,9 +343,6 @@ export const gettingArrayOfUsers = async (req, res) => {
 export const getUsersNotInArray = async (req, res) => {
   try {
     let { userIdsArray } = req.query;
-    console.log("userIdsArray", userIdsArray);
-    console.log(req.query, "req.query");
-
     const userId = req.user._id;
     if (!userIdsArray) {
       userIdsArray = [];
@@ -364,9 +350,6 @@ export const getUsersNotInArray = async (req, res) => {
       const data = userIdsArray.split(",");
       userIdsArray = [...data];
     }
-    console.log("gettin the request for users not in array");
-
-    console.log("userIdsArray", userIdsArray);
     if (!userIdsArray) {
       return res.status(400).json({
         message: "Bad request: userIdsArray is required",
@@ -410,9 +393,6 @@ export const getUsersNotInArray = async (req, res) => {
 export const gettingUsersInArray = async (req, res) => {
   try {
     let { userIdsArray } = req.query;
-    console.log("userIdsArray", userIdsArray);
-    console.log(req.query, "req.query");
-
     const userId = req.user._id;
     if (!userIdsArray) {
       userIdsArray = [];
@@ -420,9 +400,6 @@ export const gettingUsersInArray = async (req, res) => {
       const data = userIdsArray.split(",");
       userIdsArray = [...data];
     }
-    console.log("gettin the request for users not in array");
-
-    console.log("userIdsArray", userIdsArray);
     if (!userIdsArray) {
       return res.status(400).json({
         message: "Bad request: userIdsArray is required",

@@ -1,16 +1,18 @@
 import { Server } from "socket.io";
 import { createClient } from "redis";
 import { createAdapter } from "@socket.io/redis-adapter";
+import dotevn from "dotenv";
+dotevn.config();
 
 const io = new Server(3005, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: process.env.CLIENT_URL,
   },
 });
 
 // Main Redis clients for adapter
 const pubClient = createClient({
-  url: "rediss://default:AVgAAAIjcDEwZWNhMmEzNDViMjE0M2I4OGU5NjUzNzg3MGRmM2UyNHAxMA@crucial-boar-22528.upstash.io:6379",
+  url: process.env.REDIS_URL,
 });
 const subClient = pubClient.duplicate();
 
