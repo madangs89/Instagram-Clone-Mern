@@ -334,86 +334,86 @@ const MessageChat = ({ setIsChatOpen }) => {
         }
         return;
       }
-      try {
-        if (!input && !file && id == "myAi") return;
-        let media = [];
-        const generatedTempId = Date.now();
-        setTempIds(generatedTempId);
-        if (isFileSelected && file) {
-          media.push({
-            url: URL.createObjectURL(file),
-            publicId: Date.now(),
-            type: file.type.includes("image") ? ["image"] : ["video"],
+    }
+    try {
+      if (!input && !file && id == "myAi") return;
+      let media = [];
+      const generatedTempId = Date.now();
+      setTempIds(generatedTempId);
+      if (isFileSelected && file) {
+        media.push({
+          url: URL.createObjectURL(file),
+          publicId: Date.now(),
+          type: file.type.includes("image") ? ["image"] : ["video"],
+        });
+      }
+      const data = {
+        conversationId: id,
+        text: input,
+        tempId: generatedTempId,
+        status: [
+          {
+            userId: !selectedIndex.isGroup && selectedIndex?.userId,
+            state: "sending",
+            receivedAt: "",
+            readAt: "",
+          },
+        ],
+        reactions: [],
+      };
+      if (file && isFileSelected) {
+        let newMedia = [];
+        const tempData = { ...data, media, sender: user._id };
+        dispatch(updateCurrentUserMessage(tempData));
+        setIsFileSelected(false);
+        setInput("");
+        const formData = new FormData();
+        formData.append("media", file);
+        const result = await dispatch(uploadMediatoClodinary(formData));
+        if (result?.payload?.success) {
+          const finalData = result.payload.data;
+          newMedia.push({
+            url: finalData.url,
+            publicId: finalData.publicId,
+            type: finalData.type,
           });
-        }
-        const data = {
-          conversationId: id,
-          text: input,
-          tempId: generatedTempId,
-          status: [
-            {
-              userId: !selectedIndex.isGroup && selectedIndex?.userId,
-              state: "sending",
-              receivedAt: "",
-              readAt: "",
-            },
-          ],
-          reactions: [],
-        };
-        if (file && isFileSelected) {
-          let newMedia = [];
-          const tempData = { ...data, media, sender: user._id };
-          dispatch(updateCurrentUserMessage(tempData));
-          setIsFileSelected(false);
-          setInput("");
-          const formData = new FormData();
-          formData.append("media", file);
-          const result = await dispatch(uploadMediatoClodinary(formData));
-          if (result?.payload?.success) {
-            const finalData = result.payload.data;
-            newMedia.push({
-              url: finalData.url,
-              publicId: finalData.publicId,
-              type: finalData.type,
-            });
-            const originalData = {
-              ...data,
-              media: newMedia,
-              sender: user._id,
-            };
-            const answer = await dispatch(createMessage(originalData));
-            if (answer?.payload?.conversationId) {
-              console.log(result.payload, "result in message chat");
-              dispatch(
-                updatingStatusForMessages({
-                  newStatus: answer.payload.status[0].state,
-                  tempId: data.tempId,
-                  realMessageId: answer.payload._id,
-                })
-              );
-            }
-            setFile(null);
-          }
-        } else {
-          const tempData = { ...data, media, sender: user._id };
-          dispatch(updateCurrentUserMessage(tempData));
-          const result = await dispatch(createMessage(data));
-          if (result?.payload?.conversationId) {
+          const originalData = {
+            ...data,
+            media: newMedia,
+            sender: user._id,
+          };
+          const answer = await dispatch(createMessage(originalData));
+          if (answer?.payload?.conversationId) {
             console.log(result.payload, "result in message chat");
             dispatch(
               updatingStatusForMessages({
-                newStatus: result.payload.status[0].state,
+                newStatus: answer.payload.status[0].state,
                 tempId: data.tempId,
-                realMessageId: result.payload._id,
+                realMessageId: answer.payload._id,
               })
             );
-            setInput("");
-            dispatch(updateUpSideDownTheAllConversationsAndGroups(id));
           }
+          setFile(null);
         }
-      } catch (error) {
-        console.log(error);
+      } else {
+        const tempData = { ...data, media, sender: user._id };
+        dispatch(updateCurrentUserMessage(tempData));
+        const result = await dispatch(createMessage(data));
+        if (result?.payload?.conversationId) {
+          console.log(result.payload, "result in message chat");
+          dispatch(
+            updatingStatusForMessages({
+              newStatus: result.payload.status[0].state,
+              tempId: data.tempId,
+              realMessageId: result.payload._id,
+            })
+          );
+          setInput("");
+          dispatch(updateUpSideDownTheAllConversationsAndGroups(id));
+        }
       }
+    } catch (error) {
+      console.log(error);
     }
   };
   const handleOnEmojiClick = (emojiObject) => {
