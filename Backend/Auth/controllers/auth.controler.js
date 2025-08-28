@@ -3,7 +3,6 @@ import axios from "axios";
 import jwt from "jsonwebtoken";
 export const login = async (req, res) => {
   try {
-    console.log("getting the requrest");
 
     
     const { userName, password } = req.body;
@@ -53,7 +52,7 @@ export const login = async (req, res) => {
     return res.status(500).json({
       message: "Server error" + error.message,
       success: false,
-      error: error.message,
+      error: error.message || error,
     });
   }
 };
@@ -120,7 +119,7 @@ export const logout = async (req, res) => {
       .json({ message: "Logout successful", success: true });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ message: "Server error", success: false });
+    return res.status(500).json({ message: "Server error", success: false  , error: error.message });
   }
 };
 export const isAuth = async (req, res) => {

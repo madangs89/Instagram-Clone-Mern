@@ -7,7 +7,7 @@ import { messageRouter } from "./routes/message.routes.js";
 import { uploadRouter } from "./routes/upload.routes.js";
 import { createClient } from "redis";
 import { handleBulkRead } from "./controler/message.controler.js";
-dotenv.config({ path: "./.env" });
+dotenv.config();
 
 const app = express();
 app.use(
@@ -22,8 +22,15 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+console.log("Redis URL:", process.env.REDIS_URL);
+
+
 export const redis = createClient({
   url: "rediss://default:AVgAAAIjcDEwZWNhMmEzNDViMjE0M2I4OGU5NjUzNzg3MGRmM2UyNHAxMA@crucial-boar-22528.upstash.io:6379",
+  // socket: {
+  //   tls: true, // enable TLS
+  //   rejectUnauthorized: false, // helps avoid local SSL cert issues
+  // },
 });
 
 redis.on("error", (err) => console.log("Redis Client Error", err));
