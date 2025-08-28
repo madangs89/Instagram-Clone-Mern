@@ -1,6 +1,5 @@
 import express from "express";
 import { authMiddleware } from "../middelwares/auth.middelware.js";
-import { upload } from "../../Message/utils/cloudinary.js";
 import {
   createReel,
   deleteReel,
@@ -11,6 +10,7 @@ import {
   updateReel,
 } from "../controllers/reel.controller.js";
 import { createView } from "../controllers/views.contrler.js";
+import { upload } from "../utils/cloudinary.js";
 
 const reelRouter = express.Router();
 reelRouter.post("/", authMiddleware, upload.single("reel"), createReel);
