@@ -1,5 +1,6 @@
-import express from "express";
 import dotenv from "dotenv";
+dotenv.config();
+import express from "express";
 import cors from "cors";
 import postRouter from "./routes/post.route.js";
 import cookieParser from "cookie-parser";
@@ -9,7 +10,7 @@ import { connectDB } from "./utils/ConnectDB.js";
 import commentRouter from "./routes/comment.route.js";
 import notificationRouter from "./routes/notification.route.js";
 import { createClient } from "redis";
-dotenv.config();
+
 
 const app = express();
 app.use(
@@ -33,8 +34,8 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/post", postRouter);
-app.use("/reel", reelRouter);
+// app.use("/post", postRouter);
+// app.use("/reel", reelRouter);
 app.use("/notification", notificationRouter);
 app.use("/", likesRouter);
 
