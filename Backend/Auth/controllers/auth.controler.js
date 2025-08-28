@@ -56,7 +56,6 @@ export const login = async (req, res) => {
     });
   }
 };
-
 export const register = async (req, res) => {
   try {
     const { userName, password, email, name, publicKey, encryptedPrivateKey } =
