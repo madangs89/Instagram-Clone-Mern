@@ -1,6 +1,5 @@
 import express from "express";
 import { authMiddleware } from "../middelwares/auth.middelware.js";
-import { upload } from "../../Message/utils/cloudinary.js";
 import {
   createPost,
   deletePost,
@@ -9,6 +8,7 @@ import {
   getPostById,
   updatePost,
 } from "../controllers/post.controler.js";
+import { upload } from "../utils/cloudinary.js";
 
 const postRouter = express.Router();
 
