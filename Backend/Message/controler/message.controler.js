@@ -1,7 +1,9 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import { redis } from "../index.js";
 import Conversation from "../models/Conversation.model.js";
 import Message from "../models/Message.js";
-import { uploadToCloudinarySingle } from "../utils/cloudinary.js";
 import axios from "axios";
 
 const api = axios.create({
@@ -140,6 +142,7 @@ export const getAllMessages = async (req, res) => {
 };
 export const getAllConversationAndGroup = async (req, res) => {
   try {
+    console.log("USER_BACKEND:", process.env.USER_BACKEND);
     const userId = req.user._id;
     const conversations = await Conversation.find({
       members: { $in: [userId] },

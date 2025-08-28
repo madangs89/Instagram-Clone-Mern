@@ -1,5 +1,6 @@
-import express from "express";
 import dotenv from "dotenv";
+dotenv.config();
+import express from "express";
 import cors from "cors";
 import { connectDB } from "./utils/ConnectDB.js";
 import cookieParser from "cookie-parser";
@@ -7,7 +8,6 @@ import { messageRouter } from "./routes/message.routes.js";
 import { uploadRouter } from "./routes/upload.routes.js";
 import { createClient } from "redis";
 import { handleBulkRead } from "./controler/message.controler.js";
-dotenv.config();
 
 const app = express();
 app.use(
