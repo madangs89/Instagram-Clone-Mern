@@ -76,7 +76,6 @@ await customSubClient.subscribe("readTheConversation", async (data) => {
 });
 await customSubClient.subscribe("userComesOnline", async (data) => {
   const result = JSON.parse(data);
-
   if (Array.isArray(result) && result.length > 0) {
     for (const user of result) {
       const { sender, conversationIds: conversationId } = user;
