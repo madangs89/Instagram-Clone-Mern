@@ -34,8 +34,8 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// app.use("/post", postRouter);
-// app.use("/reel", reelRouter);
+app.use("/post", postRouter);
+app.use("/reel", reelRouter);
 app.use("/notification", notificationRouter);
 app.use("/", likesRouter);
 
