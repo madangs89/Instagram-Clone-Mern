@@ -59,8 +59,6 @@ const MessageInbox = ({ allInbox }) => {
             userId: user._id,
           });
         }
-        await dispatch(markAllChatsAsRead(data.payload._id));
-
         dispatch(
           handleMakeTheUnreadCountToZero({
             conversationId: data.payload._id,
