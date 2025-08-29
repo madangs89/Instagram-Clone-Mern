@@ -35,22 +35,22 @@ const PostWrapper = () => {
   }, [posts]);
 
   // ✅ Clear render flow
-  if (posts.loading) {
-    return (
-      <div className="w-full h-full flex items-center justify-center">
-        <Loader />
-      </div>
-    );
-  }
+ if (posts.loading || posts.posts === null) {
+  // 🚀 Either loading OR not fetched yet
+  return (
+    <div className="w-full h-full flex items-center justify-center">
+      <Loader />
+    </div>
+  );
+}
 
-  if (!posts.loading && posts?.posts?.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <p className="text-gray-500">No posts available</p>
-      </div>
-    );
-  }
-
+if (!posts.loading && posts.posts.length === 0) {
+  return (
+    <div className="flex items-center justify-center h-full">
+      <p className="text-gray-500">No posts available</p>
+    </div>
+  );
+}
   return (
     <div
       ref={containerRef}
