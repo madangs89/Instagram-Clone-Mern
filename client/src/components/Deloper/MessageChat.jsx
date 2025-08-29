@@ -537,7 +537,7 @@ const MessageChat = ({ setIsChatOpen }) => {
   };
 
   return (
-    <div className="flex flex-col h-screen w-full bg-black text-white overflow-hidden">
+    <div className="flex flex-col h-[100dvh] w-full bg-black text-white overflow-hidden">
       {/* Header (always visible) */}
       <div className="p-4 flex items-center justify-between border-b font-semibold sticky top-0 bg-black z-20 border-[0.1px] border-[#2f2f2f] text-sm sm:text-base">
         <div
