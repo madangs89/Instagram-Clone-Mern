@@ -14,6 +14,7 @@ const authSlice = createSlice({
     loading: false,
     error: null,
     isAuthenticated: false,
+    token: null,
   },
   extraReducers: (builder) => {
     builder
@@ -57,6 +58,9 @@ const authSlice = createSlice({
         state.userName = action.payload.user.userName;
         state._id = action.payload.user._id;
         state.avatar = action.payload.user.avatar;
+        state.token = action.payload.user.token;
+        state.email = action.payload.user.email;
+        state.name = action.payload.user.name;
       })
       .addCase(checkIsAuth.rejected, (state, action) => {
         state.loading = false;

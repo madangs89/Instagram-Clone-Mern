@@ -1,11 +1,9 @@
 import dotenv from "dotenv";
 dotenv.config();
-
 import { redis } from "../index.js";
 import Conversation from "../models/Conversation.model.js";
 import Message from "../models/Message.js";
 import axios from "axios";
-
 const api = axios.create({
   baseURL: `${process.env.USER_BACKEND}`,
   withCredentials: true,

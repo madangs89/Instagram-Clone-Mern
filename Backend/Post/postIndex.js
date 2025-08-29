@@ -10,8 +10,6 @@ import { connectDB } from "./utils/ConnectDB.js";
 import commentRouter from "./routes/comment.route.js";
 import notificationRouter from "./routes/notification.route.js";
 import { createClient } from "redis";
-
-
 const app = express();
 app.use(
   cors({

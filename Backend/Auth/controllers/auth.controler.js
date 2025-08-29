@@ -3,8 +3,6 @@ import axios from "axios";
 import jwt from "jsonwebtoken";
 export const login = async (req, res) => {
   try {
-
-    
     const { userName, password } = req.body;
     console.log(userName, password);
     if (!userName || !password) {
@@ -43,10 +41,12 @@ export const login = async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV == "production",
-      sameSite:"None",
+      sameSite: "None",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-    return res.status(200).json({ message: "Login successful", success: true });
+    return res
+      .status(200)
+      .json({ message: "Login successful", success: true, token });
   } catch (error) {
     console.log(error);
     return res.status(500).json({
@@ -104,7 +104,7 @@ export const register = async (req, res) => {
         sameSite: "None",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
-      .json({ message: "Registration successful", success: true });
+      .json({ message: "Registration successful", success: true, token });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Server error", success: false });
@@ -118,7 +118,9 @@ export const logout = async (req, res) => {
       .json({ message: "Logout successful", success: true });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ message: "Server error", success: false  , error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Server error", success: false, error: error.message });
   }
 };
 export const isAuth = async (req, res) => {
