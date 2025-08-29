@@ -542,13 +542,13 @@ const MessageChat = ({ setIsChatOpen }) => {
     return diffMins > 5 ? true : false;
   };
   return (
-    <div className="relative w-screen">
-      {/* header */}
-      <div className="p-4 flex items-center justify-between border-b font-semibold absolute right-0 top-0 bg-black z-20 border-[0.1px] border-[#2f2f2f] text-sm sm:text-base">
+    <div className="relative w-screen h-screen flex flex-col bg-black text-white">
+      {/* HEADER */}
+      <div className="p-4 flex items-center justify-between border-b font-semibold sticky top-0 z-20 bg-black border-[0.1px] border-[#2f2f2f] text-sm sm:text-base">
         <div
           onClick={() => {
             if (!selectedIndex.isGroup && id !== "myAi") {
-              navigate(`/profile/${selectedIndex?.userId}`); // <-- fixed backticks
+              navigate(`/profile/${selectedIndex?.userId}`);
             }
           }}
           className="flex gap-2 cursor-pointer items-center"
@@ -586,14 +586,13 @@ const MessageChat = ({ setIsChatOpen }) => {
           className="w-6 h-6 text-white cursor-pointer"
         />
       </div>
-      <div
-        style={{ height: `calc(100vh - 72px)` }}
-        className="flex flex-col w-full bg-black text-white overflow-hidden"
-      >
+
+      {/* CHAT BODY */}
+      <div className="flex-1 flex flex-col w-full overflow-hidden">
         {/* MESSAGES SCROLLER */}
         <div
           ref={messageRef}
-          className="flex-1 relative overflow-x-hidden overflow-y-auto px-3 py-2 space-y-5 scroll-smooth"
+          className="flex-1 relative overflow-x-hidden overflow-y-auto px-3 py-2 space-y-5"
         >
           {/* Reactions modal */}
           {showReactionsModal &&
@@ -653,7 +652,7 @@ const MessageChat = ({ setIsChatOpen }) => {
               </>
             )}
 
-          {/* Floating emoji picker (context one) */}
+          {/* Floating emoji picker */}
           {showEmoji && (
             <div
               ref={emojiRef}
@@ -662,7 +661,7 @@ const MessageChat = ({ setIsChatOpen }) => {
               <EmojiPicker
                 onEmojiClick={handleOnEmojiClick}
                 theme="dark"
-                width="100%" // <-- fully visible
+                width="100%"
                 searchDisabled
                 skinTonesDisabled
                 previewConfig={{ showPreview: false }}
@@ -791,25 +790,6 @@ const MessageChat = ({ setIsChatOpen }) => {
                             {msg.reactions.map((item) => item.emoji)}
                           </div>
                         )}
-
-                        {/* HOVER ACTIONS - only for MY messages */}
-                        {/* {hoverShow?.id === msgId && (
-                        <div className="md:flex hidden text-white gap-2 absolute -top-1 right-0">
-                          <button className="p-1 hover:bg-gray-700 rounded-full">
-                            <Smile
-                              className="cursor-pointer rounded-full"
-                              onClick={() => handleOpenEmoji(msgId)}
-                              size={16}
-                            />
-                          </button>
-                          <button className="p-1 hover:bg-gray-700 rounded-full">
-                            <ArrowBigLeft size={16} />
-                          </button>
-                          <button className="p-1 hover:bg-gray-700 rounded-full">
-                            •••
-                          </button>
-                        </div>
-                      )} */}
                       </div>
                     </div>
                   )}
@@ -825,7 +805,7 @@ const MessageChat = ({ setIsChatOpen }) => {
           )}
         </div>
 
-        {/* KEYBOARD EMOJI PICKER (bottom, centered, mobile-safe) */}
+        {/* Keyboard Emoji Picker */}
         {keyboardEmojiShow && (
           <div
             ref={keyboardEmojiRef}
@@ -842,7 +822,7 @@ const MessageChat = ({ setIsChatOpen }) => {
           </div>
         )}
 
-        {/* INPUT BAR (sticky bottom) */}
+        {/* INPUT BAR */}
         <div className="p-3 border-t border-[0.1px] border-[#2f2f2f] sticky bottom-0 bg-black z-20 pb-[env(safe-area-inset-bottom)]">
           <div
             className={`flex w-full flex-col border ${
