@@ -14,7 +14,7 @@ export const getAllUnlikedPosts = createAsyncThunk(
   async (_, { getState, rejectWithValue }) => {
     try {
       const token = getState().auth.token;
-      console.log(token , "fetching the posts");
+      console.log(token, "fetching the posts");
       const response = await api.get("/post", {
         headers: {
           Authorization: `Bearer ${token}`,
