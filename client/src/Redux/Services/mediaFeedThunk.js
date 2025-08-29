@@ -11,9 +11,14 @@ const api2 = axios.create({
 });
 export const getAllUnlikedPosts = createAsyncThunk(
   "mediaFeed/post",
-  async (_, { rejectWithValue }) => {
+  async (_, { getState, rejectWithValue }) => {
     try {
-      const response = await api.get("/post");
+      const token = getState().auth.token;
+      const response = await api.get("/post", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Error");
@@ -22,9 +27,14 @@ export const getAllUnlikedPosts = createAsyncThunk(
 );
 export const getAllUnlikedReels = createAsyncThunk(
   "mediaFeed/reels",
-  async (_, { rejectWithValue }) => {
+  async (_, { getState, rejectWithValue }) => {
     try {
-      const response = await api.get("/reel");
+      const token = getState().auth.token;
+      const response = await api.get("/reel", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Error");
@@ -33,9 +43,14 @@ export const getAllUnlikedReels = createAsyncThunk(
 );
 export const getAllUnlikedStories = createAsyncThunk(
   "mediaFeed/stories",
-  async (_, { rejectWithValue }) => {
+  async (_, { getState, rejectWithValue }) => {
     try {
-      const response = await api2.get("/story");
+      const token = getState().auth.token;
+      const response = await api2.get("/story", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Error");
@@ -44,9 +59,14 @@ export const getAllUnlikedStories = createAsyncThunk(
 );
 export const veiwStory = createAsyncThunk(
   "mediaFeed/viewStory",
-  async (storyId, { rejectWithValue }) => {
+  async (storyId, { getState, rejectWithValue }) => {
     try {
-      const response = await api2.patch(`/story/update/${storyId}`);
+      const token = getState().auth.token;
+      const response = await api2.patch(`/story/update/${storyId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Error");
@@ -55,9 +75,14 @@ export const veiwStory = createAsyncThunk(
 );
 export const curretStoryView = createAsyncThunk(
   "mediaFeed/curretStoryView",
-  async (storyId, { rejectWithValue }) => {
+  async (storyId, { getState, rejectWithValue }) => {
     try {
-      const response = await api2.get(`/story/views/${storyId}`);
+      const token = getState().auth.token;
+      const response = await api2.get(`/story/views/${storyId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Error");
@@ -66,9 +91,14 @@ export const curretStoryView = createAsyncThunk(
 );
 export const getReelById = createAsyncThunk(
   "mediaFeed/getReelById",
-  async (reelId, { rejectWithValue }) => {
+  async (reelId, { getState, rejectWithValue }) => {
     try {
-      const response = await api.get(`/reel/get/reel/${reelId}`);
+      const token = getState().auth.token;
+      const response = await api.get(`/reel/get/reel/${reelId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Error");
@@ -77,9 +107,14 @@ export const getReelById = createAsyncThunk(
 );
 export const getPostById = createAsyncThunk(
   "mediaFeed/getPostById",
-  async (postId, { rejectWithValue }) => {
+  async (postId, { getState, rejectWithValue }) => {
     try {
-      const response = await api.get(`/post/get/post/${postId}`);
+      const token = getState().auth.token;
+      const response = await api.get(`/post/get/post/${postId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Error");
@@ -88,9 +123,14 @@ export const getPostById = createAsyncThunk(
 );
 export const getAllUserNotification = createAsyncThunk(
   "mediaFeed/getAllUserNotification",
-  async (_, { rejectWithValue }) => {
+  async (_, { getState, rejectWithValue }) => {
     try {
-      const response = await api.get(`/notification`);
+      const token = getState().auth.token;
+      const response = await api.get(`/notification`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Error");
@@ -99,9 +139,14 @@ export const getAllUserNotification = createAsyncThunk(
 );
 export const markTheNotificationAsRead = createAsyncThunk(
   "mediaFeed/markTheNotificationAsRead",
-  async (id, { rejectWithValue }) => {
+  async (id, { getState, rejectWithValue }) => {
     try {
-      const response = await api.patch(`/notification/read/${id}`);
+      const token = getState().auth.token;
+      const response = await api.patch(`/notification/read/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Error");
