@@ -25,7 +25,7 @@ const Layout = () => {
       console.log(data.token, "token from layout");
       await dispatch(getAllUnlikedPosts());
     })();
-  }, []);
+  }, [auth]);
 
   useEffect(() => {
     (async () => {
