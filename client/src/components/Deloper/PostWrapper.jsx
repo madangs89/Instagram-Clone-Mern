@@ -48,7 +48,7 @@ const PostWrapper = () => {
           <Loader />
         </div>
       )}
-      {posts.posts?.length === 0 && !posts.loading && (
+      {!posts.loading && posts.posts?.length === 0 && (
         <div className="flex items-center justify-center h-full">
           <p className="text-gray-500">No posts available</p>
         </div>
