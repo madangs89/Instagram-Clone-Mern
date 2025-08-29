@@ -142,11 +142,15 @@ export const markTheNotificationAsRead = createAsyncThunk(
   async (id, { getState, rejectWithValue }) => {
     try {
       const token = getState().auth.token;
-      const response = await api.patch(`/notification/read/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.patch(
+        `/notification/read/${id}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Error");
