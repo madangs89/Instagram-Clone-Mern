@@ -543,7 +543,7 @@ const MessageChat = ({ setIsChatOpen }) => {
   };
   return (
     <>
-      <div className="p-4 flex items-center justify-between border-b font-semibold absolute left-0 top-0 bg-black z-20 border-[0.1px] border-[#2f2f2f] text-sm sm:text-base">
+      <div className="p-4 w-screen flex items-center justify-between border-b font-semibold absolute right-0 top-0 bg-black z-20 border-[0.1px] border-[#2f2f2f] text-sm sm:text-base">
         <div
           onClick={() => {
             if (!selectedIndex.isGroup && id !== "myAi") {
@@ -562,7 +562,7 @@ const MessageChat = ({ setIsChatOpen }) => {
             alt=""
           />
           <div className="flex flex-col">
-            <div className="font-medium">
+            <div className="font-medium text-white">
               {selectedIndex.isGroup
                 ? selectedIndex?.groupName
                 : selectedIndex?.userName}
