@@ -36,14 +36,13 @@ const App = () => {
   useEffect(() => {
     (async () => {
       await dispatch(checkIsAuth());
+      console.log(data.token, "token from app.jsx");
     })();
   }, []);
 
   useEffect(() => {
     if (auth && data._id) {
       (async () => {
-        console.log(data.token, "token from app.jsx");
-
         await dispatch(getUser(data?._id));
         await dispatch(getCurrentUserDetails(data?._id));
       })();
