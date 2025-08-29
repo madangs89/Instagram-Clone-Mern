@@ -18,6 +18,7 @@ import { like } from "../Redux/Services/UserThunk";
 import CommentShowingDiv from "../components/Deloper/CommentShowingDiv";
 import FollowUnFolowButton from "../components/Deloper/FollowUnFolowButton";
 import { toast } from "sonner";
+import Loader from "../components/Deloper/Loader";
 
 const ExploreDetailsPage = () => {
   const { id, type } = useParams();
@@ -30,7 +31,7 @@ const ExploreDetailsPage = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isMuted, setIsMuted] = useState(true);
   const [showAllComments, setShowAllComments] = useState(false);
-
+  const [loading, setLoading] = useState(true);
   const videoRef = useRef(null);
 
   useEffect(() => {
@@ -41,6 +42,7 @@ const ExploreDetailsPage = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       if (type === "reel") {
         const res = await dispatch(getReelById(id));
         setSelectedData(res.payload.reel);
@@ -49,6 +51,7 @@ const ExploreDetailsPage = () => {
         setSelectedData(res.payload.post);
       }
     };
+    setLoading(false);
     fetchData();
   }, [id, type, dispatch]);
 
@@ -111,6 +114,14 @@ const ExploreDetailsPage = () => {
       toast.error("Something went wrong");
     }
   };
+
+  if (loading) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center">
+        <Loader />
+      </div>
+    );
+  }
 
   const renderMedia = () => {
     const mediaArray = selectedData?.media;
