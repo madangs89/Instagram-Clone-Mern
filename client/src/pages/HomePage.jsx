@@ -16,12 +16,17 @@ const HomePage = () => {
   const dispatch = useDispatch();
   useEffect(() => {
     if (!userData._id) {
-      console.log("user data is not there so calling api", authData.token);
-
+      console.log(
+        "user data is not there so calling api authData:",
+        authData.token
+      );
       (async () => {
         await dispatch(checkIsAuth());
+        console.log(
+          "user data is not there so calling api authData:",
+          authData.token
+        );
       })();
-      console.log("user data is not there so calling api", authData.token);
     }
   }, [userData._id, dispatch]);
   return (
