@@ -542,8 +542,9 @@ const MessageChat = ({ setIsChatOpen }) => {
     return diffMins > 5 ? true : false;
   };
   return (
-    <>
-      <div className="p-4 w-screen flex items-center justify-between border-b font-semibold absolute right-0 top-0 bg-black z-20 border-[0.1px] border-[#2f2f2f] text-sm sm:text-base">
+    <div className="relative w-screen">
+      {/* header */}
+      <div className="p-4 flex items-center justify-between border-b font-semibold absolute right-0 top-0 bg-black z-20 border-[0.1px] border-[#2f2f2f] text-sm sm:text-base">
         <div
           onClick={() => {
             if (!selectedIndex.isGroup && id !== "myAi") {
@@ -582,62 +583,17 @@ const MessageChat = ({ setIsChatOpen }) => {
         </div>
         <ArrowLeft
           onClick={handleArrowClick}
-          className="w-6 h-6 cursor-pointer"
+          className="w-6 h-6 text-white cursor-pointer"
         />
       </div>
       <div
-        // style={{ height }}
-        className="flex flex-col md:h-screen h-[80vh] w-full bg-black text-white overflow-hidden"
+        style={{ height: `calc(100vh - 72px)` }}
+        className="flex flex-col w-full bg-black text-white overflow-hidden"
       >
-        {/* Header (always visible) */}
-        {/* <div className="p-4 flex items-center justify-between border-b font-semibold absolute left-0 top-0 bg-black z-20 border-[0.1px] border-[#2f2f2f] text-sm sm:text-base">
-          <div
-            onClick={() => {
-              if (!selectedIndex.isGroup && id !== "myAi") {
-                navigate(`/profile/${selectedIndex?.userId}`); // <-- fixed backticks
-              }
-            }}
-            className="flex gap-2 cursor-pointer items-center"
-          >
-            <img
-              className="w-10 h-10 rounded-full object-cover"
-              src={
-                selectedIndex.isGroup
-                  ? selectedIndex?.groupAvatar
-                  : selectedIndex?.avatar
-              }
-              alt=""
-            />
-            <div className="flex flex-col">
-              <div className="font-medium">
-                {selectedIndex.isGroup
-                  ? selectedIndex?.groupName
-                  : selectedIndex?.userName}
-              </div>
-              <div className="text-xs text-gray-500">
-                {selectedIndex.isGroup
-                  ? selectedIndex?.groupName
-                  : selectedIndex?.name}{" "}
-                •{" "}
-                {id !== "myAi"
-                  ? selectedIndex.isGroup
-                    ? "Group"
-                    : "User"
-                  : "Bot"}
-              </div>
-            </div>
-          </div>
-          <ArrowLeft
-            onClick={handleArrowClick}
-            className="w-6 h-6 cursor-pointer"
-          />
-        </div> */}
-
         {/* MESSAGES SCROLLER */}
         <div
           ref={messageRef}
           className="flex-1 relative overflow-x-hidden overflow-y-auto px-3 py-2 space-y-5 scroll-smooth"
-          // style={{ height: "100%" }}
         >
           {/* Reactions modal */}
           {showReactionsModal &&
@@ -973,7 +929,7 @@ const MessageChat = ({ setIsChatOpen }) => {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 export default MessageChat;
