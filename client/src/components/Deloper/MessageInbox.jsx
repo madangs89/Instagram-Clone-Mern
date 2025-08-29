@@ -101,8 +101,8 @@ const MessageInbox = ({ allInbox }) => {
 
   if (allInbox && allInbox.length === 0) {
     return (
-      <div className="w-full h-full flex items-center justify-center">
-        <Loader />
+      <div className="flex items-center justify-center h-full">
+        <p className="text-gray-500">No messages found</p>
       </div>
     );
   }
@@ -140,8 +140,7 @@ const MessageInbox = ({ allInbox }) => {
           </div>
         </div>
 
-        {allInbox &&
-          allInbox.length > 0 &&
+        {allInbox && allInbox.length > 0 ? (
           allInbox.map((chat, index) => (
             <div
               key={index}
@@ -171,7 +170,12 @@ const MessageInbox = ({ allInbox }) => {
                 <div className="w-2 h-2 bg-blue-500 rounded-full" />
               )}
             </div>
-          ))}
+          ))
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <Loader />
+          </div>
+        )}
       </div>
       //{" "}
     </div>
