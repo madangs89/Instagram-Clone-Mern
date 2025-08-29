@@ -46,12 +46,13 @@ const ExploreDetailsPage = () => {
       if (type === "reel") {
         const res = await dispatch(getReelById(id));
         setSelectedData(res.payload.reel);
+        setLoading(false);
       } else {
         const res = await dispatch(getPostById(id));
         setSelectedData(res.payload.post);
+        setLoading(false);
       }
     };
-    setLoading(false);
     fetchData();
   }, [id, type, dispatch]);
 
