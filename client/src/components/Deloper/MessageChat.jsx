@@ -537,16 +537,16 @@ const MessageChat = ({ setIsChatOpen }) => {
   };
 
   return (
-    <div className="flex flex-col h-[100dvh] w-full bg-black text-white relative">
-      {/* Header */}
-      <div className="sticky top-0 z-10 bg-black border-b border-[#2f2f2f] p-4 flex items-center justify-between font-semibold text-sm sm:text-base">
+    <div className="flex flex-col h-screen w-full bg-black text-white overflow-hidden">
+      {/* Header (always visible) */}
+      <div className="p-4 flex items-center justify-between border-b font-semibold sticky top-0 bg-black z-20 border-[0.1px] border-[#2f2f2f] text-sm sm:text-base">
         <div
           onClick={() => {
-            selectedIndex.isGroup === false &&
-              id !== "myAi" &&
-              navigate(`/profile/${selectedIndex?.userId}`);
+            if (!selectedIndex.isGroup && id !== "myAi") {
+              navigate(`/profile/${selectedIndex?.userId}`); // <-- fixed backticks
+            }
           }}
-          className="flex gap-2 items-center cursor-pointer"
+          className="flex gap-2 cursor-pointer items-center"
         >
           <img
             className="w-10 h-10 rounded-full object-cover"
@@ -582,70 +582,82 @@ const MessageChat = ({ setIsChatOpen }) => {
         />
       </div>
 
-      {/* Messages Container */}
+      {/* MESSAGES SCROLLER */}
       <div
         ref={messageRef}
-        className="flex-1 overflow-y-auto px-3 py-2 space-y-5"
-        style={{ paddingBottom: "120px" }} // reserve space for input
+        className="flex-1 relative overflow-x-hidden overflow-y-auto px-3 py-2 space-y-5 scroll-smooth"
+        style={{ height: "100%" }}
       >
-        {/* Reactions Modal */}
+        {/* Reactions modal */}
         {showReactionsModal &&
-          messageSlice?.currentMesageAllReactions.length > 0 && (
-            <div
-              ref={reactionRef}
-              className="fixed z-10 bottom-0 md:bottom-auto md:top-1/2 md:-translate-y-1/2 left-1/2 -translate-x-1/2 w-[97%] md:w-[400px] min-h-[350px] md:min-h-[200px] bg-neutral-900 text-white rounded-t-3xl md:rounded-2xl shadow-lg"
-            >
-              <div className="flex justify-between items-center px-4 py-3 border-b border-neutral-700">
-                <button
-                  onClick={() => setShowReactionsModal(false)}
-                  className="text-xl cursor-pointer font-bold hidden md:block"
-                >
-                  ✕
-                </button>
-                <h2 className="text-lg font-semibold">Reactions</h2>
-                <div className="w-6" />
-              </div>
-              <div className="overflow-y-auto max-h-[250px]">
-                {messageSlice.currentMesageAllReactions.map((data, index) => (
-                  <div
-                    onClick={() => handleRemoveReaction(data?.userId)}
-                    key={index}
-                    className={`flex justify-between items-center px-4 py-2 hover:bg-neutral-800 transition ${
-                      data.userId === user._id ? "cursor-pointer" : ""
-                    }`}
+          messageSlice?.currentMesageAllReactions?.length > 0 && (
+            <>
+              <div
+                className="fixed inset-0 bg-black/40 z-30"
+                onClick={() => setShowReactionsModal(false)}
+              />
+              <div
+                ref={reactionRef}
+                className="fixed z-40 bottom-0 md:bottom-auto md:top-1/2 md:-translate-y-1/2 left-1/2 -translate-x-1/2
+                 rounded-t-3xl md:rounded-2xl w-[97%] md:w-[400px] min-h-[350px] md:min-h-[200px]
+                 bg-neutral-900 text-white shadow-lg"
+              >
+                <div className="flex justify-between items-center px-4 py-3 border-b border-neutral-700">
+                  <button
+                    onClick={() => setShowReactionsModal(false)}
+                    className="text-xl cursor-pointer font-bold hidden md:block"
                   >
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={data?.avatar}
-                        alt="Avatar"
-                        className="w-10 h-10 rounded-full"
-                      />
-                      <div className="flex flex-col gap-1">
-                        <span className="text-sm">{data?.name}</span>
-                        <span className="text-[10px] text-gray-400">
-                          {data?.userId === user._id ? "Select To Remove" : ""}
-                        </span>
+                    ✕
+                  </button>
+                  <h2 className="text-lg font-semibold">Reactions</h2>
+                  <div className="w-6" />
+                </div>
+                <div className="overflow-y-auto max-h-[250px]">
+                  {messageSlice?.currentMesageAllReactions?.map(
+                    (data, index) => (
+                      <div
+                        onClick={() => handleRemoveReaction(data?.userId)}
+                        key={index}
+                        className={`flex justify-between items-center px-4 py-2 hover:bg-neutral-800 transition ${
+                          data.userId == user._id ? "cursor-pointer" : ""
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={data?.avatar}
+                            alt="Avatar"
+                            className="w-10 h-10 rounded-full"
+                          />
+                          <div className="flex gap-1 flex-col">
+                            <span className="text-sm">{data?.name}</span>
+                            <span className="text-[10px] text-gray-400">
+                              {data?.userId == user._id
+                                ? "Select To Remove"
+                                : ""}
+                            </span>
+                          </div>
+                        </div>
+                        <span className="text-lg">{data?.emoji}</span>
                       </div>
-                    </div>
-                    <span className="text-lg">{data?.emoji}</span>
-                  </div>
-                ))}
+                    )
+                  )}
+                </div>
               </div>
-            </div>
+            </>
           )}
 
-        {/* Emoji Modal */}
+        {/* Floating emoji picker (context one) */}
         {showEmoji && (
           <div
             ref={emojiRef}
-            className="fixed overflow-hidden right-0 h-[400px] z-50"
+            className="fixed bottom-16 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-sm overflow-hidden"
           >
             <EmojiPicker
               onEmojiClick={handleOnEmojiClick}
               theme="dark"
-              width="50"
-              searchDisabled={true}
-              skinTonesDisabled={true}
+              width="100%" // <-- fully visible
+              searchDisabled
+              skinTonesDisabled
               previewConfig={{ showPreview: false }}
             />
           </div>
@@ -654,144 +666,149 @@ const MessageChat = ({ setIsChatOpen }) => {
         {/* Messages */}
         {messageSlice.currentUserMessage &&
         messageSlice.currentUserMessage.length > 0 ? (
-          messageSlice.currentUserMessage.map((msg, index) => (
-            <div
-              key={index}
-              onTouchStart={(e) => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                handleTouchStart({
-                  id: msg._id ? msg._id : msg?.tempId,
-                  x: rect.left,
-                  y: rect.top,
-                });
-              }}
-              onTouchEnd={handleTouchEnd}
-              onMouseEnter={() =>
-                setHoverShow({
-                  id: msg._id || msg.tempId,
-                  right: msg?.sender === user?._id,
-                })
-              }
-              onMouseLeave={() => setHoverShow({})}
-              className={`flex flex-col relative ${
-                msg?.sender === user?._id ? "items-end" : "items-start"
-              }`}
-            >
-              {/* Media Messages */}
-              {msg.media?.map((media, i) => (
-                <div
-                  key={i}
-                  className="flex relative items-center justify-center gap-5"
-                >
-                  {msg.sender !== user._id && (
-                    <div className="absolute bottom-0 left-0 w-7 h-7 rounded-full z-10">
-                      <img
-                        src={selectedIndex.avatar}
-                        alt=""
-                        className="w-full h-full object-cover rounded-full"
-                      />
-                    </div>
-                  )}
-                  <div className="relative p-1">
-                    {media.type.includes("image") ? (
-                      <img
-                        src={media.url}
-                        alt=""
-                        className="max-w-64 max-h-64 rounded-md object-cover"
-                      />
-                    ) : (
-                      <video
-                        src={media.url}
-                        controls
-                        className="max-w-64 max-h-64 rounded-md object-cover"
-                      />
-                    )}
-                    {msg?.sender === user._id && checkTheStatus(msg.status)}
-                    {msg.reactions?.length > 0 && (
-                      <div
-                        onClick={() => handleMessageShowReactions(msg._id)}
-                        className="absolute bottom-[1px] right-0 text-[10px] bg-gray-500 px-2 py-0.5 rounded-full cursor-pointer"
-                      >
-                        {msg.reactions.map((item) => item.emoji)}
-                      </div>
-                    )}
+          messageSlice.currentUserMessage.map((msg, index) => {
+            const msgId = msg._id ?? msg?.tempId;
+
+            return (
+              <div
+                key={index}
+                onTouchStart={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  handleTouchStart({ id: msgId, x: rect.left, y: rect.top });
+                }}
+                onTouchEnd={handleTouchEnd}
+                onMouseEnter={() =>
+                  setHoverShow({ id: msgId, right: msg?.sender == user?._id })
+                }
+                onMouseLeave={() => setHoverShow({})}
+                className={`flex flex-col relative ${
+                  msg?.sender == user?._id ? "items-end" : "items-start"
+                }`}
+              >
+                {/* Mobile emoji (long-press) */}
+                {mobileEmoji && (
+                  <div className="md:hidden absolute bottom-0 left-1/2 -translate-x-1/2 w-[95%] max-w-sm z-50">
+                    <EmojiPicker
+                      onEmojiClick={handleOnEmojiClick}
+                      theme="dark"
+                      width="100%"
+                      searchDisabled
+                      skinTonesDisabled
+                      previewConfig={{ showPreview: false }}
+                    />
                   </div>
+                )}
 
-                  {/* Hover actions for media */}
-                  {hoverShow?.id === (msg?.tempId || msg?._id) && (
-                    <div className="hidden md:flex gap-2 text-white">
-                      <button className="p-1 hover:bg-gray-700 rounded-full">
-                        <Smile
-                          onClick={() => handleOpenEmoji(msg._id || msg.tempId)}
-                          size={16}
-                        />
-                      </button>
-                      <button className="p-1 hover:bg-gray-700 rounded-full">
-                        <ArrowBigLeft size={16} />
-                      </button>
-                      <button className="p-1 hover:bg-gray-700 rounded-full">
-                        •••
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ))}
-
-              {/* Text Messages */}
-              {msg.text && (
-                <div className="flex items-center gap-3 max-w-full">
-                  {msg?.sender === user._id &&
-                    hoverShow?.id === (msg?._id || msg?.tempId) && (
-                      <div className="hidden md:flex gap-2 text-white">
-                        <button className="p-1 hover:bg-gray-700 rounded-full">
-                          <Smile
-                            onClick={() => handleOpenEmoji(msg._id)}
-                            size={16}
-                          />
-                        </button>
-                        <button className="p-1 hover:bg-gray-700 rounded-full">
-                          <ArrowBigLeft size={16} />
-                        </button>
-                        <button className="p-1 hover:bg-gray-700 rounded-full">
-                          •••
-                        </button>
-                      </div>
-                    )}
-                  <div className="flex items-end gap-2">
-                    {msg?.sender !== user._id && handleTimer(msg, index) ? (
-                      <div className="w-7 h-7 rounded-full">
-                        <img
-                          src={selectedIndex.avatar}
-                          alt=""
-                          className="w-full h-full object-cover rounded-full"
-                        />
-                      </div>
-                    ) : (
-                      <div className="w-7 h-7" />
-                    )}
+                {/* MEDIA */}
+                {msg.media?.length > 0 &&
+                  msg.media.map((media, mIdx) => (
                     <div
-                      className={`px-4 py-2 rounded-lg text-sm break-words max-w-96 ${
-                        msg.sender !== user._id
-                          ? "bg-blue-500 text-white"
-                          : "bg-[#262626] text-white"
-                      } relative flex items-end`}
+                      key={mIdx}
+                      className="block p-1 overflow-hidden relative"
                     >
-                      {msg.text}
-                      {msg?.sender === user._id && checkTheStatus(msg.status)}
-                      {msg.reactions?.length > 0 && (
+                      {media.type.includes("image") ? (
+                        <div className="flex items-end justify-end flex-col">
+                          <img
+                            src={media.url}
+                            alt=""
+                            className="max-w-64 max-h-64 rounded-md object-cover"
+                          />
+                          {msg?.sender == user._id &&
+                            checkTheStatus(msg.status)}
+                        </div>
+                      ) : (
+                        <div className="flex items-end justify-end flex-col">
+                          <video
+                            src={media.url}
+                            controls
+                            className="max-w-64 max-h-64 rounded-md object-cover"
+                          />
+                          {msg?.sender == user._id &&
+                            checkTheStatus(msg.status)}
+                        </div>
+                      )}
+
+                      {/* Reactions chip on media */}
+                      {!msg.text && msg.reactions?.length > 0 && (
                         <div
                           onClick={() => handleMessageShowReactions(msg._id)}
-                          className="absolute -bottom-2 right-0 text-[10px] bg-gray-500 px-2 py-0.5 rounded-full cursor-pointer"
+                          className="absolute bottom-1 right-1 cursor-pointer bg-gray-500 text-[10px] rounded-full px-2 py-0.5"
                         >
                           {msg.reactions.map((item) => item.emoji)}
                         </div>
                       )}
+
+                      {/* HOVER ACTIONS - only for MY messages */}
+                      {!msg.text &&
+                        msg?.sender == user?._id &&
+                        hoverShow?.id === msgId && (
+                          <div className="md:flex hidden text-white h-fit overflow-hidden gap-2 absolute -top-1 right-0">
+                            <button className="p-1 hover:bg-gray-700 rounded-full">
+                              <Smile
+                                className="cursor-pointer rounded-full"
+                                onClick={() => handleOpenEmoji(msgId)}
+                                size={16}
+                              />
+                            </button>
+                            <button className="p-1 hover:bg-gray-700 rounded-full">
+                              <ArrowBigLeft size={16} />
+                            </button>
+                            <button className="p-1 hover:bg-gray-700 rounded-full">
+                              •••
+                            </button>
+                          </div>
+                        )}
+                    </div>
+                  ))}
+
+                {/* TEXT */}
+                {msg.text && (
+                  <div className="max-w-full items-center flex gap-3">
+                    <div
+                      className={`md:max-w-96 max-w-64 relative flex items-end justify-center gap-2 px-4 py-2 rounded-lg text-sm
+                              whitespace-pre-wrap break-words
+                              ${
+                                msg?.sender != user._id
+                                  ? "bg-blue-500 text-white"
+                                  : "bg-[#262626] text-white"
+                              }`}
+                    >
+                      {msg.text}
+                      {msg?.sender == user._id && checkTheStatus(msg.status)}
+
+                      {msg.reactions?.length > 0 && (
+                        <div
+                          onClick={() => handleMessageShowReactions(msg._id)}
+                          className="absolute -bottom-2 right-0 cursor-pointer bg-gray-500 text-[10px] rounded-full px-2 py-0.5"
+                        >
+                          {msg.reactions.map((item) => item.emoji)}
+                        </div>
+                      )}
+
+                      {/* HOVER ACTIONS - only for MY messages */}
+                      {/* {hoverShow?.id === msgId && (
+                        <div className="md:flex hidden text-white gap-2 absolute -top-1 right-0">
+                          <button className="p-1 hover:bg-gray-700 rounded-full">
+                            <Smile
+                              className="cursor-pointer rounded-full"
+                              onClick={() => handleOpenEmoji(msgId)}
+                              size={16}
+                            />
+                          </button>
+                          <button className="p-1 hover:bg-gray-700 rounded-full">
+                            <ArrowBigLeft size={16} />
+                          </button>
+                          <button className="p-1 hover:bg-gray-700 rounded-full">
+                            •••
+                          </button>
+                        </div>
+                      )} */}
                     </div>
                   </div>
-                </div>
-              )}
-            </div>
-          ))
+                )}
+              </div>
+            );
+          })
         ) : (
           <div className="text-center">
             {id === "myAi"
@@ -801,13 +818,16 @@ const MessageChat = ({ setIsChatOpen }) => {
         )}
       </div>
 
-      {/* Keyboard Emoji Picker */}
+      {/* KEYBOARD EMOJI PICKER (bottom, centered, mobile-safe) */}
       {keyboardEmojiShow && (
-        <div ref={keyboardEmojiRef} className="absolute bottom-0 left-1/2">
+        <div
+          ref={keyboardEmojiRef}
+          className="absolute bottom-16 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-sm"
+        >
           <EmojiPicker
             onEmojiClick={(e) => setInput((prev) => prev + e.emoji)}
             theme="dark"
-            width="50"
+            width="100%"
             searchDisabled
             skinTonesDisabled
             previewConfig={{ showPreview: false }}
@@ -815,20 +835,20 @@ const MessageChat = ({ setIsChatOpen }) => {
         </div>
       )}
 
-      {/* Input */}
-      <div className="sticky bottom-0 bg-black border-t border-[#2f2f2f] p-3 z-10">
+      {/* INPUT BAR (sticky bottom) */}
+      <div className="p-3 border-t border-[0.1px] border-[#2f2f2f] sticky bottom-0 bg-black z-20 pb-[env(safe-area-inset-bottom)]">
         <div
-          className={`flex flex-col gap-2 px-2 py-2 text-sm border ${
+          className={`flex w-full flex-col border ${
             isFileSelected && file ? "rounded-md" : "rounded-full"
-          }`}
+          } gap-2 px-2 py-2 text-sm`}
         >
           {isFileSelected && file && (
-            <div className="flex items-center gap-2">
+            <div className="flex gap-2 items-center">
               {file.type.includes("image") ? (
                 <div className="relative">
                   <img
                     src={URL.createObjectURL(file)}
-                    className="w-24 h-24 rounded-md"
+                    className="w-24 rounded-md h-24"
                   />
                   <X
                     strokeWidth={3}
@@ -836,14 +856,14 @@ const MessageChat = ({ setIsChatOpen }) => {
                       setFile(null);
                       setIsFileSelected(false);
                     }}
-                    className="absolute -top-1 -right-1 w-5 h-5 p-1 bg-black rounded-full cursor-pointer"
+                    className="absolute cursor-pointer -top-1 bg-black rounded-full -right-1 w-5 p-1 h-5"
                   />
                 </div>
               ) : (
                 <div className="relative">
                   <video
                     src={URL.createObjectURL(file)}
-                    className="w-24 h-24 rounded-md"
+                    className="w-24 rounded-md h-24"
                   />
                   <X
                     strokeWidth={3}
@@ -851,16 +871,17 @@ const MessageChat = ({ setIsChatOpen }) => {
                       setFile(null);
                       setIsFileSelected(false);
                     }}
-                    className="absolute -top-1 -right-1 w-5 h-5 p-1 bg-black rounded-full cursor-pointer"
+                    className="absolute cursor-pointer -top-1 bg-black rounded-full -right-1 w-5 p-1 h-5"
                   />
                 </div>
               )}
             </div>
           )}
+
           <div className="flex gap-2 w-full items-center">
             <Smile
               onClick={() => setKeyboardEmojiShow(true)}
-              className="cursor-pointer"
+              className="cursor-pointer rounded-full"
             />
             <Image
               className="cursor-pointer"
@@ -884,7 +905,7 @@ const MessageChat = ({ setIsChatOpen }) => {
               placeholder={
                 botLoading ? "Bot is Answering Wait!!" : "Type a message..."
               }
-              className="flex-1 focus:outline-none bg-black text-white"
+              className="flex-1 bg-transparent focus:outline-none"
             />
             {(input || (isFileSelected && file)) && (
               <SendHorizontal
@@ -892,7 +913,11 @@ const MessageChat = ({ setIsChatOpen }) => {
                 className="w-5 h-5 cursor-pointer text-blue-500"
               />
             )}
-            {id === "myAi" && botLoading && <Loader />}
+            {id === "myAi" && botLoading && (
+              <div className="flex items-center justify-center">
+                <Loader />
+              </div>
+            )}
           </div>
         </div>
       </div>
