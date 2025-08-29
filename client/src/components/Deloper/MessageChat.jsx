@@ -547,7 +547,7 @@ const MessageChat = ({ setIsChatOpen }) => {
       className="flex flex-col md:h-screen h-[80vh] w-full bg-black text-white overflow-hidden"
     >
       {/* Header (always visible) */}
-      <div className="p-4 flex items-center justify-between border-b font-semibold sticky top-0 bg-black z-20 border-[0.1px] border-[#2f2f2f] text-sm sm:text-base">
+      <div className="p-4 flex items-center justify-between border-b font-semibold absolute left-0 top-0 bg-black z-20 border-[0.1px] border-[#2f2f2f] text-sm sm:text-base">
         <div
           onClick={() => {
             if (!selectedIndex.isGroup && id !== "myAi") {
