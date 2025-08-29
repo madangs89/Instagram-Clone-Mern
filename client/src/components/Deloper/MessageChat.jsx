@@ -397,8 +397,8 @@ const MessageChat = ({ setIsChatOpen }) => {
         }
       } else {
         const tempData = { ...data, media, sender: user._id };
-        dispatch(updateCurrentUserMessage(tempData));
         setInput("");
+        dispatch(updateCurrentUserMessage(tempData));
         const result = await dispatch(createMessage(data));
         if (result?.payload?.conversationId) {
           console.log(result.payload, "result in message chat");
