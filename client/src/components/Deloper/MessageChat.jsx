@@ -593,7 +593,7 @@ const MessageChat = ({ setIsChatOpen }) => {
       {/* MESSAGES SCROLLER */}
       <div
         ref={messageRef}
-        className="h-[80vh] relative overflow-x-hidden overflow-y-auto px-3 py-2 space-y-5 scroll-smooth"
+        className="md:h-[80vh] h-[50vh] relative overflow-x-hidden overflow-y-auto px-3 py-2 space-y-5 scroll-smooth"
         // style={{ height: "100%" }}
       >
         {/* Reactions modal */}
