@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "../ui/input";
 import { ArrowLeft } from "lucide-react";
@@ -19,10 +19,11 @@ import {
 } from "../../Redux/Slice/MessageSlice";
 import { formatDistanceToNow } from "date-fns";
 import MessageSearch from "./MessageSearch";
-import { useEffect } from "react";
+
 const MessageInbox = ({ allInbox }) => {
   const navigate = useNavigate();
   const [searchShow, setSearchShow] = useState(false);
+  const [loading, setLoading] = useState(true); // ✅ added loading state
   const socket = useSelector((state) => state.socket.socket);
   const user = useSelector((state) => state.auth);
   const data = useSelector((state) => state.user);
@@ -90,6 +91,13 @@ const MessageInbox = ({ allInbox }) => {
     };
   }, [socket]);
 
+  useEffect(() => {
+    // ✅ when allInbox is defined, stop loading
+    if (allInbox !== undefined) {
+      setLoading(false);
+    }
+  }, [allInbox]);
+
   const isUnReadMessage = (chat) => {
     if (!chat?.unreadCount || !Array.isArray(chat.unreadCount)) return false;
 
@@ -133,7 +141,12 @@ const MessageInbox = ({ allInbox }) => {
           </div>
         </div>
 
-        {allInbox && allInbox.length > 0 ? (
+        {/* ✅ Loader / Messages / Empty state */}
+        {loading ? (
+          <div className="w-full h-full flex items-center justify-center">
+            <Loader />
+          </div>
+        ) : allInbox && allInbox.length > 0 ? (
           allInbox.map((chat, index) => (
             <div
               key={index}
@@ -165,17 +178,11 @@ const MessageInbox = ({ allInbox }) => {
             </div>
           ))
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Loader />
-          </div>
-        )}
-
-        {allInbox && allInbox.length === 0 && (
           <div className="flex items-center justify-center h-full">
             <p className="text-gray-500">No messages found</p>
           </div>
         )}
-      </div>{" "}
+      </div>
     </div>
   );
 };
