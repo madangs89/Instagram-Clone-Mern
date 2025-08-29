@@ -99,13 +99,6 @@ const MessageInbox = ({ allInbox }) => {
     );
   };
 
-  if (allInbox && allInbox.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <p className="text-gray-500">No messages found</p>
-      </div>
-    );
-  }
   return (
     <div className="h-full text-white overflow-hidden">
       <div className="px-4">
@@ -176,8 +169,13 @@ const MessageInbox = ({ allInbox }) => {
             <Loader />
           </div>
         )}
-      </div>
-      //{" "}
+
+        {allInbox && allInbox.length === 0 && (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-gray-500">No messages found</p>
+          </div>
+        )}
+      </div>{" "}
     </div>
   );
 };
