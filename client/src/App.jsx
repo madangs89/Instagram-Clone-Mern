@@ -51,7 +51,7 @@ const App = () => {
 
   useEffect(() => {
     if (auth && data._id) {
-      const socket = io("http://localhost:3005", {
+      const socket = io("https://instagram-clone-mern-socket.onrender.com", {
         query: {
           userId: data._id,
         },
