@@ -129,7 +129,9 @@ const FollowerFollowingShowing = ({ onClose, F, id }) => {
               </div>
             ))
           ) : (
-            <Loader />
+            <div className="w-full h-full flex items-center justify-center">
+              <Loader />
+            </div>
           )}
           {!loading && showingData && showingData.length === 0 && (
             <div className="text-white text-center">No {F} yet</div>
