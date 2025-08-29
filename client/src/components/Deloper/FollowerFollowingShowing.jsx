@@ -10,6 +10,7 @@ import {
 } from "../../Redux/Services/UserThunk";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
+import Loader from "./Loader";
 
 const FollowerFollowingShowing = ({ onClose, F, id }) => {
   const dialogRef = useRef(null);
@@ -17,6 +18,7 @@ const FollowerFollowingShowing = ({ onClose, F, id }) => {
   const data = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const [showingData, setShowingData] = useState([]);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dialogRef.current && !dialogRef.current.contains(event.target)) {
@@ -31,12 +33,14 @@ const FollowerFollowingShowing = ({ onClose, F, id }) => {
 
   useEffect(() => {
     (async () => {
+      setLoading(true);
       const data = await dispatch(getFollowAndFollowingUsers(id));
       if (F == "followers" || F == "Followers") {
         setShowingData(data?.payload?.user?.followers);
       } else if (F === "following" || F === "Following") {
         setShowingData(data?.payload?.user?.following);
       }
+      setLoading(false);
     })();
   }, []);
 
@@ -51,12 +55,14 @@ const FollowerFollowingShowing = ({ onClose, F, id }) => {
     console.log("clicking", data?.following?.includes(id));
     if (data?.following?.includes(id)) {
       try {
+        setLoading(true);
         const result = await dispatch(unFollowUser(id));
         if (!result?.payload?.success) {
           // rollback on failure
           dispatch(addAndRemoveFollower(id));
           toast.error(`Failed to unfollow the user`);
         }
+        setLoading(false);
       } catch (error) {
         dispatch(addAndRemoveFollower(id));
         console.error(error);
@@ -65,12 +71,14 @@ const FollowerFollowingShowing = ({ onClose, F, id }) => {
       }
     } else {
       try {
+        setLoading(true);
         const result = await dispatch(followUser(id));
         if (!result?.payload?.success) {
           // rollback on failure
           dispatch(addAndRemoveFollower(id));
           toast.error(`Failed to follow the user`);
         }
+        setLoading(false);
       } catch (error) {
         dispatch(addAndRemoveFollower(id));
         console.error(error);
@@ -79,10 +87,6 @@ const FollowerFollowingShowing = ({ onClose, F, id }) => {
       }
     }
   };
-
-  console.log(data.following, "data. floowing");
-  console.log(showingData, "showingData");
-
   return (
     <div className="fixed inset-0 z-[50000] bg-black/70 flex justify-center items-end md:items-center">
       <div
@@ -96,7 +100,7 @@ const FollowerFollowingShowing = ({ onClose, F, id }) => {
         </div>
         {/* Scrollable Comments */}
         <div className="flex-1 overflow-y-auto px-4 py-2 space-y-6 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-          {showingData && showingData.length > 0 ? (
+          {!loading && showingData && showingData.length > 0 ? (
             showingData.map((d, index) => (
               <div
                 key={index}
@@ -125,6 +129,9 @@ const FollowerFollowingShowing = ({ onClose, F, id }) => {
               </div>
             ))
           ) : (
+            <Loader />
+          )}
+          {!loading && showingData && showingData.length === 0 && (
             <div className="text-white text-center">No {F} yet</div>
           )}
         </div>
