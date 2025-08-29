@@ -9,7 +9,6 @@ const FullPageLoader = () => {
         <div className="flex items-center justify-center">
           <Loader />
         </div>
-        <p className="text-white animate-pulse  [animation-duration:1s] text-lg font-medium">Loading Instagram...</p>
       </div>
     </div>
   );

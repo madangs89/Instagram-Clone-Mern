@@ -23,23 +23,7 @@ import { toast } from "sonner";
 import Swal from "sweetalert2";
 import { logoutUser } from "../Redux/Services/AuthThunk";
 import FollowerFollowingShowing from "../components/Deloper/FollowerFollowingShowing";
-const dummyHighlights = [
-  { id: 1, label: "🪔", image: "/highlight1.jpg" },
-  { id: 2, label: "💪", image: "/highlight2.jpg" },
-  { id: 3, label: "💜", image: "/highlight3.jpg" },
-  { id: 1, label: "🪔", image: "/highlight1.jpg" },
-  { id: 2, label: "💪", image: "/highlight2.jpg" },
-  { id: 3, label: "💜", image: "/highlight3.jpg" },
-  { id: 1, label: "🪔", image: "/highlight1.jpg" },
-  { id: 2, label: "💪", image: "/highlight2.jpg" },
-  { id: 3, label: "💜", image: "/highlight3.jpg" },
-  { id: 1, label: "🪔", image: "/highlight1.jpg" },
-  { id: 2, label: "💪", image: "/highlight2.jpg" },
-  { id: 3, label: "💜", image: "/highlight3.jpg" },
-  { id: 1, label: "🪔", image: "/highlight1.jpg" },
-  { id: 2, label: "💪", image: "/highlight2.jpg" },
-  { id: 3, label: "💜", image: "/highlight3.jpg" },
-];
+
 const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("posts");
   const [show, setShow] = useState(false);
