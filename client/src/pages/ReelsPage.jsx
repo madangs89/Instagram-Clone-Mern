@@ -3,6 +3,7 @@ import ReelVedio from "../components/Deloper/ReelVedio";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllUnlikedReels } from "../Redux/Services/mediaFeedThunk";
 import { addView } from "../Redux/Services/mediaUploadThunk";
+import Loader from "../components/Deloper/Loader";
 
 const ReelsPage = () => {
   const [activeReelId, setActiveReelId] = useState(null);
@@ -14,7 +15,7 @@ const ReelsPage = () => {
     ? { height: `calc(100vh - ${navHeight}px)` }
     : {};
 
-  const reels = useSelector((state) => state.mediaFeed.reels);
+  const reels = useSelector((state) => state.mediaFeed);
   const viewFeed = useSelector((state) => state.mediaUpload.userViews);
   const dispatch = useDispatch();
   useEffect(() => {
@@ -62,6 +63,14 @@ const ReelsPage = () => {
       console.log(data, "data");
     })();
   }, []);
+
+  if (reels.loading) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center">
+        <Loader />
+      </div>
+    );
+  }
   return (
     <div className="w-full h-screen bg-black flex overflow-hidden justify-center">
       <div
@@ -69,8 +78,8 @@ const ReelsPage = () => {
         style={containerStyle}
         ref={containerRer}
       >
-        {reels && reels.length > 0 ? (
-          reels.map((reel, index) => (
+        {reels.reels && reels.reels.length > 0 ? (
+          reels.reels.map((reel, index) => (
             <div
               key={reel._id + index}
               data-id={reel?._id}
