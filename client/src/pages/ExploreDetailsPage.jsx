@@ -85,7 +85,16 @@ const ExploreDetailsPage = () => {
     }
   };
 
-  console.log(selectedData);
+  useEffect(() => {
+    return () => {
+      setSelectedData({});
+      setComments([]);
+      setComment("");
+      setIsMobile(window.innerWidth < 768);
+      setIsMuted(true);
+      setShowAllComments(false);
+    };
+  }, []);
 
   const addComments = async () => {
     const result = await dispatch(
@@ -130,25 +139,20 @@ const ExploreDetailsPage = () => {
             playsInline
             className="max-h-screen w-auto object-contain"
           />
-          {isMobile && (
-            <button
-              onClick={toggleMute}
-              className="absolute top-4 right-4 bg-black/50 rounded-full p-2"
-            >
-              {isMuted ? (
-                <VolumeX className="text-white" />
-              ) : (
-                <Volume2 className="text-white" />
-              )}
-            </button>
-          )}
+          <button
+            onClick={toggleMute}
+            className="absolute top-4 right-4 bg-black/50 rounded-full p-2"
+          >
+            {isMuted ? (
+              <VolumeX className="text-white" />
+            ) : (
+              <Volume2 className="text-white" />
+            )}
+          </button>
         </div>
       );
     }
   };
-
-  console.log(selectedData, "selectedData");
-
   /** ------------------ MOBILE LAYOUT ------------------ **/
   if (isMobile) {
     return (
