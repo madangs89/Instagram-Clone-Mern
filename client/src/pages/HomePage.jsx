@@ -11,15 +11,17 @@ import { checkIsAuth } from "../Redux/Services/AuthThunk.js";
 
 const HomePage = () => {
   const userData = useSelector((state) => state.user);
+  const authData = useSelector((state) => state.auth);
 
   const dispatch = useDispatch();
   useEffect(() => {
     if (!userData._id) {
-      console.log("user data is not there so calling api");
-      
+      console.log("user data is not there so calling api", authData.token);
+
       (async () => {
         await dispatch(checkIsAuth());
       })();
+      console.log("user data is not there so calling api", authData.token);
     }
   }, [userData._id, dispatch]);
   return (
