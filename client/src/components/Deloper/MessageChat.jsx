@@ -515,7 +515,6 @@ const MessageChat = ({ setIsChatOpen }) => {
     navigate(`/message`);
     setIsChatOpen(false);
   };
-
   if (messageSlice.loading2) {
     return (
       <div className="w-full h-full flex items-center justify-center">
@@ -523,7 +522,6 @@ const MessageChat = ({ setIsChatOpen }) => {
       </div>
     );
   }
-
   const handleTimer = (msg, index) => {
     const dateA = new Date(msg?.createdAt);
     const dateB = new Date(
@@ -532,10 +530,8 @@ const MessageChat = ({ setIsChatOpen }) => {
     const diffMs = dateA - dateB;
     const diffMins = Math.round(diffMs / 1000 / 60);
     console.log(diffMins, "diffMins");
-
     return diffMins > 5 ? true : false;
   };
-
   return (
     <div className="flex flex-col h-[100dvh] w-full bg-black text-white overflow-hidden">
       {/* Header (always visible) */}
