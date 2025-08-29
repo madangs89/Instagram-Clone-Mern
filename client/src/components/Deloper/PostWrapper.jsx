@@ -28,26 +28,29 @@ const PostWrapper = () => {
     postElements.forEach((el) => observer.observe(el));
     return () => {
       postElements.forEach((el) => observer.unobserve(el));
+      observer.disconnect();
     };
   }, [posts]);
-  if (posts.loading) {
-    return (
-      <div className="flex mt-4 flex-col relative w-full md:max-w-2xl overflow-hidden ">
-        <Loader />
-      </div>
-    );
-  }
 
   return (
     <div
       ref={containerRer}
       className="flex mt-4 flex-col relative w-full md:max-w-2xl overflow-hidden "
     >
-      {posts?.posts.map((post) => (
-        <div key={post._id} data-id={post._id}>
-          <PostCard post={post} isActive={activePostId == post._id} />
+      {!posts.loading && posts.posts ? (
+        posts?.posts.map((post) => (
+          <div key={post._id} data-id={post._id}>
+            <PostCard post={post} isActive={activePostId == post._id} />
+          </div>
+        ))
+      ) : (
+        <Loader />
+      )}
+      {posts.posts?.length === 0 && !posts.loading && (
+        <div className="flex items-center justify-center h-full">
+          <p className="text-gray-500">No posts available</p>
         </div>
-      ))}
+      )}
     </div>
   );
 };
