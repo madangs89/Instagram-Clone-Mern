@@ -48,6 +48,7 @@ const MessageChat = ({ setIsChatOpen }) => {
   const messageSlice = useSelector((state) => state.message);
   const user = useSelector((state) => state.user);
   const selectedIndex = messageSlice.selectedIndex;
+  const [height, setHeight] = useState(window.innerHeight);
   const { id } = useParams();
   const navigate = useNavigate();
   const inputRef = useRef(null);
@@ -506,6 +507,14 @@ const MessageChat = ({ setIsChatOpen }) => {
     };
   }, [input, file]);
 
+  useEffect(() => {
+    const handleResize = () => setHeight(window.innerHeight);
+    window.addEventListener("resize", handleResize);
+    setHeight(window.innerHeight);
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const handleArrowClick = () => {
     socket.emit("openedConversation", {
       userId: user._id,
@@ -533,7 +542,10 @@ const MessageChat = ({ setIsChatOpen }) => {
     return diffMins > 5 ? true : false;
   };
   return (
-    <div className="flex flex-col h-[100dvh] w-full bg-black text-white overflow-hidden">
+    <div
+      style={{ height }}
+      className="flex flex-col w-full bg-black text-white overflow-hidden"
+    >
       {/* Header (always visible) */}
       <div className="p-4 flex items-center justify-between border-b font-semibold sticky top-0 bg-black z-20 border-[0.1px] border-[#2f2f2f] text-sm sm:text-base">
         <div
