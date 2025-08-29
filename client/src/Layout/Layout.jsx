@@ -15,17 +15,21 @@ import { getUnReadMessageCount } from "../Redux/Services/MessageThunk";
 const Layout = () => {
   const dispatch = useDispatch();
   const auth = useSelector((state) => state.auth.isAuthenticated);
+  const data = useSelector((state) => state.auth);
   const socket = useSelector((state) => state.socket.socket);
 
   // const data = useSelector((state) => state.auth);
   useEffect(() => {
     (async () => {
+      if (!auth) return;
+      console.log(data.token, "token from layout");
       await dispatch(getAllUnlikedPosts());
     })();
   }, []);
 
   useEffect(() => {
     (async () => {
+      if (!auth) return;
       await dispatch(getAllUnlikedStories());
     })();
   }, []);
