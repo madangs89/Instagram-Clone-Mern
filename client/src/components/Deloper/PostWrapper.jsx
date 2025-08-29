@@ -30,9 +30,12 @@ const PostWrapper = () => {
       postElements.forEach((el) => observer.unobserve(el));
     };
   }, [posts]);
-
   if (posts.loading) {
-    return <Loader />;
+    return (
+      <div className="flex mt-4 flex-col relative w-full md:max-w-2xl overflow-hidden ">
+        <Loader />
+      </div>
+    );
   }
 
   return (
