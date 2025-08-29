@@ -542,7 +542,7 @@ const MessageChat = ({ setIsChatOpen }) => {
     return diffMins > 5 ? true : false;
   };
   return (
-    <div className="relative w-screen h-screen flex flex-col bg-black text-white">
+    <div className="relative w-full h-screen flex flex-col bg-black text-white">
       {/* HEADER */}
       <div className="p-4 flex items-center justify-between border-b font-semibold sticky top-0 z-20 bg-black border-[0.1px] border-[#2f2f2f] text-sm sm:text-base">
         <div
