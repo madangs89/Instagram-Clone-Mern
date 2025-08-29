@@ -230,7 +230,7 @@ export const createConversation = async (req, res) => {
     }
     if (!members || members.length == 0 || !Array.isArray(members))
       return res.status(400).json({ message: "Missing fields" });
-    unreadCount = [
+    const unreadCount = [
       { userId, count: 0 },
       ...members.map((member) => ({ userId: member, count: 0 })),
     ];
@@ -241,6 +241,7 @@ export const createConversation = async (req, res) => {
       message: "Conversation created",
       success: true,
       conversation,
+      unreadCount,
     });
   } catch (error) {
     console.error("Error in createConversation:", error);
