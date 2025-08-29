@@ -49,7 +49,7 @@ export const createPost = async (req, res) => {
       .status(201)
       .json({ success: true, message: "Post created", post: newPost });
   } catch (error) {
-    console.error("Create Post Error:", error);
+    console.error("Create Post Error:", error.message);
     return res.status(500).json({ success: false, message: "Server Error" });
   }
 };

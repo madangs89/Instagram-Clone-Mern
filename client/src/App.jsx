@@ -69,6 +69,7 @@ const App = () => {
     });
 
     return () => {
+      socket.off("message");
       socket.emit("removeUser", { userId: data._id });
     };
   }, [socket]);
