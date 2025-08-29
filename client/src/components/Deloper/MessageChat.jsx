@@ -543,8 +543,8 @@ const MessageChat = ({ setIsChatOpen }) => {
   };
   return (
     <div
-      style={{ height }}
-      className="flex flex-col w-full bg-black text-white overflow-hidden"
+      // style={{ height }}
+      className="flex flex-col md:h-screen h-[80vh] w-full bg-black text-white overflow-hidden"
     >
       {/* Header (always visible) */}
       <div className="p-4 flex items-center justify-between border-b font-semibold sticky top-0 bg-black z-20 border-[0.1px] border-[#2f2f2f] text-sm sm:text-base">
@@ -593,7 +593,7 @@ const MessageChat = ({ setIsChatOpen }) => {
       {/* MESSAGES SCROLLER */}
       <div
         ref={messageRef}
-        className="md:h-[80vh] h-[72vh] relative overflow-x-hidden overflow-y-auto px-3 py-2 space-y-5 scroll-smooth"
+        className="flex-1 relative overflow-x-hidden overflow-y-auto px-3 py-2 space-y-5 scroll-smooth"
         // style={{ height: "100%" }}
       >
         {/* Reactions modal */}
