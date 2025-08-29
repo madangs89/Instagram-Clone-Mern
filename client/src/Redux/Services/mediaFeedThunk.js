@@ -58,22 +58,28 @@ export const getAllUnlikedStories = createAsyncThunk(
     }
   }
 );
+
 export const veiwStory = createAsyncThunk(
   "mediaFeed/viewStory",
   async (storyId, { getState, rejectWithValue }) => {
     try {
       const token = getState().auth.token;
-      const response = await api2.patch(`/story/update/${storyId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api2.patch(
+        `/story/update/${storyId}`,
+        {}, // if no body needed
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Error");
     }
   }
 );
+
 export const curretStoryView = createAsyncThunk(
   "mediaFeed/curretStoryView",
   async (storyId, { getState, rejectWithValue }) => {

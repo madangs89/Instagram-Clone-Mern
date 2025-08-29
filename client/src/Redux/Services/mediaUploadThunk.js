@@ -11,9 +11,14 @@ const api2 = axios.create({
 });
 export const addPost = createAsyncThunk(
   "mediaUpload/post",
-  async (formData, { rejectWithValue }) => {
+  async (formData, {getState, rejectWithValue }) => {
     try {
-      const response = await api.post("/post", formData);
+      const token = getState().auth.token;
+      const response = await api.post("/post", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Error");
@@ -22,9 +27,14 @@ export const addPost = createAsyncThunk(
 );
 export const addReel = createAsyncThunk(
   "mediaUpload/reel",
-  async (formData, { rejectWithValue }) => {
+  async (formData, {getState, rejectWithValue }) => {
     try {
-      const response = await api.post("/reel", formData);
+      const token = getState().auth.token;
+      const response = await api.post("/reel", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       console.log(response, "response");
 
       return response.data;
@@ -35,9 +45,14 @@ export const addReel = createAsyncThunk(
 );
 export const addStory = createAsyncThunk(
   "mediaUpload/story",
-  async (formData, { rejectWithValue }) => {
+  async (formData, {getState, rejectWithValue }) => {
     try {
-      const response = await api2.post("/story/create", formData);
+      const token = getState().auth.token;
+      const response = await api2.post("/story/create", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Error");
@@ -46,9 +61,14 @@ export const addStory = createAsyncThunk(
 );
 export const addComment = createAsyncThunk(
   "mediaUpload/addComment",
-  async (data, { rejectWithValue }) => {
+  async (data, {getState, rejectWithValue }) => {
     try {
-      const response = await api.post("/comment", data);
+      const token = getState().auth.token;
+      const response = await api.post("/comment", data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Error");
@@ -57,9 +77,14 @@ export const addComment = createAsyncThunk(
 );
 export const getAllComments = createAsyncThunk(
   "mediaUpload/getAllComments",
-  async (mediaId, { rejectWithValue }) => {
+  async (mediaId, {getState, rejectWithValue }) => {
     try {
-      const response = await api.get(`/comment/${mediaId}`);
+      const token = getState().auth.token;
+      const response = await api.get(`/comment/${mediaId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Error");
@@ -68,9 +93,14 @@ export const getAllComments = createAsyncThunk(
 );
 export const deleteComment = createAsyncThunk(
   "mediaUpload/delete",
-  async (commentId, { rejectWithValue }) => {
+  async (commentId, {getState, rejectWithValue }) => {
     try {
-      const response = await api.delete(`/comment/${commentId}`);
+      const token = getState().auth.token;
+      const response = await api.delete(`/comment/${commentId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Error");
@@ -79,9 +109,14 @@ export const deleteComment = createAsyncThunk(
 );
 export const addView = createAsyncThunk(
   "mediaUpload/addView",
-  async (data, { rejectWithValue }) => {
+  async (data, {getState, rejectWithValue }) => {
     try {
-      const response = await api.post(`/reel/view/create`, data);
+      const token = getState().auth.token;
+      const response = await api.post(`/reel/view/create`, data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Error");

@@ -8,9 +8,14 @@ const api = axios.create({
 
 export const getAllConversationAndGroup = createAsyncThunk(
   "messsage/getAllConversatoin",
-  async (_, { rejectWithValue }) => {
+  async (_, { getState, rejectWithValue }) => {
     try {
-      const response = await api.get(`/message/all`);
+      const token = getState().auth.token;
+      const response = await api.get(`/message/all`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       console.log(response.data.data, "response in message thunk");
 
       return response?.data?.data;
@@ -21,11 +26,20 @@ export const getAllConversationAndGroup = createAsyncThunk(
 );
 export const addConversation = createAsyncThunk(
   "messsage/addConversation",
-  async ({ members }, { rejectWithValue }) => {
+  async ({ members }, { getState, rejectWithValue }) => {
     try {
-      const response = await api.post(`/message/conversation/create`, {
-        members,
-      });
+      const token = getState().auth.token;
+      const response = await api.post(
+        `/message/conversation/create`,
+        {
+          members,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       console.log(response.data.conversation, "response in message thunk");
 
       return response?.data?.conversation;
@@ -36,9 +50,14 @@ export const addConversation = createAsyncThunk(
 );
 export const getCurrentUserMessage = createAsyncThunk(
   "message/currentUserMessage",
-  async (data, { rejectWithValue }) => {
+  async (data, { getState, rejectWithValue }) => {
     try {
-      const response = await api.get(`/message/all/messages/${data.id}`);
+      const token = getState().auth.token;
+      const response = await api.get(`/message/all/messages/${data.id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       console.log(response.data.messages, "response in message thunk");
 
       return response?.data?.messages;
@@ -49,9 +68,14 @@ export const getCurrentUserMessage = createAsyncThunk(
 );
 export const createMessage = createAsyncThunk(
   "message/createMessage",
-  async (data, { rejectWithValue }) => {
+  async (data, { getState, rejectWithValue }) => {
     try {
-      const response = await api.post("/message/create/message", data);
+      const token = getState().auth.token;
+      const response = await api.post("/message/create/message", data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       console.log(response.data.messageData, "response in message thunk");
 
       return response?.data?.messageData;
@@ -62,9 +86,14 @@ export const createMessage = createAsyncThunk(
 );
 export const uploadMediatoClodinary = createAsyncThunk(
   "message/uploadMediatoClodinary",
-  async (data, { rejectWithValue }) => {
+  async (data, { getState, rejectWithValue }) => {
     try {
-      const response = await api.post("/message/upload/files", data);
+      const token = getState().auth.token;
+      const response = await api.post("/message/upload/files", data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       console.log(response.data.data, "response in message thunk");
       return response?.data;
     } catch (error) {
@@ -74,9 +103,14 @@ export const uploadMediatoClodinary = createAsyncThunk(
 );
 export const addReactions = createAsyncThunk(
   "message/addReactions",
-  async (data, { rejectWithValue }) => {
+  async (data, { getState, rejectWithValue }) => {
     try {
-      const response = await api.post("/message/add/reactions", data);
+      const token = getState().auth.token;
+      const response = await api.post("/message/add/reactions", data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       console.log(response.data, "response in message thunk");
       return response?.data;
     } catch (error) {
@@ -86,10 +120,16 @@ export const addReactions = createAsyncThunk(
 );
 export const getAllMessageReaction = createAsyncThunk(
   "message/getAllMessageReaction",
-  async (data, { rejectWithValue }) => {
+  async (data, { getState, rejectWithValue }) => {
     try {
+      const token = getState().auth.token;
       const response = await api.get(
-        `/message/all/reactions/${data.messageId}`
+        `/message/all/reactions/${data.messageId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       console.log(response.data, "response in message thunk");
       return response?.data;
@@ -100,9 +140,15 @@ export const getAllMessageReaction = createAsyncThunk(
 );
 export const removeMessageReaction = createAsyncThunk(
   "message/removeMessageReaction",
-  async (data, { rejectWithValue }) => {
+  async (data, { getState, rejectWithValue }) => {
     try {
-      const response = await api.delete(`/message/delete/reactions`, { data });
+      const token = getState().auth.token;
+      const response = await api.delete(`/message/delete/reactions`, {
+        data,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       console.log(response.data, "response in message thunk");
       return response?.data.data;
     } catch (error) {
@@ -112,9 +158,14 @@ export const removeMessageReaction = createAsyncThunk(
 );
 export const getConversationByUserId = createAsyncThunk(
   "message/getConversationByUserId",
-  async (data, { rejectWithValue }) => {
+  async (data, { getState, rejectWithValue }) => {
     try {
-      const response = await api.post(`/message/get/conversation`, data);
+      const token = getState().auth.token;
+      const response = await api.post(`/message/get/conversation`, data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       return response?.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Erorr");
@@ -124,20 +175,35 @@ export const getConversationByUserId = createAsyncThunk(
 
 export const markAllChatsAsRead = createAsyncThunk(
   "message/markAllChatsAsRead",
-  async (id, { rejectWithValue }) => {
+  async (id, { getState, rejectWithValue }) => {
     try {
-      const response = await api.post(`/message/markAsRead/${id}`);
+      const token = getState().auth.token;
+      const response = await api.post(
+        `/message/markAsRead/${id}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       return response?.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || "Erorr");
+      return rejectWithValue(error.response?.data || "Error");
     }
   }
 );
+
 export const getUnReadMessageCount = createAsyncThunk(
   "message/getUnReadMessageCount",
-  async (id, { rejectWithValue }) => {
+  async (id, { getState, rejectWithValue }) => {
     try {
-      const response = await api.get(`/message/unreadChatsCount`);
+      const token = getState().auth.token;
+      const response = await api.get(`/message/unreadChatsCount`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       return response?.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Erorr");
