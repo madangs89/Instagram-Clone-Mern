@@ -153,7 +153,10 @@ export default function PostCard({ post, isActive }) {
             •{" "}
             {formatDistanceToNow(new Date(post?.createdAt), {
               addSuffix: true,
-            })}
+            })
+              .split(" ") // split into words
+              .slice(0, 3) // take first 3 words
+              .join(" ")}{" "}
           </span>
         </div>
         <button
