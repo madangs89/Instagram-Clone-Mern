@@ -6,8 +6,6 @@ import MobileNavTop from "../components/Deloper/MobileNavTop.jsx";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { checkIsAuth } from "../Redux/Services/AuthThunk.js";
-// import { useEffect } from "react";
-// import { checkIsAuth } from "../Redux/Services/AuthThunk.js";
 
 const HomePage = () => {
   const userData = useSelector((state) => state.user);
@@ -16,10 +14,6 @@ const HomePage = () => {
   const dispatch = useDispatch();
   useEffect(() => {
     if (!userData._id) {
-      console.log(
-        "user data is not there so calling api authData:",
-        authData.token
-      );
       (async () => {
         await dispatch(checkIsAuth());
         console.log(

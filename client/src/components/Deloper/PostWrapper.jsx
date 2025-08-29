@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import PostCard from "./PostCard";
 import { useSelector } from "react-redux";
+import Loader from "./Loader";
 
 const PostWrapper = () => {
-  const posts = useSelector((state) => state.mediaFeed.posts);
+  const posts = useSelector((state) => state.mediaFeed);
   const [activePostId, setActivePostId] = useState(null);
   const containerRer = useRef(null);
 
@@ -30,12 +31,16 @@ const PostWrapper = () => {
     };
   }, [posts]);
 
+  if (posts.loading) {
+    return <Loader />;
+  }
+
   return (
     <div
       ref={containerRer}
       className="flex mt-4 flex-col relative w-full md:max-w-2xl overflow-hidden "
     >
-      {posts.map((post) => (
+      {posts?.posts.map((post) => (
         <div key={post._id} data-id={post._id}>
           <PostCard post={post} isActive={activePostId == post._id} />
         </div>

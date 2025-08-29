@@ -4,15 +4,14 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-
+import { io } from "socket.io-client";
 import AuthPage from "./pages/AuthPage";
 import HomePage from "./pages/HomePage";
-
 import Layout from "./Layout/Layout";
 import ProfilePage from "./pages/ProfilePage";
 import EditProfile from "./pages/EditProfliePage";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { checkIsAuth } from "./Redux/Services/AuthThunk";
 import Upload from "./pages/Upload";
 import { getCurrentUserDetails, getUser } from "./Redux/Services/UserThunk";
@@ -20,24 +19,30 @@ import ReelsPage from "./pages/ReelsPage";
 import StoryPage from "./pages/StoryPage";
 import MessagePage from "./pages/MessagePage";
 import ExplorePage from "./pages/ExplorePage";
-import { io } from "socket.io-client";
+
 import Searchpage from "./pages/Searchpage";
 import ExploreDetailsPage from "./pages/ExploreDetailsPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import { clearSocket, setSocket } from "./Redux/Slice/SocketSlice";
 import { handleIncreaseMessageCount } from "./Redux/Slice/MessageSlice";
+import FullPageLoader from "./components/Deloper/FullPageLoader";
 
 const App = () => {
   const auth = useSelector((state) => state.auth.isAuthenticated);
   const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
   const data = useSelector((state) => state.auth);
   const socket = useSelector((state) => state.socket.socket);
 
   useEffect(() => {
-    (async () => {
-      await dispatch(checkIsAuth());
-      console.log(data.token, "token from app.jsx");
-    })();
+    if (!auth) {
+      setLoading(true);
+      (async () => {
+        await dispatch(checkIsAuth());
+        console.log(data.token, "token from app.jsx");
+        setLoading(false);
+      })();
+    }
   }, []);
 
   useEffect(() => {
@@ -73,6 +78,10 @@ const App = () => {
       socket.emit("removeUser", { userId: data._id });
     };
   }, [socket]);
+
+  if (loading) {
+    return <FullPageLoader />;
+  }
   return (
     <Router>
       <Routes>

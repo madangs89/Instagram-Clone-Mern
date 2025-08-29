@@ -398,6 +398,7 @@ const MessageChat = ({ setIsChatOpen }) => {
       } else {
         const tempData = { ...data, media, sender: user._id };
         dispatch(updateCurrentUserMessage(tempData));
+        setInput("");
         const result = await dispatch(createMessage(data));
         if (result?.payload?.conversationId) {
           console.log(result.payload, "result in message chat");
@@ -408,7 +409,6 @@ const MessageChat = ({ setIsChatOpen }) => {
               realMessageId: result.payload._id,
             })
           );
-          setInput("");
           dispatch(updateUpSideDownTheAllConversationsAndGroups(id));
         }
       }
