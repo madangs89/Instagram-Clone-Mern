@@ -162,14 +162,14 @@ const ExploreDetailsPage = () => {
             {/* Header */}
             <div className="flex items-center cursor-pointer justify-between p-3 border-b border-white/20">
               <div
-                className="flex items-center gap-3"
+                className="flex w-8 h-8 shrink-0 items-center gap-3"
                 onClick={() =>
                   navigate(`/profile/${selectedData?.userId?._id}`)
                 }
               >
                 <img
                   src={selectedData?.userId?.avatar}
-                  className="w-8 h-8 rounded-full object-cover"
+                  className="w-full h-full rounded-full object-cover"
                   alt=""
                 />
                 <span className="font-semibold text-white">
