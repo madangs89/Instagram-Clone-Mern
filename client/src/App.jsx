@@ -4,6 +4,7 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+import axios from "axios";
 import { io } from "socket.io-client";
 import AuthPage from "./pages/AuthPage";
 import HomePage from "./pages/HomePage";
@@ -44,6 +45,8 @@ const App = () => {
       })();
     }
   }, []);
+
+
 
   useEffect(() => {
     if (auth && data._id) {
