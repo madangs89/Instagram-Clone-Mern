@@ -57,6 +57,18 @@ const App = () => {
     }
   }, [auth, data._id, dispatch]);
 
+
+     useEffect(() => {
+      (async () => {
+        await axios.get(`${import.meta.env.VITE_MESSAGE_URL}`)
+        await axios.get(`${import.meta.env.VITE_STORY_URL}`)
+        await axios.get(`${import.meta.env.VITE_POST_URL}`)
+        await axios.get(`${import.meta.env.VITE_USER_URL}`)
+        await axios.get(`${import.meta.env.VITE_AUTH_URL}`)
+      })();
+
+  }, []);
+
   useEffect(() => {
     if (auth && data._id) {
       const socket = io("https://instagram-clone-mern-socket.onrender.com", {
