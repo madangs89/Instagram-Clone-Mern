@@ -60,10 +60,40 @@ const App = () => {
 
      useEffect(() => {
       (async () => {
+
+        // Calling because of render(deploy) cold start
         await axios.get(`${import.meta.env.VITE_MESSAGE_URL}`)
+        
+      })();
+
+  }, []);
+     useEffect(() => {
+      (async () => {
+          // Calling because of render(deploy) cold start
         await axios.get(`${import.meta.env.VITE_STORY_URL}`)
+       
+      })();
+
+  }, []);
+     useEffect(() => {
+      (async () => {
+          // Calling because of render(deploy) cold start
+    
         await axios.get(`${import.meta.env.VITE_POST_URL}`)
+   
+      })();
+
+  }, []);
+     useEffect(() => {
+      (async () => {
+               // Calling because of render(deploy) cold start
         await axios.get(`${import.meta.env.VITE_USER_URL}`)
+      })();
+
+  }, []);
+     useEffect(() => {
+      (async () => {
+         // Calling because of render(deploy) cold start
         await axios.get(`${import.meta.env.VITE_AUTH_URL}`)
       })();
 
