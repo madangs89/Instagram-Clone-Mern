@@ -186,9 +186,9 @@ const AuthPage = () => {
                 {login ? "Login" : "Sign Up"}
               </Button>
             )}
-            <Button variant="outline" type="button" className="w-full">
+            {/* <Button variant="outline" type="button" className="w-full">
               Login with Google
-            </Button>
+            </Button> */}
           </CardFooter>
         </form>
       </Card>
