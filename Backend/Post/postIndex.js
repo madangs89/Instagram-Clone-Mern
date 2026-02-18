@@ -21,7 +21,7 @@ app.use(
 );
 
 export const redis = createClient({
-  url: "rediss://default:AUuFAAIncDJmNzEyY2NjYWM2MTg0N2Q4OTExNDUyMGE4Yjk4OWEwM3AyMTkzMzM@one-dingo-19333.upstash.io:6379",
+  url: "rediss://default:AUMzAAIncDFiYTMxNzk4ODBjZTY0NzMxODE1OTkxZTJmY2I3NDA2NnAxMTcyMDM@enjoyed-bullfrog-17203.upstash.io:6379",
 });
 await redis.connect();
 
