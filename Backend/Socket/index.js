@@ -26,7 +26,7 @@ const io = new Server(s, {
 });
 // Main Redis clients for adapter
 const pubClient = createClient({
-  url: process.env.REDIS_URL,
+  url: "rediss://default:AUMzAAIncDFiYTMxNzk4ODBjZTY0NzMxODE1OTkxZTJmY2I3NDA2NnAxMTcyMDM@enjoyed-bullfrog-17203.upstash.io:6379",
 });
 const subClient = pubClient.duplicate();
 pubClient.on("error", (err) => console.log("Redis Client Error", err));
